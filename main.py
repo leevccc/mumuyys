@@ -1,6 +1,7 @@
 import os
 import sys
 import time
+import tkinter as tk
 from random import random
 
 import aircv
@@ -12,6 +13,8 @@ import win32gui
 
 
 class Script:
+    title = "1"
+
     # 初始化
     def __init__(self):
         self.x = None
@@ -78,7 +81,7 @@ class Script:
 
         match_result = aircv.find_template(screenshot, img, confidence)
         # 返回是个字典 result 是中心坐标
-        x, y = match_result['result']
+        x, y = match_result["result"]
 
         return int(x), int(y)
 
@@ -118,14 +121,33 @@ class Script:
         num = int(num)
         if num < 1 or num > 9:
             num = 2
-        pyautogui.hotkey('ctrl', str(num))
+        pyautogui.hotkey("ctrl", str(num))
 
 
-if __name__ == '__main__':
+class App:
+    def __init__(self):
+        # 注册脚本窗口
+        window = tk.Tk()
+
+        # 设置窗口title
+        window.title("mumu阴阳师助手")
+
+        # 设置窗口大小:宽x高
+        window.geometry("400x600")
+
+        # 进入消息循环
+        window.mainloop()
+
+
+if __name__ == "__main__":
     # 实例化脚本
     script = Script()
+
+    # 获取模拟器窗口句柄
     script.get_hwnd()
+
+    # 初始化模拟器窗口
     script.init_mumu_window()
-    # script.click(760, 160)
-    script.switch_window(1)
-    # script.print_screen()
+
+    # 注册助手
+    App()
