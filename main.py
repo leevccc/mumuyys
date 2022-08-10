@@ -109,12 +109,16 @@ class Script:
         time.sleep(sleep / 1000)
 
     @staticmethod
-    def switch_window():
+    def switch_window(num):
         """
         切换窗口
 
+        :param num: 切换到第 num 个模拟器窗口, 默认第一个游戏窗口为 2
         """
-        pyautogui.hotkey('ctrl', '1')
+        num = int(num)
+        if num < 1 or num > 9:
+            num = 2
+        pyautogui.hotkey('ctrl', str(num))
 
 
 if __name__ == '__main__':
@@ -123,5 +127,5 @@ if __name__ == '__main__':
     script.get_hwnd()
     script.init_mumu_window()
     # script.click(760, 160)
-    script.switch_window()
+    script.switch_window(1)
     # script.print_screen()
