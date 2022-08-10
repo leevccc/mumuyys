@@ -9,7 +9,6 @@ import pyautogui
 # pip install pywin32
 import win32con
 import win32gui
-from PyQt5.QtWidgets import QApplication
 
 
 class Script:
@@ -17,6 +16,8 @@ class Script:
     def __init__(self):
         self.x = None
         self.y = None
+        self.weight = 1440
+        self.height = 810
         self.hwnd = None
         self.path = os.path.split(os.path.realpath(__file__))[0]
 
@@ -35,9 +36,13 @@ class Script:
         """
         调整模拟器位置和大小
         """
+        # 还原窗口
+        win32gui.SendMessage(self.hwnd, win32con.WM_SYSCOMMAND, win32con.SC_RESTORE, 0)
+        # 激活窗口
+        win32gui.SetForegroundWindow(self.hwnd)
         # 设置窗口位置和大小 宽 1440 高 899(含标题36 底部工具栏53) 实际分辨率 1440 x 810
-        win32gui.SetWindowPos(self.hwnd, win32con.HWND_TOPMOST, 0, 0, 1440, 899, win32con.SWP_SHOWWINDOW)
-        # 获取 窗口位置
+        win32gui.SetWindowPos(self.hwnd, win32con.HWND_TOP, 0, 0, 1440, 899, win32con.SWP_SHOWWINDOW)
+        # 获取窗口位置参数
         left, top, right, bottom = win32gui.GetWindowRect(self.hwnd)
         self.x = left
         self.y = top + 36
@@ -47,11 +52,17 @@ class Script:
         """
         窗口截图
         """
-        app = QApplication(sys.argv)
-        screen = QApplication.primaryScreen()
-        img = screen.grabWindow(self.hwnd).toImage()
-        url = self.path + "\\img\\screenshot.jpg"
-        img.save(url)
+        # app = QApplication(sys.argv)
+        # screen = QApplication.primaryScreen()
+        # img = screen.grabWindow(self.hwnd).toImage()
+        # url = self.path + "\\img\\screenshot.jpg"
+        # img.save(url)
+        x = self.x
+        y = self.y
+        rx = self.x + self.weight
+        ry = self.y + self.height
+        screen = pyautogui.screenshot(region=(x, y, rx, ry))
+        screen.save(self.path + "\\img\\screenshot.jpg")
 
     def find_pic(self, path, confidence=0.8):
         """
@@ -73,7 +84,6 @@ class Script:
 
     @staticmethod
     def click(x, y):
-        y = y + 36
         pyautogui.moveTo(x, y)
         Script.random_sleep(500)
         pyautogui.click()
@@ -92,11 +102,16 @@ class Script:
         sleep = min_sleep + round(random() * (max_sleep - min_sleep))
         time.sleep(sleep / 1000)
 
+    @staticmethod
+    def switch_window():
+        pyautogui.hotkey('ctrl', '1')
+
 
 if __name__ == '__main__':
     # 实例化脚本
     script = Script()
     script.get_hwnd()
     script.init_mumu_window()
-    script.print_screen()
     # script.click(760, 160)
+    script.switch_window()
+    # script.print_screen()
