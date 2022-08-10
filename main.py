@@ -84,6 +84,12 @@ class Script:
 
     @staticmethod
     def click(x, y):
+        """
+        模拟鼠标点击
+
+        :param x: 横坐标
+        :param y: 纵坐标
+        """
         pyautogui.moveTo(x, y)
         Script.random_sleep(500)
         pyautogui.click()
@@ -104,6 +110,10 @@ class Script:
 
     @staticmethod
     def switch_window():
+        """
+        切换窗口
+
+        """
         pyautogui.hotkey('ctrl', '1')
 
 
