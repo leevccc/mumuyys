@@ -133,6 +133,9 @@ class Script:
         Script.random_sleep()
         pyautogui.click()
 
+    def click_100(self):
+        self.click(10, 10, 190, 90)
+
     @staticmethod
     def random_max(num):
         """
@@ -174,13 +177,30 @@ class Script:
         now = datetime.now()
         module_logger.info("[窗口%s](%s): %s" % (window, now.strftime("%H:%M:%S"), text))
 
-    def kai_juan_zhou(self):
+    def task_kai_juan_zhou(self):
+        self.log("自动开启底部导航卷轴")
         self.find_pic("tingyuanjuanzhou.jpg", click=True)
+
+    def task_qiandao(self):
+        self.log("执行签到任务")
+        self.find_pic("qiandao.jpg", click=True)
+        self.find_pic("qiandao2.jpg", click=True)
+        self.find_pic("close.jpg", click=True)
+
+    def zt_zai_ting_yuan(self):
+        x, y = self.find_pic("feng.jpg")
+        if x is not None:
+            self.log("在庭院")
+            return True
+        else:
+            return False
 
     def task(self):
         while True:
             if self.task_status:
-                self.kai_juan_zhou()
+                if self.zt_zai_ting_yuan():
+                    self.task_kai_juan_zhou()
+                    self.task_qiandao()
                 self.task_status = False
 
     def run(self):
