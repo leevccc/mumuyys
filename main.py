@@ -21,7 +21,7 @@ class MyThread(Thread):
 
     def run(self):
         print("开启线程： " + self.name)
-        self.script_obj.task(self.name)
+        self.script_obj.task()
 
 
 class Script:
@@ -33,7 +33,7 @@ class Script:
         self.weight = 1440
         self.height = 810
         self.hwnd = None
-        self.path = os.path.split(os.path.realpath(__file__))[0]
+        self.path = os.path.split(os.path.realpath(__file__))[0] + "\\img\\"
 
     def get_hwnd(self):
         """
@@ -76,48 +76,77 @@ class Script:
         rx = self.x + self.weight
         ry = self.y + self.height
         screen = pyautogui.screenshot(region=(x, y, rx, ry))
-        screen.save(self.path + "\\img\\screenshot.jpg")
+        screen.save(self.path + "\\temp\\screenshot.jpg")
 
-    def find_pic(self, path, confidence=0.8):
+    def find_pic(self, path, confidence=0.8, click=False):
         """
         查找图片
 
         :param path: 图片相对地址
         :param confidence: 匹配度
+        :param click: 识别后是否点击
         :return: x , y 坐标
         """
         Script.print_screen(self)
-        screenshot = aircv.imread(self.path + "\\img\\screenshot.jpg")
+        screenshot = aircv.imread(self.path + "\\temp\\screenshot.jpg")
         img = aircv.imread(self.path + path)
 
         match_result = aircv.find_template(screenshot, img, confidence)
-        # 返回是个字典 result 是中心坐标
+
+        if match_result is None:
+            return None, None
+        # match_result
+        # {
+        #   'result': (1335.0, 731.5),
+        #   'rectangle': ((1298, 682), (1298, 781), (1372, 682), (1372, 781)),
+        #   'confidence': 0.993413507938385
+        # }
         x, y = match_result["result"]
+
+        if click:
+            x = match_result["rectangle"][0][0]
+            y = match_result["rectangle"][0][1]
+            width = match_result["rectangle"][3][0] - x
+            height = match_result["rectangle"][3][1] - y
+            self.click(x, y, width, height)
 
         return int(x), int(y)
 
-    @staticmethod
-    def click(x, y):
+    def click(self, x, y, width, height):
         """
         模拟鼠标点击
 
         :param x: 横坐标
         :param y: 纵坐标
+        :param width: 横坐标偏移量
+        :param height: 纵坐标偏移量
         """
-        pyautogui.moveTo(x, y)
-        Script.random_sleep(500)
+        x = self.x + x
+        y = self.y + y
+        pyautogui.moveTo(x + self.random_max(width), y + self.random_max(height))
+        Script.random_sleep()
         pyautogui.click()
 
     @staticmethod
-    def random_sleep(max_sleep, min_sleep=0):
+    def random_max(num):
         """
-        随机延迟 min ~ max 毫秒, 如果 min > max 则重设 max = min + 1000
+        返回 0 ~ max 的随机数
+
+        :param num: 最大值
+        :return:
+        """
+        return round(random() * num)
+
+    @staticmethod
+    def random_sleep(max_sleep=1000, min_sleep=500):
+        """
+        随机延迟 min ~ max 毫秒, 如果 min > max 则重设 max = min + 500
 
         :param max_sleep: 最大毫秒
         :param min_sleep: 最小毫秒
         """
         if min_sleep > max_sleep:
-            max_sleep = min_sleep + 1000
+            max_sleep = min_sleep + 500
 
         sleep = min_sleep + round(random() * (max_sleep - min_sleep))
         time.sleep(sleep / 1000)
@@ -134,11 +163,18 @@ class Script:
             num = 2
         pyautogui.hotkey("ctrl", str(num))
 
-    def task(self, thread_name):
+    def log(self, text):
+        print("%s: %s" % (text, time.ctime(time.time())))
+
+    def kai_juan_zhou(self):
+        x, y = self.find_pic("tingyuanjuanzhou.jpg", click=True)
+        self.log(x)
+
+    def task(self):
         for i in range(0, 10):
-            print("%s: %s" % (thread_name, time.ctime(time.time())))
             time.sleep(2)
             if self.task_status:
+                self.kai_juan_zhou()
                 print(i)
                 i += 1
 
@@ -182,11 +218,11 @@ if __name__ == "__main__":
     # 实例化脚本
     script = Script()
 
-    # # 获取模拟器窗口句柄
-    # script.get_hwnd()
-    #
-    # # 初始化模拟器窗口
-    # script.init_mumu_window()
+    # 获取模拟器窗口句柄
+    script.get_hwnd()
+
+    # 初始化模拟器窗口
+    script.init_mumu_window()
 
     main_thread = MyThread('主程序', script)
     main_thread.setDaemon(True)
