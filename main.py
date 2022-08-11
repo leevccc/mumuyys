@@ -210,6 +210,25 @@ class Script:
                 self.log("没有邮件, 返回庭院")
                 self.action_hui_ting_yuan()
 
+    def task_shang_dian_fu_li(self):
+        self.log("[任务] 领取商店每日福利")
+        self.log("进入商店")
+        self.click(685, 684, 50, 60)
+
+        self.log("关闭推荐按钮")
+        self.find_pic("close.jpg", click=True, times=4)
+
+        self.log("进入礼包屋")
+        self.click(1300, 714, 60, 60)
+
+        self.log("点击黑蛋")
+        if self.find_pic("mianfei.jpg", click=True, times=6) is False:
+            self.find_pic("tuijian.jpg", click=True)
+            self.find_pic("mianfei.jpg", click=True, times=6)
+        self.random_sleep(1500, 1000)
+        self.click_100()
+        self.action_hui_ting_yuan()
+
     def zt_zai_ting_yuan(self):
         x, y = self.find_pic("feng.jpg")
         if x is not None:
@@ -231,6 +250,7 @@ class Script:
                     self.task_kai_juan_zhou()
                     self.task_qiandao()
                     self.task_mail()
+                    self.task_shang_dian_fu_li()
                 self.log("所有任务执行完毕")
                 self.task_status = False
 
