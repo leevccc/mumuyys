@@ -47,8 +47,7 @@ class Script:
         """
         window = win32gui.FindWindow(0, "阴阳师 - MuMu模拟器")
         if window == 0:
-            print("找不到游戏窗口, 脚本退出")
-            sys.exit(0)
+            self.kill("找不到游戏窗口, 脚本退出")
         self.hwnd = window
         return window
 
@@ -92,7 +91,7 @@ class Script:
         :param confidence: 匹配度
         :param click: 识别后是否点击
         :param times: 次数
-        :return: x , y 坐标
+        :return: 按匹配结果依次返回: 失败 - None, None; 成功 - int(x), int(Y); 成功且需要点击 - True
         """
         match_result = None
         for i in range(0, times):
@@ -115,7 +114,7 @@ class Script:
                 break
 
         if match_result is None:
-            return None, None
+            return False if click is True else (None, None)
 
         x, y = match_result["result"]
         if click:
@@ -124,6 +123,7 @@ class Script:
             width = match_result["rectangle"][3][0] - x
             height = match_result["rectangle"][3][1] - y
             self.click(x, y, width, height)
+            return True
 
         return int(x), int(y)
 
@@ -191,18 +191,38 @@ class Script:
         self.find_pic("tingyuanjuanzhou.jpg", click=True)
 
     def task_qiandao(self):
-        self.log("执行签到任务")
-        if self.find_pic("qiandao.jpg", click=True)[0] is not None:
+        self.log("[任务] 签到")
+        if self.find_pic("qiandao.jpg", click=True):
             self.find_pic("qiandao2.jpg", click=True, times=30)
             self.find_pic("close.jpg", click=True, times=10)
+
+    def task_mail(self):
+        self.log("[任务] 收取邮件")
+        if self.find_pic("mail.jpg", click=True):
+            if self.find_pic("receivemail.jpg", click=True, times=10):
+                if self.find_pic("confirm.jpg", click=True, times=10):
+                    self.random_sleep(1500, 1000)
+                    self.click_100()
+                    self.action_hui_ting_yuan()
+                else:
+                    self.kill("找不到确认按钮")
+            else:
+                self.log("没有邮件, 返回庭院")
+                self.action_hui_ting_yuan()
 
     def zt_zai_ting_yuan(self):
         x, y = self.find_pic("feng.jpg")
         if x is not None:
-            self.log("在庭院")
+            self.log("[状态] 在庭院")
             return True
         else:
             return False
+
+    def action_hui_ting_yuan(self):
+        self.log("[动作] 回庭院")
+        while self.zt_zai_ting_yuan() is False:
+            pyautogui.hotkey("esc")
+            time.sleep(1)
 
     def task(self):
         while True:
@@ -210,6 +230,7 @@ class Script:
                 if self.zt_zai_ting_yuan():
                     self.task_kai_juan_zhou()
                     self.task_qiandao()
+                    self.task_mail()
                 self.log("所有任务执行完毕")
                 self.task_status = False
 
@@ -218,6 +239,11 @@ class Script:
 
     def stop(self):
         self.task_status = False
+
+    @staticmethod
+    def kill(msg):
+        print(msg)
+        sys.exit(0)
 
 
 class HandlerLog(logging.StreamHandler):
