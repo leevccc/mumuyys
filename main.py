@@ -178,12 +178,10 @@ class Script:
         self.find_pic("tingyuanjuanzhou.jpg", click=True)
 
     def task(self):
-        for i in range(0, 10):
-            time.sleep(2)
+        while True:
             if self.task_status:
-                # self.kai_juan_zhou()
-                self.log(i)
-                i += 1
+                self.kai_juan_zhou()
+                self.task_status = False
 
     def run(self):
         self.task_status = True
