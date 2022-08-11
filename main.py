@@ -1,7 +1,9 @@
+import logging
 import os
 import sys
 import time
 import tkinter as tk
+from datetime import datetime
 from random import random
 from threading import Thread
 
@@ -11,6 +13,8 @@ import pyautogui
 # pip install pywin32
 import win32con
 import win32gui
+
+module_logger = logging.getLogger(__name__)
 
 
 class MyThread(Thread):
@@ -25,15 +29,17 @@ class MyThread(Thread):
 
 
 class Script:
+    task_status = False
+    x = None
+    y = None
+    weight = 1440
+    height = 810
+    hwnd = None
+    path = os.path.split(os.path.realpath(__file__))[0] + "\\img\\"
+    window = 2
+
     # 初始化
-    def __init__(self):
-        self.task_status = False
-        self.x = None
-        self.y = None
-        self.weight = 1440
-        self.height = 810
-        self.hwnd = None
-        self.path = os.path.split(os.path.realpath(__file__))[0] + "\\img\\"
+    # def __init__(self):
 
     def get_hwnd(self):
         """
@@ -163,19 +169,20 @@ class Script:
             num = 2
         pyautogui.hotkey("ctrl", str(num))
 
-    def log(self, text):
-        print("%s: %s" % (text, time.ctime(time.time())))
+    @staticmethod
+    def log(text, window=window):
+        now = datetime.now()
+        module_logger.info("[窗口%s](%s): %s" % (window, now.strftime("%H:%M:%S"), text))
 
     def kai_juan_zhou(self):
-        x, y = self.find_pic("tingyuanjuanzhou.jpg", click=True)
-        self.log(x)
+        self.find_pic("tingyuanjuanzhou.jpg", click=True)
 
     def task(self):
         for i in range(0, 10):
             time.sleep(2)
             if self.task_status:
-                self.kai_juan_zhou()
-                print(i)
+                # self.kai_juan_zhou()
+                self.log(i)
                 i += 1
 
     def run(self):
@@ -185,7 +192,22 @@ class Script:
         self.task_status = False
 
 
+class HandlerLog(logging.StreamHandler):
+    def __init__(self, textctrl):
+        logging.StreamHandler.__init__(self)
+        App.log = textctrl
+
+    def emit(self, record):
+        msg = self.format(record)
+        App.log.config(state="normal")
+        App.log.insert("end", msg + "\n")
+        App.log.update()
+        App.log.config(state="disabled")
+
+
 class App:
+    log = None
+
     def __init__(self, root, script_object):
         # 设置窗口title
         root.title("mumu阴阳师助手")
@@ -201,16 +223,18 @@ class App:
         root.resizable(width=False, height=False)
 
         # 功能区
+        self.log = tk.Text(root, state="disabled", background="#FFF", borderwidth=1)
+        self.log.place(x=300, y=10, width=300, height=430)
 
         # 底部按钮
-        Script.start_button_text = tk.StringVar()
-        Script.start_button_text.set("启动")
-        start_button = tk.Button(root, textvariable=Script.start_button_text, command=lambda: script_object.run())
+        self.start_button_text = tk.StringVar()
+        self.start_button_text.set("启动")
+        start_button = tk.Button(root, textvariable=self.start_button_text, command=lambda: script_object.run())
         start_button.place(x=200, y=450, width=80, height=30)
 
-        Script.stop_button_text = tk.StringVar()
-        Script.stop_button_text.set("结束")
-        stop_button = tk.Button(root, textvariable=Script.stop_button_text, command=lambda: script_object.stop())
+        self.stop_button_text = tk.StringVar()
+        self.stop_button_text.set("结束")
+        stop_button = tk.Button(root, textvariable=self.stop_button_text, command=lambda: script_object.stop())
         stop_button.place(x=320, y=450, width=80, height=30)
 
 
@@ -231,4 +255,12 @@ if __name__ == "__main__":
     # 注册助手
     tkinter = tk.Tk()
     app = App(tkinter, script)
+
+    # 注册日志监听
+    stderrHandler = logging.StreamHandler()  # no arguments => stderr
+    module_logger.addHandler(stderrHandler)
+    guiHandler = HandlerLog(app.log)
+    module_logger.addHandler(guiHandler)
+    module_logger.setLevel(logging.INFO)
+
     tkinter.mainloop()
