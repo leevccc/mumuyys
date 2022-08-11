@@ -84,31 +84,40 @@ class Script:
         screen = pyautogui.screenshot(region=(x, y, rx, ry))
         screen.save(self.path + "\\temp\\screenshot.jpg")
 
-    def find_pic(self, path, confidence=0.8, click=False):
+    def find_pic(self, path, confidence=0.8, click=False, times=1):
         """
-        查找图片
+        查找图片, 每隔 0.5 秒读取一次
 
         :param path: 图片相对地址
         :param confidence: 匹配度
         :param click: 识别后是否点击
+        :param times: 次数
         :return: x , y 坐标
         """
-        Script.print_screen(self)
-        screenshot = aircv.imread(self.path + "\\temp\\screenshot.jpg")
-        img = aircv.imread(self.path + path)
+        match_result = None
+        for i in range(0, times):
+            Script.print_screen(self)
+            screenshot = aircv.imread(self.path + "\\temp\\screenshot.jpg")
+            img = aircv.imread(self.path + path)
 
-        match_result = aircv.find_template(screenshot, img, confidence)
+            match_result = aircv.find_template(screenshot, img, confidence)
+            # match_result
+            # {
+            #   'result': (1335.0, 731.5),
+            #   'rectangle': ((1298, 682), (1298, 781), (1372, 682), (1372, 781)),
+            #   'confidence': 0.993413507938385
+            # }
+
+            if match_result is None:
+                time.sleep(0.5)
+                continue
+            else:
+                break
 
         if match_result is None:
             return None, None
-        # match_result
-        # {
-        #   'result': (1335.0, 731.5),
-        #   'rectangle': ((1298, 682), (1298, 781), (1372, 682), (1372, 781)),
-        #   'confidence': 0.993413507938385
-        # }
-        x, y = match_result["result"]
 
+        x, y = match_result["result"]
         if click:
             x = match_result["rectangle"][0][0]
             y = match_result["rectangle"][0][1]
@@ -183,9 +192,9 @@ class Script:
 
     def task_qiandao(self):
         self.log("执行签到任务")
-        self.find_pic("qiandao.jpg", click=True)
-        self.find_pic("qiandao2.jpg", click=True)
-        self.find_pic("close.jpg", click=True)
+        if self.find_pic("qiandao.jpg", click=True)[0] is not None:
+            self.find_pic("qiandao2.jpg", click=True, times=30)
+            self.find_pic("close.jpg", click=True, times=10)
 
     def zt_zai_ting_yuan(self):
         x, y = self.find_pic("feng.jpg")
@@ -201,6 +210,7 @@ class Script:
                 if self.zt_zai_ting_yuan():
                     self.task_kai_juan_zhou()
                     self.task_qiandao()
+                self.log("所有任务执行完毕")
                 self.task_status = False
 
     def run(self):
