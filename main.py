@@ -3,6 +3,7 @@ import sys
 import time
 import tkinter as tk
 from random import random
+from threading import Thread
 
 import aircv
 import pyautogui
@@ -12,11 +13,21 @@ import win32con
 import win32gui
 
 
-class Script:
-    title = "1"
+class MyThread(Thread):
+    def __init__(self, name, script_obj):
+        Thread.__init__(self)
+        self.name = name
+        self.script_obj = script_obj
 
+    def run(self):
+        print("开启线程： " + self.name)
+        self.script_obj.task(self.name)
+
+
+class Script:
     # 初始化
     def __init__(self):
+        self.task_status = False
         self.x = None
         self.y = None
         self.weight = 1440
@@ -123,9 +134,23 @@ class Script:
             num = 2
         pyautogui.hotkey("ctrl", str(num))
 
+    def task(self, thread_name):
+        for i in range(0, 10):
+            print("%s: %s" % (thread_name, time.ctime(time.time())))
+            time.sleep(2)
+            if self.task_status:
+                print(i)
+                i += 1
+
+    def run(self):
+        self.task_status = True
+
+    def stop(self):
+        self.task_status = False
+
 
 class App:
-    def __init__(self, root):
+    def __init__(self, root, script_object):
         # 设置窗口title
         root.title("mumu阴阳师助手")
 
@@ -144,23 +169,30 @@ class App:
         # 底部按钮
         Script.start_button_text = tk.StringVar()
         Script.start_button_text.set("启动")
-        tk.Button(root, textvariable=Script.start_button_text).place(x=200, y=450, width=80, height=30)
+        start_button = tk.Button(root, textvariable=Script.start_button_text, command=lambda: script_object.run())
+        start_button.place(x=200, y=450, width=80, height=30)
+
         Script.stop_button_text = tk.StringVar()
         Script.stop_button_text.set("结束")
-        tk.Button(root, textvariable=Script.stop_button_text).place(x=320, y=450, width=80, height=30)
+        stop_button = tk.Button(root, textvariable=Script.stop_button_text, command=lambda: script_object.stop())
+        stop_button.place(x=320, y=450, width=80, height=30)
 
 
 if __name__ == "__main__":
-    # # 实例化脚本
-    # script = Script()
-    #
+    # 实例化脚本
+    script = Script()
+
     # # 获取模拟器窗口句柄
     # script.get_hwnd()
     #
     # # 初始化模拟器窗口
     # script.init_mumu_window()
 
+    main_thread = MyThread('主程序', script)
+    main_thread.setDaemon(True)
+    main_thread.start()
+
     # 注册助手
-    window = tk.Tk()
-    app = App(window)
-    window.mainloop()
+    tkinter = tk.Tk()
+    app = App(tkinter, script)
+    tkinter.mainloop()
