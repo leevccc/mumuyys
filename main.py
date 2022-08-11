@@ -125,29 +125,42 @@ class Script:
 
 
 class App:
-    def __init__(self):
-        # 注册脚本窗口
-        window = tk.Tk()
-
+    def __init__(self, root):
         # 设置窗口title
-        window.title("mumu阴阳师助手")
+        root.title("mumu阴阳师助手")
 
         # 设置窗口大小:宽x高
-        window.geometry("400x600")
+        # root.geometry("400x600")
+        width = 600
+        height = 500
+        screenwidth = root.winfo_screenwidth()
+        screenheight = root.winfo_screenheight()
+        align_str = '%dx%d+%d+%d' % (width, height, (screenwidth - width) / 2, (screenheight - height) / 2)
+        root.geometry(align_str)
+        root.resizable(width=False, height=False)
 
-        # 进入消息循环
-        window.mainloop()
+        # 功能区
+
+        # 底部按钮
+        Script.start_button_text = tk.StringVar()
+        Script.start_button_text.set("启动")
+        tk.Button(root, textvariable=Script.start_button_text).place(x=200, y=450, width=80, height=30)
+        Script.stop_button_text = tk.StringVar()
+        Script.stop_button_text.set("结束")
+        tk.Button(root, textvariable=Script.stop_button_text).place(x=320, y=450, width=80, height=30)
 
 
 if __name__ == "__main__":
-    # 实例化脚本
-    script = Script()
-
-    # 获取模拟器窗口句柄
-    script.get_hwnd()
-
-    # 初始化模拟器窗口
-    script.init_mumu_window()
+    # # 实例化脚本
+    # script = Script()
+    #
+    # # 获取模拟器窗口句柄
+    # script.get_hwnd()
+    #
+    # # 初始化模拟器窗口
+    # script.init_mumu_window()
 
     # 注册助手
-    App()
+    window = tk.Tk()
+    app = App(window)
+    window.mainloop()
