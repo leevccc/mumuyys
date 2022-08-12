@@ -502,16 +502,18 @@ class App:
 
     # Tab: 基本设置
     def initTab2(self):
-        tk.Button(self.tab2, text="保存配置", command=lambda: self.saveSettings()).grid(row=0, column=0)
-        tk.Button(self.tab2, text="读取配置", command=lambda: self.loadSettings()).grid(row=0, column=2)
-        tk.Label(self.tab2, text="客户端数").grid(row=1, column=0)
-        print(self.settings)
+        tk.Label(self.tab2, text="客户端数", anchor='e').place(x=0, y=0, width=60, height=20)
         tk.Radiobutton(self.tab2, text="单开", value="1", variable=self.settings["基本设置"]["客户端数"]) \
-            .grid(row=1, column=1)
+            .place(x=60, y=0, width=50, height=20)
         tk.Radiobutton(self.tab2, text="双开", value="2", variable=self.settings["基本设置"]["客户端数"]) \
-            .grid(row=1, column=2)
+            .place(x=110, y=0, width=50, height=20)
         tk.Radiobutton(self.tab2, text="三开", value="3", variable=self.settings["基本设置"]["客户端数"]) \
-            .grid(row=1, column=3)
+            .place(x=160, y=0, width=50, height=20)
+        # 底部 配置按钮
+        tk.Button(self.tab2, text="保存配置", command=lambda: self.saveSettings()) \
+            .place(x=190, y=410, width=80, height=30)
+        tk.Button(self.tab2, text="读取配置", command=lambda: self.loadSettings()) \
+            .place(x=310, y=410, width=80, height=30)
 
 
 if __name__ == "__main__":
