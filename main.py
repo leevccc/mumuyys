@@ -270,6 +270,15 @@ class Script:
                 self.click_100()
         self.action_hui_ting_yuan()
 
+    def task_liao_zi_jin(self):
+        self.log("[任务] 寮资金领取")
+        self.click(530, 674, 66, 73)
+        if self.find_pic("zijinlingqu.jpg", click=True, confidence=0.95, times=4):
+            if self.find_pic("lingqu.jpg", click=True, times=4):
+                self.random_sleep()
+                self.click_100()
+        self.action_hui_ting_yuan()
+
     def zt_zai_ting_yuan(self):
         """
         判断是否在庭院
