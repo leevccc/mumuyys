@@ -85,7 +85,7 @@ class Script:
         # img = screen.grabWindow(self.hwnd).toImage()
         # url = self.path + "\\img\\screenshot.jpg"
         # img.save(url)
-        pyautogui.moveTo(0, 0)
+        pyautogui.moveTo(100, 10)
         x = self.x
         y = self.y
         rx = self.x + self.weight
@@ -312,9 +312,11 @@ class Script:
                 self.task_status = False
 
     def run(self):
+        self.log("运行脚本")
         self.task_status = True
 
     def stop(self):
+        self.log("结束脚本")
         self.task_status = False
 
     @staticmethod
@@ -338,6 +340,7 @@ class HandlerLog(logging.StreamHandler):
 
 class App:
     log = None
+    status = 0
 
     def __init__(self, root, script_object):
         # 设置窗口title
@@ -358,10 +361,19 @@ class App:
         self.log.place(x=300, y=10, width=300, height=430)
 
         # 底部按钮
+        def run(e):
+            if self.status == 0:
+                script_object.run()
+                self.status = 1
+            else:
+                script_object.stop()
+                self.status = 0
+
         self.start_button_text = tk.StringVar()
         self.start_button_text.set("启动")
         start_button = tk.Button(root, textvariable=self.start_button_text, command=lambda: script_object.run())
         start_button.place(x=200, y=450, width=80, height=30)
+        root.bind("<F10>", run)
 
         self.stop_button_text = tk.StringVar()
         self.stop_button_text.set("结束")
