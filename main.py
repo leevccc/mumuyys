@@ -257,6 +257,15 @@ class Script:
             self.random_sleep()
             self.click_100()
 
+    def task_you_qing_dian(self):
+        self.log("[任务] 友情点")
+        self.click(964, 686, 62, 68)
+        if self.find_pic("youqingdian.jpg", click=True, times=4):
+            self.find_pic("yijianlingqu.jpg", click=True, times=4)
+            self.random_sleep()
+            self.click_100()
+        self.action_hui_ting_yuan()
+
     def zt_zai_ting_yuan(self):
         """
         判断是否在庭院
@@ -290,13 +299,14 @@ class Script:
         while True:
             if self.task_status:
                 if self.zt_zai_ting_yuan():
-                    self.task_ting_yuan_shou_si()
-                    self.task_kai_juan_zhou()
-                    self.task_mail()
-                    self.task_shang_dian_fu_li()
-                    self.task_qiandao()
-                    self.task_ting_yuan_gou_yu()
-                    self.task_huang_jin_qiandao()
+                    # self.task_ting_yuan_shou_si()
+                    # self.task_kai_juan_zhou()
+                    # self.task_mail()
+                    # self.task_shang_dian_fu_li()
+                    # self.task_qiandao()
+                    # self.task_ting_yuan_gou_yu()
+                    # self.task_huang_jin_qiandao()
+                    self.task_you_qing_dian()
                 self.log("所有任务执行完毕")
                 self.task_status = False
 
