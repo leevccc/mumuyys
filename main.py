@@ -203,6 +203,7 @@ class Script:
         self.log("[任务] 签到")
         if self.find_pic("qiandao.jpg", click=True):
             self.find_pic("qiandao2.jpg", click=True, times=30)
+            self.random_sleep(2000, 1500)
             self.find_pic("close.jpg", click=True, times=10)
 
     def task_mail(self):
@@ -238,6 +239,18 @@ class Script:
         self.click_100()
         self.action_hui_ting_yuan()
 
+    def task_ting_yuan_shou_si(self):
+        self.log("[任务] 庭院寿司")
+        self.find_pic("shousi.jpg", click=True)
+        self.random_sleep()
+        self.click_100()
+
+    def task_ting_yuan_gou_yu(self):
+        self.log("[任务] 庭院勾玉")
+        self.find_pic("gouyu.jpg", click=True)
+        self.random_sleep()
+        self.click_100()
+
     def zt_zai_ting_yuan(self):
         """
         判断是否在庭院
@@ -271,10 +284,12 @@ class Script:
         while True:
             if self.task_status:
                 if self.zt_zai_ting_yuan():
+                    self.task_ting_yuan_shou_si()
                     self.task_kai_juan_zhou()
-                    self.task_qiandao()
                     self.task_mail()
                     self.task_shang_dian_fu_li()
+                    self.task_qiandao()
+                    self.task_ting_yuan_gou_yu()
                 self.log("所有任务执行完毕")
                 self.task_status = False
 
