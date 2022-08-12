@@ -24,6 +24,7 @@ user32 = ctypes.windll.user32  # 加载user32.dll
 
 class Script:
     app = None
+    log_tag = None
     task_status = False
     x = None
     y = None
@@ -69,7 +70,8 @@ class Script:
         left, top, right, bottom = win32gui.GetWindowRect(self.hwnd)
         self.x = left
         self.y = top + 36
-        module_logger.info("窗口坐标:", "宽", right, "高", bottom, "顶", top, "左", left, "分辨率 1440 x 810")
+        self.syslog("窗口坐标: 宽 " + str(right) + " 高 " + str(bottom) + " 顶 " + str(top) + " 左 " + str(
+            left) + " 分辨率 1440 x 810")
 
     def print_screen(self):
         """
@@ -198,7 +200,13 @@ class Script:
     @staticmethod
     def log(text, window=window):
         now = datetime.now()
-        module_logger.info("[窗口%s](%s): %s" % (window, now.strftime("%H:%M:%S"), text))
+        module_logger.info("%s [窗口%s]: %s" % (now.strftime("%H:%M:%S"), window, text))
+
+    def syslog(self, text):
+        now = datetime.now()
+        self.log_tag = "sys"
+        module_logger.info("%s (系统): %s" % (now.strftime("%H:%M:%S"), text))
+        self.log_tag = None
 
     def task_kai_juan_zhou(self):
         self.log("自动开启底部导航卷轴")
@@ -327,12 +335,12 @@ class Script:
 
     def run(self):
         if self.task_status:
-            self.log("暂停脚本")
+            self.syslog("暂停脚本")
             self.app.start_button_text.set("运行 F10")
             self.task_status = False
         else:
             self.init_mumu_window()
-            self.log("运行脚本")
+            self.syslog("运行脚本")
             self.app.start_button_text.set("暂停 F10")
             self.task_status = True
 
@@ -346,16 +354,16 @@ class Script:
 
 
 class HandlerLog(logging.StreamHandler):
-    def __init__(self, textctrl):
+    def __init__(self, app_obj):
         logging.StreamHandler.__init__(self)
-        App.log = textctrl
+        self.app = app_obj
 
     def emit(self, record):
         msg = self.format(record)
-        App.log.config(state="normal")
-        App.log.insert("end", msg + "\n")
-        App.log.update()
-        App.log.config(state="disabled")
+        self.app.log.config(state="normal")
+        self.app.log.insert("end", msg + "\n", script.log_tag)
+        self.app.log.update()
+        self.app.log.config(state="disabled")
 
 
 class TaskThread(Thread):
@@ -431,6 +439,9 @@ class App:
         # 日志页 - 日志
         self.log = tk.Text(tab1, state="disabled", padx=0, pady=0)
         self.log.place(x=-1, y=-1, width=width, height=400)
+        # 设置系统日志样式 tag
+        self.log.tag_add("sys", "end")
+        self.log.tag_config("sys", foreground="blue", background="pink")
 
         # 日志页 - 底部按钮
         self.start_button_text = tk.StringVar()
@@ -451,9 +462,6 @@ if __name__ == "__main__":
     # 获取模拟器窗口句柄
     script.get_hwnd()
 
-    # 初始化模拟器窗口
-    script.init_mumu_window()
-
     # 注册线程
     main_thread = TaskThread(script)
     main_thread.setDaemon(True)
@@ -466,7 +474,7 @@ if __name__ == "__main__":
     # 注册日志监听
     stderrHandler = logging.StreamHandler()  # no arguments => stderr
     module_logger.addHandler(stderrHandler)
-    guiHandler = HandlerLog(app.log)
+    guiHandler = HandlerLog(app)
     module_logger.addHandler(guiHandler)
     module_logger.setLevel(logging.INFO)
     module_logger.info("[日志信息]")
