@@ -1,3 +1,5 @@
+import ctypes
+import ctypes.wintypes
 import logging
 import os
 import sys
@@ -16,18 +18,11 @@ import win32con
 import win32gui
 
 module_logger = logging.getLogger(__name__)
-
-
-class MyThread(Thread):
-    def __init__(self, script_obj):
-        Thread.__init__(self)
-        self.script_obj = script_obj
-
-    def run(self):
-        self.script_obj.task()
+user32 = ctypes.windll.user32  # 加载user32.dll
 
 
 class Script:
+    app = None
     task_status = False
     x = None
     y = None
@@ -320,17 +315,23 @@ class Script:
                 self.task_status = False
 
     def run(self):
-        self.log("运行脚本")
-        self.task_status = True
-
-    def stop(self):
-        self.log("暂停脚本")
-        self.task_status = False
+        if self.task_status:
+            self.log("暂停脚本")
+            self.app.start_button_text.set("运行 F10")
+            self.task_status = False
+        else:
+            self.init_mumu_window()
+            self.log("运行脚本")
+            self.app.start_button_text.set("暂停 F10")
+            self.task_status = True
 
     @staticmethod
     def kill(msg):
         messagebox.showinfo('提示', msg)
         sys.exit(0)
+
+    def setApp(self, obj):
+        self.app = obj
 
 
 class HandlerLog(logging.StreamHandler):
@@ -346,10 +347,54 @@ class HandlerLog(logging.StreamHandler):
         App.log.config(state="disabled")
 
 
+class TaskThread(Thread):
+    def __init__(self, script_obj):
+        Thread.__init__(self)
+        self.script_obj = script_obj
+
+    def run(self):
+        self.script_obj.task()
+
+
+class HotkeyThread(Thread):  # 创建一个Thread.threading的扩展类
+    f10 = 121
+
+    def __init__(self, script_obj):
+        Thread.__init__(self)
+        self.script_obj = script_obj
+
+    def run(self):
+        # 注册快捷键F10并判断是否成功
+        if not user32.RegisterHotKey(None, self.f10, 0, win32con.VK_F10):
+            Script.log("F10 热键注册失败, 请检查是否被占用")
+            messagebox.showerror("注册热键失败", "F10 热键注册失败, 请检查是否被占用")
+
+        try:
+            # 监听热键
+            msg = ctypes.wintypes.MSG()
+            while True:
+                if user32.GetMessageA(ctypes.byref(msg), None, 0, 0) != 0:
+                    if msg.message == win32con.WM_HOTKEY:
+                        if msg.wParam == self.f10:
+                            Script.run(self.script_obj)
+
+                    user32.TranslateMessage(ctypes.byref(msg))
+                    user32.DispatchMessageA(ctypes.byref(msg))
+
+        finally:
+            # 释放热键
+            user32.UnregisterHotKey(None, "F10")
+
+
 class App:
     log = None
+    start_button_text = None
+    stop_button_text = None
 
-    def __init__(self, root, script_object):
+    def __init__(self, root, script_obj):
+        # 将 app 注册到 script, 允许 script 修改 app 按钮
+        script_obj.setApp(self)
+
         # 设置窗口title
         root.title("mumu阴阳师助手")
 
@@ -368,24 +413,15 @@ class App:
         self.log.place(x=300, y=10, width=300, height=430)
 
         # 底部按钮
-        def run(e):
-            if script_object.task_status:
-                script_object.stop()
-                self.start_button_text.set("运行 F10")
-            else:
-                script_object.run()
-                self.start_button_text.set("暂停 F10")
-
         self.start_button_text = tk.StringVar()
         self.start_button_text.set("运行 F10")
-        start_button = tk.Button(root, textvariable=self.start_button_text, command=lambda: script_object.run())
+        start_button = tk.Button(root, textvariable=self.start_button_text, command=lambda: script_obj.run())
         start_button.place(x=200, y=450, width=80, height=30)
-        root.bind("<F10>", run)
 
         self.stop_button_text = tk.StringVar()
         self.stop_button_text.set("结束")
         stop_button = tk.Button(root, textvariable=self.stop_button_text,
-                                command=lambda: script_object.kill("手动结束"))
+                                command=lambda: script_obj.kill("手动结束"))
         stop_button.place(x=320, y=450, width=80, height=30)
 
 
@@ -399,11 +435,12 @@ if __name__ == "__main__":
     # 初始化模拟器窗口
     script.init_mumu_window()
 
-    main_thread = MyThread(script)
+    # 注册线程
+    main_thread = TaskThread(script)
     main_thread.setDaemon(True)
     main_thread.start()
 
-    # 注册助手
+    # 注册助手界面
     tkinter = tk.Tk()
     app = App(tkinter, script)
 
@@ -414,4 +451,10 @@ if __name__ == "__main__":
     module_logger.addHandler(guiHandler)
     module_logger.setLevel(logging.INFO)
 
+    # 注册快捷键
+    hotkey = HotkeyThread(script)
+    hotkey.setDaemon(True)
+    hotkey.start()
+
+    # 启动助手界面
     tkinter.mainloop()
