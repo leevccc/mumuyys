@@ -35,6 +35,9 @@ class Script:
     hwnd = None
     path = os.path.split(os.path.realpath(__file__))[0] + "\\img\\"
     window = 2
+    init = 0
+    clients = 1
+    window_info = []
 
     # 初始化
     # def __init__(self):
@@ -187,20 +190,24 @@ class Script:
         sleep = min_sleep + round(random() * (max_sleep - min_sleep))
         time.sleep(sleep / 1000)
 
-    @staticmethod
-    def switch_window(num):
+    def switch_window(self, num=None):
         """
         切换窗口
 
-        :param num: 切换到第 num 个模拟器窗口, 默认第一个游戏窗口为 2
+        :param num: 切换到第 num 个模拟器窗口, 不填默认为下个窗口
         """
+        if num is None:
+            num = self.window + 1
         num = int(num)
         if num < 1 or num > 9:
             num = 2
         pyautogui.hotkey("ctrl", str(num))
+        self.window = num
+        self.syslog("切换到窗口 " + str(num))
 
-    @staticmethod
-    def log(text, window=window):
+    def log(self, text, window=None):
+        if window is None:
+            window = self.window
         now = datetime.now()
         module_logger.info("%s [窗口%s]: %s" % (now.strftime("%H:%M:%S"), window, text))
 
@@ -284,7 +291,7 @@ class Script:
     def task_liao_zi_jin(self):
         self.log("[任务] 寮资金领取")
         self.click(530, 674, 66, 73)
-        if self.find_pic("zijinlingqu.jpg", click=True, confidence=0.98, times=4):
+        if self.find_pic("zijinlingqu.jpg", click=True, confidence=0.99, times=4):
             if self.find_pic("lingqu.jpg", click=True, times=4):
                 self.random_sleep()
                 self.click_100()
@@ -322,18 +329,27 @@ class Script:
     def task(self):
         while True:
             if self.task_status:
-                if self.zt_zai_ting_yuan():
-                    self.task_ting_yuan_shou_si()
-                    self.task_kai_juan_zhou()
-                    self.task_mail()
-                    self.task_shang_dian_fu_li()
-                    self.task_qiandao()
-                    self.task_ting_yuan_gou_yu()
-                    self.task_huang_jin_qiandao()
-                    self.task_you_qing_dian()
-                    self.task_liao_zi_jin()
+                times = self.clients
+                while times > 0:
+                    if self.zt_zai_ting_yuan():
+                        self.task_ting_yuan_shou_si()
+                        self.task_kai_juan_zhou()
+                        self.task_mail()
+                        self.task_shang_dian_fu_li()
+                        self.task_qiandao()
+                        self.task_ting_yuan_gou_yu()
+                        self.task_huang_jin_qiandao()
+                        self.task_you_qing_dian()
+                        self.task_liao_zi_jin()
+
+                    times -= 1
+                    if 1 < self.clients and (self.window - 1) < self.clients:
+                        # 最大客户端数大于 1 且当前窗口未超出客户端范围, 切换到下个窗口
+                        self.switch_window()
+
                 self.log("所有任务执行完毕")
                 self.run()
+                self.init = 0
 
     def run(self):
         if self.task_status:
@@ -342,6 +358,13 @@ class Script:
             self.task_status = False
         else:
             self.init_mumu_window()
+            if self.init == 0:
+                self.clients = int(app.settings['基本设置']['客户端数'].get())
+                self.window_info = []
+                # 多开, 重置窗口为第一个游戏窗口
+                if self.clients > 1:
+                    self.switch_window(2)
+                self.init = 1
             self.syslog("运行脚本")
             self.app.start_button_text.set("暂停 F10")
             self.task_status = True
@@ -365,6 +388,7 @@ class HandlerLog(logging.StreamHandler):
         self.app.log.config(state="normal")
         self.app.log.insert("end", msg + "\n", script.log_tag)
         self.app.log.update()
+        self.app.log.see("end")
         self.app.log.config(state="disabled")
 
 
