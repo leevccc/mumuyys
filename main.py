@@ -199,8 +199,8 @@ class Script:
     def task_mail(self):
         self.log("[任务] 收取邮件")
         if self.find_pic("mail.jpg", click=True):
-            if self.find_pic("receivemail.jpg", click=True, times=10):
-                if self.find_pic("confirm.jpg", click=True, times=10):
+            if self.find_pic("receivemail.jpg", click=True, times=6):
+                if self.find_pic("confirm.jpg", click=True, times=6):
                     self.random_sleep(1500, 1000)
                     self.click_100()
                     self.action_hui_ting_yuan()
@@ -239,9 +239,19 @@ class Script:
 
     def action_hui_ting_yuan(self):
         self.log("[动作] 回庭院")
-        while self.zt_zai_ting_yuan() is False:
-            pyautogui.hotkey("esc")
-            time.sleep(1)
+        button = [
+            "close2.jpg",
+            "fanhui.jpg",
+            "fanhui2.jpg",
+        ]
+
+        max_times = len(button)
+        for i in range(0, max_times):
+            if self.zt_zai_ting_yuan() is False:
+                self.find_pic(button[i], click=True)
+                time.sleep(1)
+            else:
+                i = max_times
 
     def task(self):
         while True:
