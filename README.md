@@ -3,7 +3,7 @@
 
 ## 打包 exe
 ```bash
-pyinstaller -Fw main.py
+pyinstaller -F main.py
 ````
 
 ## 导出配置

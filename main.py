@@ -33,7 +33,7 @@ class Script:
     weight = 1440
     height = 810
     hwnd = None
-    path = os.path.split(os.path.realpath(__file__))[0] + "\\img\\"
+    path = os.getcwd() + "\\img\\"
     window = 2
     init = 0
     clients = 1
