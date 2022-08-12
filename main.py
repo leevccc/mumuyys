@@ -3,6 +3,7 @@ import os
 import sys
 import time
 import tkinter as tk
+import tkinter.messagebox as messagebox
 from datetime import datetime
 from random import random
 from threading import Thread
@@ -18,13 +19,11 @@ module_logger = logging.getLogger(__name__)
 
 
 class MyThread(Thread):
-    def __init__(self, name, script_obj):
+    def __init__(self, script_obj):
         Thread.__init__(self)
-        self.name = name
         self.script_obj = script_obj
 
     def run(self):
-        print("开启线程： " + self.name)
         self.script_obj.task()
 
 
@@ -85,6 +84,11 @@ class Script:
         # img = screen.grabWindow(self.hwnd).toImage()
         # url = self.path + "\\img\\screenshot.jpg"
         # img.save(url)
+
+        # 脚本运行的本质是 识别图片+鼠标点击, 所以只需要在截图和点击功能里加入线程阻塞即可实现暂停功能
+        while self.task_status is False:
+            time.sleep(1)
+
         pyautogui.moveTo(100, 10)
         x = self.x
         y = self.y
@@ -146,6 +150,10 @@ class Script:
         :param width: 横坐标偏移量
         :param height: 纵坐标偏移量
         """
+        # 脚本运行的本质是 识别图片+鼠标点击, 所以只需要在截图和点击功能里加入线程阻塞即可实现暂停功能
+        while self.task_status is False:
+            time.sleep(1)
+
         x = self.x + x
         y = self.y + y
         pyautogui.moveTo(x + self.random_max(width), y + self.random_max(height))
@@ -316,12 +324,12 @@ class Script:
         self.task_status = True
 
     def stop(self):
-        self.log("结束脚本")
+        self.log("暂停脚本")
         self.task_status = False
 
     @staticmethod
     def kill(msg):
-        print(msg)
+        messagebox.showinfo('提示', msg)
         sys.exit(0)
 
 
@@ -340,7 +348,6 @@ class HandlerLog(logging.StreamHandler):
 
 class App:
     log = None
-    status = 0
 
     def __init__(self, root, script_object):
         # 设置窗口title
@@ -362,22 +369,23 @@ class App:
 
         # 底部按钮
         def run(e):
-            if self.status == 0:
-                script_object.run()
-                self.status = 1
-            else:
+            if script_object.task_status:
                 script_object.stop()
-                self.status = 0
+                self.start_button_text.set("运行 F10")
+            else:
+                script_object.run()
+                self.start_button_text.set("暂停 F10")
 
         self.start_button_text = tk.StringVar()
-        self.start_button_text.set("启动")
+        self.start_button_text.set("运行 F10")
         start_button = tk.Button(root, textvariable=self.start_button_text, command=lambda: script_object.run())
         start_button.place(x=200, y=450, width=80, height=30)
         root.bind("<F10>", run)
 
         self.stop_button_text = tk.StringVar()
         self.stop_button_text.set("结束")
-        stop_button = tk.Button(root, textvariable=self.stop_button_text, command=lambda: script_object.stop())
+        stop_button = tk.Button(root, textvariable=self.stop_button_text,
+                                command=lambda: script_object.kill("手动结束"))
         stop_button.place(x=320, y=450, width=80, height=30)
 
 
@@ -391,7 +399,7 @@ if __name__ == "__main__":
     # 初始化模拟器窗口
     script.init_mumu_window()
 
-    main_thread = MyThread('主程序', script)
+    main_thread = MyThread(script)
     main_thread.setDaemon(True)
     main_thread.start()
 
