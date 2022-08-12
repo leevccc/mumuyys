@@ -379,7 +379,7 @@ class Script:
         messagebox.showinfo('提示', msg)
         sys.exit(0)
 
-    def setApp(self, obj):
+    def set_app(self, obj):
         self.app = obj
 
 
@@ -416,7 +416,7 @@ class HotkeyThread(Thread):  # 创建一个Thread.threading的扩展类
     def run(self):
         # 注册快捷键F10并判断是否成功
         if not user32.RegisterHotKey(None, self.f10, 0, win32con.VK_F10):
-            Script.log("F10 热键注册失败, 请检查是否被占用")
+            self.script_obj.log("F10 热键注册失败, 请检查是否被占用")
             messagebox.showerror("注册热键失败", "F10 热键注册失败, 请检查是否被占用")
 
         try:
@@ -450,10 +450,10 @@ class App:
     def __init__(self, root, script_obj):
         # setting 值初始化
         self.script_obj = script_obj
-        self.initSetting()
+        self.init_setting()
 
         # 将 app 注册到 script, 允许 script 修改 app 按钮文字
-        script_obj.setApp(self)
+        script_obj.set_app(self)
 
         # 助手界面
         root.title("mumu阴阳师助手")
@@ -471,16 +471,16 @@ class App:
 
         self.tab1 = tk.Frame(notebook)
         notebook.add(self.tab1, text="日志信息")
-        self.initTab1()
+        self.init_tab1()
 
         self.tab2 = tk.Frame(notebook)
         notebook.add(self.tab2, text="基本设置")
         self.tab2.config(padx=10, pady=10)
-        self.initTab2()
+        self.init_tab2()
 
         notebook.pack(expand=True, fill=tk.BOTH)
 
-    def saveSettings(self):
+    def save_settings(self):
         conf = ConfigParser()
         conf.read('config.ini')
 
@@ -491,7 +491,7 @@ class App:
                 conf.set(_key, __key, self.settings[_key][__key].get())
         conf.write(open('config.ini', 'w'))
 
-    def loadSettings(self):
+    def load_settings(self):
         conf = ConfigParser()
         conf.read('config.ini')
         if len(conf.sections()) == 0:
@@ -504,16 +504,16 @@ class App:
                 if conf.get(_key, __key):
                     self.settings[_key][__key].set(conf.get(_key, __key))
 
-    def initSetting(self):
+    def init_setting(self):
         self.settings["基本设置"] = {}
         self.settings["基本设置"]["客户端数"] = tk.StringVar()
         self.settings["基本设置"]["客户端数"].set("1")
 
         # 加载本地配置
-        self.loadSettings()
+        self.load_settings()
 
     # Tab: 日志信息
-    def initTab1(self):
+    def init_tab1(self):
         # 日志
         self.log = tk.Text(self.tab1, state="disabled", padx=0, pady=0)
         self.log.place(x=-1, y=-1, width=self.width, height=400)
@@ -533,7 +533,7 @@ class App:
             .place(x=320, y=420, width=80, height=30)
 
     # Tab: 基本设置
-    def initTab2(self):
+    def init_tab2(self):
         tk.Label(self.tab2, text="客户端数", anchor='e').place(x=0, y=0, width=60, height=20)
         tk.Radiobutton(self.tab2, text="单开", value="1", variable=self.settings["基本设置"]["客户端数"]) \
             .place(x=60, y=0, width=50, height=20)
@@ -542,9 +542,9 @@ class App:
         tk.Radiobutton(self.tab2, text="三开", value="3", variable=self.settings["基本设置"]["客户端数"]) \
             .place(x=160, y=0, width=50, height=20)
         # 底部 配置按钮
-        tk.Button(self.tab2, text="保存配置", command=lambda: self.saveSettings()) \
+        tk.Button(self.tab2, text="保存配置", command=lambda: self.save_settings()) \
             .place(x=190, y=410, width=80, height=30)
-        tk.Button(self.tab2, text="读取配置", command=lambda: self.loadSettings()) \
+        tk.Button(self.tab2, text="读取配置", command=lambda: self.load_settings()) \
             .place(x=310, y=410, width=80, height=30)
 
 
@@ -557,7 +557,7 @@ if __name__ == "__main__":
 
     # 注册线程
     main_thread = TaskThread(script)
-    main_thread.setDaemon(True)
+    main_thread.daemon = True
     main_thread.start()
 
     # 注册助手界面
@@ -574,7 +574,7 @@ if __name__ == "__main__":
 
     # 注册快捷键
     hotkey = HotkeyThread(script)
-    hotkey.setDaemon(True)
+    hotkey.daemon = True
     hotkey.start()
 
     # 启动助手界面
