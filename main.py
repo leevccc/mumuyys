@@ -45,7 +45,16 @@ class Script:
         """
         获取 MuMu 窗口句柄
         """
-        window = win32gui.FindWindow(0, "阴阳师 - MuMu模拟器")
+        window = 0
+        max_times = 3
+        for i in range(0, max_times):
+            window_title = "阴阳师 - MuMu模拟器"
+            if i > 0:
+                window_title = "#N" + str(i) + " 阴阳师 - MuMu模拟器"
+            window = win32gui.FindWindow(0, window_title)
+            if window != 0:
+                break
+
         if window == 0:
             self.kill("找不到游戏窗口, 脚本退出")
         self.hwnd = window
@@ -256,7 +265,7 @@ class Script:
                 self.find_pic(button[i], click=True)
                 time.sleep(1)
             else:
-                i = max_times
+                break
 
     def task(self):
         while True:
