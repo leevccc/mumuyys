@@ -5,6 +5,7 @@ import os
 import sys
 import time
 import tkinter as tk
+from tkinter import ttk
 import tkinter.messagebox as messagebox
 from datetime import datetime
 from random import random
@@ -127,6 +128,7 @@ class Script:
 
         x, y = match_result["result"]
         if click:
+            self.log(match_result)
             x = match_result["rectangle"][0][0]
             y = match_result["rectangle"][0][1]
             width = match_result["rectangle"][3][0] - x
@@ -273,7 +275,7 @@ class Script:
     def task_liao_zi_jin(self):
         self.log("[任务] 寮资金领取")
         self.click(530, 674, 66, 73)
-        if self.find_pic("zijinlingqu.jpg", click=True, confidence=0.95, times=4):
+        if self.find_pic("zijinlingqu.jpg", click=True, confidence=0.98, times=4):
             if self.find_pic("lingqu.jpg", click=True, times=4):
                 self.random_sleep()
                 self.click_100()
@@ -312,16 +314,17 @@ class Script:
         while True:
             if self.task_status:
                 if self.zt_zai_ting_yuan():
-                    # self.task_ting_yuan_shou_si()
-                    # self.task_kai_juan_zhou()
-                    # self.task_mail()
-                    # self.task_shang_dian_fu_li()
-                    # self.task_qiandao()
-                    # self.task_ting_yuan_gou_yu()
-                    # self.task_huang_jin_qiandao()
+                    self.task_ting_yuan_shou_si()
+                    self.task_kai_juan_zhou()
+                    self.task_mail()
+                    self.task_shang_dian_fu_li()
+                    self.task_qiandao()
+                    self.task_ting_yuan_gou_yu()
+                    self.task_huang_jin_qiandao()
                     self.task_you_qing_dian()
+                    self.task_liao_zi_jin()
                 self.log("所有任务执行完毕")
-                self.task_status = False
+                self.run()
 
     def run(self):
         if self.task_status:
@@ -399,6 +402,7 @@ class App:
     log = None
     start_button_text = None
     stop_button_text = None
+    setting = []
 
     def __init__(self, root, script_obj):
         # 将 app 注册到 script, 允许 script 修改 app 按钮
@@ -417,21 +421,29 @@ class App:
         root.geometry(align_str)
         root.resizable(width=False, height=False)
 
+        # 标签页
+        notebook = ttk.Notebook(root)
+        tab1 = tk.Frame(notebook, bg="#fff")
+        tab2 = tk.Frame(notebook, bg="#fff")
+        notebook.add(tab1, text="日志")
+        notebook.add(tab2, text="设置")
+        notebook.pack(expand=True, fill=tk.BOTH)
+
         # 功能区
-        self.log = tk.Text(root, state="disabled", background="#FFF", borderwidth=1)
-        self.log.place(x=300, y=10, width=300, height=430)
+        self.log = tk.Text(tab1, state="disabled", background="#FFF", borderwidth=1)
+        self.log.place(x=0, y=0, width=width, height=400)
 
         # 底部按钮
         self.start_button_text = tk.StringVar()
         self.start_button_text.set("运行 F10")
-        start_button = tk.Button(root, textvariable=self.start_button_text, command=lambda: script_obj.run())
-        start_button.place(x=200, y=450, width=80, height=30)
+        start_button = tk.Button(tab1, textvariable=self.start_button_text, command=lambda: script_obj.run())
+        start_button.place(x=200, y=420, width=80, height=30)
 
         self.stop_button_text = tk.StringVar()
         self.stop_button_text.set("结束")
-        stop_button = tk.Button(root, textvariable=self.stop_button_text,
+        stop_button = tk.Button(tab1, textvariable=self.stop_button_text,
                                 command=lambda: script_obj.kill("手动结束"))
-        stop_button.place(x=320, y=450, width=80, height=30)
+        stop_button.place(x=320, y=420, width=80, height=30)
 
 
 if __name__ == "__main__":
