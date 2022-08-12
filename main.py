@@ -5,7 +5,7 @@ import os
 import sys
 import time
 import tkinter as tk
-from tkinter import ttk
+from ttkbootstrap import ttk
 import tkinter.messagebox as messagebox
 from datetime import datetime
 from random import random
@@ -69,7 +69,7 @@ class Script:
         left, top, right, bottom = win32gui.GetWindowRect(self.hwnd)
         self.x = left
         self.y = top + 36
-        print("坐标:", "宽", right, "高", bottom, "顶", top, "左", left, "分辨率 1440 x 810")
+        module_logger.info("窗口坐标:", "宽", right, "高", bottom, "顶", top, "左", left, "分辨率 1440 x 810")
 
     def print_screen(self):
         """
@@ -128,7 +128,6 @@ class Script:
 
         x, y = match_result["result"]
         if click:
-            self.log(match_result)
             x = match_result["rectangle"][0][0]
             y = match_result["rectangle"][0][1]
             width = match_result["rectangle"][3][0] - x
@@ -423,17 +422,17 @@ class App:
 
         # 标签页
         notebook = ttk.Notebook(root)
-        tab1 = tk.Frame(notebook, bg="#fff")
-        tab2 = tk.Frame(notebook, bg="#fff")
+        tab1 = tk.Frame(notebook)
+        tab2 = tk.Frame(notebook)
         notebook.add(tab1, text="日志")
         notebook.add(tab2, text="设置")
         notebook.pack(expand=True, fill=tk.BOTH)
 
-        # 功能区
-        self.log = tk.Text(tab1, state="disabled", background="#FFF", borderwidth=1)
-        self.log.place(x=0, y=0, width=width, height=400)
+        # 日志页 - 日志
+        self.log = tk.Text(tab1, state="disabled", padx=0, pady=0)
+        self.log.place(x=-1, y=-1, width=width, height=400)
 
-        # 底部按钮
+        # 日志页 - 底部按钮
         self.start_button_text = tk.StringVar()
         self.start_button_text.set("运行 F10")
         start_button = tk.Button(tab1, textvariable=self.start_button_text, command=lambda: script_obj.run())
@@ -441,8 +440,7 @@ class App:
 
         self.stop_button_text = tk.StringVar()
         self.stop_button_text.set("结束")
-        stop_button = tk.Button(tab1, textvariable=self.stop_button_text,
-                                command=lambda: script_obj.kill("手动结束"))
+        stop_button = tk.Button(tab1, textvariable=self.stop_button_text, command=lambda: script_obj.kill("手动结束"))
         stop_button.place(x=320, y=420, width=80, height=30)
 
 
@@ -471,6 +469,7 @@ if __name__ == "__main__":
     guiHandler = HandlerLog(app.log)
     module_logger.addHandler(guiHandler)
     module_logger.setLevel(logging.INFO)
+    module_logger.info("[日志信息]")
 
     # 注册快捷键
     hotkey = HotkeyThread(script)
