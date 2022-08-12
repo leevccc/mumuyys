@@ -92,11 +92,16 @@ class Script:
         while self.task_status is False:
             time.sleep(1)
 
-        pyautogui.moveTo(100, 10)
         x = self.x
         y = self.y
         rx = self.x + self.weight
         ry = self.y + self.height
+
+        # 截图前把鼠标移除出游戏界面
+        mouse_x, mouse_y = pyautogui.position()
+        if x < mouse_x < rx and y < mouse_y < ry:
+            pyautogui.moveTo(rx, ry)
+
         screen = pyautogui.screenshot(region=(x, y, rx, ry))
         screen.save(self.path + "\\temp\\screenshot.jpg")
 
