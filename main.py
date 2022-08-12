@@ -480,6 +480,9 @@ class App:
         self.settings["基本设置"]["客户端数"] = tk.StringVar()
         self.settings["基本设置"]["客户端数"].set("1")
 
+        # 加载本地配置
+        self.loadSettings()
+
     # Tab: 日志信息
     def initTab1(self):
         # 日志
