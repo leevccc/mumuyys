@@ -247,15 +247,15 @@ class Script:
 
     def task_ting_yuan_shou_si(self):
         self.log("[任务] 庭院寿司")
-        self.find_pic("shousi.jpg", click=True)
-        self.random_sleep()
-        self.click_100()
+        if self.find_pic("shousi.jpg", confidence=0.95, click=True):
+            self.random_sleep()
+            self.click_100()
 
     def task_ting_yuan_gou_yu(self):
         self.log("[任务] 庭院勾玉")
-        self.find_pic("gouyu.jpg", click=True)
-        self.random_sleep()
-        self.click_100()
+        if self.find_pic("gouyu.jpg", click=True):
+            self.random_sleep()
+            self.click_100()
 
     def zt_zai_ting_yuan(self):
         """
