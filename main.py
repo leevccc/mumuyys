@@ -206,6 +206,12 @@ class Script:
             self.random_sleep(2000, 1500)
             self.find_pic("close.jpg", click=True, times=10)
 
+    def task_huang_jin_qiandao(self):
+        self.log("[任务] 黄金签到")
+        if self.find_pic("huangjinqiandao.jpg", click=True):
+            self.random_sleep()
+            self.click_100()
+
     def task_mail(self):
         self.log("[任务] 收取邮件")
         if self.find_pic("mail.jpg", click=True):
@@ -290,6 +296,7 @@ class Script:
                     self.task_shang_dian_fu_li()
                     self.task_qiandao()
                     self.task_ting_yuan_gou_yu()
+                    self.task_huang_jin_qiandao()
                 self.log("所有任务执行完毕")
                 self.task_status = False
 
