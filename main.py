@@ -230,6 +230,11 @@ class Script:
         self.action_hui_ting_yuan()
 
     def zt_zai_ting_yuan(self):
+        """
+        判断是否在庭院
+
+        :return: True / False
+        """
         x, y = self.find_pic("feng.jpg")
         if x is not None:
             self.log("[状态] 在庭院")
