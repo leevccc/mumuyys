@@ -265,9 +265,9 @@ class Script:
         self.log("[任务] 友情点")
         self.click(964, 686, 62, 68)
         if self.find_pic("youqingdian.jpg", click=True, times=4):
-            self.find_pic("yijianlingqu.jpg", click=True, times=4)
-            self.random_sleep()
-            self.click_100()
+            if self.find_pic("yijianlingqu.jpg", click=True, times=4):
+                self.random_sleep()
+                self.click_100()
         self.action_hui_ting_yuan()
 
     def zt_zai_ting_yuan(self):
@@ -291,13 +291,13 @@ class Script:
             "fanhui2.jpg",
         ]
 
-        max_times = len(button)
-        for i in range(0, max_times):
-            if self.zt_zai_ting_yuan() is False:
-                self.find_pic(button[i], click=True)
-                time.sleep(1)
-            else:
-                break
+        i = 0
+        while self.zt_zai_ting_yuan() is False:
+            self.find_pic(button[i], click=True)
+            i += 1
+            if i == len(button):
+                i = 0
+            time.sleep(1)
 
     def task(self):
         while True:
