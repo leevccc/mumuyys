@@ -5,6 +5,8 @@ import os
 import sys
 import time
 import tkinter as tk
+from configparser import ConfigParser
+
 from ttkbootstrap import ttk
 import tkinter.messagebox as messagebox
 from datetime import datetime
@@ -406,39 +408,83 @@ class HotkeyThread(Thread):  # 创建一个Thread.threading的扩展类
 
 
 class App:
+    script_obj = None
+    width = None
+    height = None
+    tab1 = None
+    tab2 = None
     log = None
     start_button_text = None
     stop_button_text = None
-    setting = []
+    settings = {}
 
     def __init__(self, root, script_obj):
-        # 将 app 注册到 script, 允许 script 修改 app 按钮
+        # setting 值初始化
+        self.script_obj = script_obj
+        self.initSetting()
+
+        # 将 app 注册到 script, 允许 script 修改 app 按钮文字
         script_obj.setApp(self)
 
-        # 设置窗口title
+        # 助手界面
         root.title("mumu阴阳师助手")
-
-        # 设置窗口大小:宽x高
-        # root.geometry("400x600")
-        width = 600
-        height = 500
+        self.width = 600
+        self.height = 500
         screenwidth = root.winfo_screenwidth()
         screenheight = root.winfo_screenheight()
-        align_str = '%dx%d+%d+%d' % (width, height, (screenwidth - width) / 2, (screenheight - height) / 2)
+        align_str = '%dx%d+%d+%d' % \
+                    (self.width, self.height, (screenwidth - self.width) / 2, (screenheight - self.height) / 2)
         root.geometry(align_str)
         root.resizable(width=False, height=False)
 
         # 标签页
         notebook = ttk.Notebook(root)
-        tab1 = tk.Frame(notebook)
-        tab2 = tk.Frame(notebook)
-        notebook.add(tab1, text="日志")
-        notebook.add(tab2, text="设置")
+
+        self.tab1 = tk.Frame(notebook)
+        notebook.add(self.tab1, text="日志信息")
+        self.initTab1()
+
+        self.tab2 = tk.Frame(notebook)
+        notebook.add(self.tab2, text="基本设置")
+        self.tab2.config(padx=10, pady=10)
+        self.initTab2()
+
         notebook.pack(expand=True, fill=tk.BOTH)
 
-        # 日志页 - 日志
-        self.log = tk.Text(tab1, state="disabled", padx=0, pady=0)
-        self.log.place(x=-1, y=-1, width=width, height=400)
+    def saveSettings(self):
+        conf = ConfigParser()
+        conf.read('config.ini')
+
+        for _key in self.settings:
+            if conf.has_section(_key) is False:
+                conf.add_section(_key)
+            for __key in self.settings[_key]:
+                conf.set(_key, __key, self.settings[_key][__key].get())
+        conf.write(open('config.ini', 'w'))
+
+    def loadSettings(self):
+        conf = ConfigParser()
+        conf.read('config.ini')
+        if len(conf.sections()) == 0:
+            return
+
+        for _key in self.settings:
+            if conf.has_section(_key) is False:
+                continue
+            for __key in self.settings[_key]:
+                if conf.get(_key, __key):
+                    self.settings[_key][__key].set(conf.get(_key, __key))
+
+    def initSetting(self):
+        self.settings["基本设置"] = {}
+        self.settings["基本设置"]["客户端数"] = tk.StringVar()
+        self.settings["基本设置"]["客户端数"].set("1")
+
+    # Tab: 日志信息
+    def initTab1(self):
+        # 日志
+        self.log = tk.Text(self.tab1, state="disabled", padx=0, pady=0)
+        self.log.place(x=-1, y=-1, width=self.width, height=400)
         # 设置系统日志样式 tag
         self.log.tag_add("sys", "end")
         self.log.tag_config("sys", foreground="blue", background="pink")
@@ -446,13 +492,26 @@ class App:
         # 日志页 - 底部按钮
         self.start_button_text = tk.StringVar()
         self.start_button_text.set("运行 F10")
-        start_button = tk.Button(tab1, textvariable=self.start_button_text, command=lambda: script_obj.run())
-        start_button.place(x=200, y=420, width=80, height=30)
+        tk.Button(self.tab1, textvariable=self.start_button_text, command=lambda: self.script_obj.run()) \
+            .place(x=200, y=420, width=80, height=30)
 
         self.stop_button_text = tk.StringVar()
         self.stop_button_text.set("结束")
-        stop_button = tk.Button(tab1, textvariable=self.stop_button_text, command=lambda: script_obj.kill("手动结束"))
-        stop_button.place(x=320, y=420, width=80, height=30)
+        tk.Button(self.tab1, textvariable=self.stop_button_text, command=lambda: self.script_obj.kill("手动结束")) \
+            .place(x=320, y=420, width=80, height=30)
+
+    # Tab: 基本设置
+    def initTab2(self):
+        tk.Button(self.tab2, text="保存配置", command=lambda: self.saveSettings()).grid(row=0, column=0)
+        tk.Button(self.tab2, text="读取配置", command=lambda: self.loadSettings()).grid(row=0, column=2)
+        tk.Label(self.tab2, text="客户端数").grid(row=1, column=0)
+        print(self.settings)
+        tk.Radiobutton(self.tab2, text="单开", value="1", variable=self.settings["基本设置"]["客户端数"]) \
+            .grid(row=1, column=1)
+        tk.Radiobutton(self.tab2, text="双开", value="2", variable=self.settings["基本设置"]["客户端数"]) \
+            .grid(row=1, column=2)
+        tk.Radiobutton(self.tab2, text="三开", value="3", variable=self.settings["基本设置"]["客户端数"]) \
+            .grid(row=1, column=3)
 
 
 if __name__ == "__main__":
