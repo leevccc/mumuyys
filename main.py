@@ -85,6 +85,7 @@ class Script:
         # img = screen.grabWindow(self.hwnd).toImage()
         # url = self.path + "\\img\\screenshot.jpg"
         # img.save(url)
+        pyautogui.moveTo(0, 0)
         x = self.x
         y = self.y
         rx = self.x + self.weight
