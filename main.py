@@ -222,25 +222,24 @@ class Script:
         module_logger.info("%s (系统): %s" % (now.strftime("%H:%M:%S"), text))
         self.log_tag = None
 
-    def task_kai_juan_zhou(self):
-        self.log("自动开启底部导航卷轴")
-        self.find_pic("tingyuanjuanzhou.jpg", click=True)
+    def run_task(self, setting_section, setting_key, task_func, msg=True):
+        if self.app.settings[setting_section][setting_key].get() == "1":
+            if msg:
+                self.log("[任务] %s" % setting_key)
+            task_func()
 
     def task_qiandao(self):
-        self.log("[任务] 签到")
         if self.find_pic("qiandao.jpg", click=True):
             self.find_pic("qiandao2.jpg", click=True, times=30)
             self.random_sleep(2000, 1500)
             self.find_pic("close.jpg", click=True, times=10)
 
     def task_huang_jin_qiandao(self):
-        self.log("[任务] 黄金签到")
         if self.find_pic("huangjinqiandao.jpg", click=True):
             self.random_sleep()
             self.click_100()
 
     def task_mail(self):
-        self.log("[任务] 收取邮件")
         if self.find_pic("mail.jpg", click=True):
             if self.find_pic("receivemail.jpg", click=True, times=6):
                 if self.find_pic("confirm.jpg", click=True, times=6):
@@ -254,7 +253,6 @@ class Script:
                 self.action_hui_ting_yuan()
 
     def task_shang_dian_fu_li(self):
-        self.log("[任务] 领取商店每日福利")
         self.log("进入商店")
         self.click(685, 684, 50, 60)
 
@@ -272,20 +270,7 @@ class Script:
         self.click_100()
         self.action_hui_ting_yuan()
 
-    def task_ting_yuan_shou_si(self):
-        self.log("[任务] 庭院寿司")
-        if self.find_pic("shousi.jpg", confidence=0.95, click=True):
-            self.random_sleep()
-            self.click_100()
-
-    def task_ting_yuan_gou_yu(self):
-        self.log("[任务] 庭院勾玉")
-        if self.find_pic("gouyu.jpg", click=True):
-            self.random_sleep()
-            self.click_100()
-
     def task_you_qing_dian(self):
-        self.log("[任务] 友情点")
         self.click(964, 686, 62, 68)
         if self.find_pic("youqingdian.jpg", click=True, times=4):
             if self.find_pic("yijianlingqu.jpg", click=True, times=4):
@@ -294,13 +279,44 @@ class Script:
         self.action_hui_ting_yuan()
 
     def task_liao_zi_jin(self):
-        self.log("[任务] 寮资金领取")
         self.click(530, 674, 66, 73)
         if self.find_pic("zijinlingqu.jpg", click=True, confidence=0.99, times=4):
             if self.find_pic("lingqu.jpg", click=True, times=4):
                 self.random_sleep()
                 self.click_100()
         self.action_hui_ting_yuan()
+
+    def action_ting_yuan_shou_si(self):
+        if self.find_pic("shousi.jpg", confidence=0.95, click=True):
+            self.log("[动作] 领取庭院寿司")
+            self.random_sleep()
+            self.click_100()
+
+    def action_ting_yuan_gou_yu(self):
+        if self.find_pic("gouyu.jpg", click=True):
+            self.log("[动作] 领取庭院勾玉")
+            self.random_sleep()
+            self.click_100()
+
+    def action_hui_ting_yuan(self):
+        button = [
+            "close2.jpg",
+            "fanhui.jpg",
+            "fanhui2.jpg",
+        ]
+
+        i = 0
+        while self.zt_zai_ting_yuan() is False:
+            self.log("[动作] 回庭院")
+            self.find_pic(button[i], click=True)
+            i += 1
+            if i == len(button):
+                i = 0
+            time.sleep(1)
+
+    def action_kai_juan_zhou(self):
+        if self.find_pic("tingyuanjuanzhou.jpg", click=True):
+            self.log("[动作] 开启底部导航卷轴")
 
     def zt_zai_ting_yuan(self):
         """
@@ -311,25 +327,11 @@ class Script:
         x, y = self.find_pic("feng.jpg")
         if x is not None:
             self.log("[状态] 在庭院")
+            self.run_task("日常任务", "领取庭院寿司", self.action_ting_yuan_shou_si, False)
+            self.run_task("日常任务", "领取庭院勾玉", self.action_ting_yuan_gou_yu, False)
             return True
         else:
             return False
-
-    def action_hui_ting_yuan(self):
-        self.log("[动作] 回庭院")
-        button = [
-            "close2.jpg",
-            "fanhui.jpg",
-            "fanhui2.jpg",
-        ]
-
-        i = 0
-        while self.zt_zai_ting_yuan() is False:
-            self.find_pic(button[i], click=True)
-            i += 1
-            if i == len(button):
-                i = 0
-            time.sleep(1)
 
     def task(self):
         while True:
@@ -337,15 +339,13 @@ class Script:
                 times = self.clients
                 while times > 0:
                     if self.zt_zai_ting_yuan():
-                        self.task_ting_yuan_shou_si()
-                        self.task_kai_juan_zhou()
-                        self.task_mail()
-                        self.task_shang_dian_fu_li()
-                        self.task_qiandao()
-                        self.task_ting_yuan_gou_yu()
-                        self.task_huang_jin_qiandao()
-                        self.task_you_qing_dian()
-                        self.task_liao_zi_jin()
+                        self.action_kai_juan_zhou()
+                        self.run_task("日常任务", "每日签到", self.task_qiandao)
+                        self.run_task("日常任务", "黄金签到", self.task_huang_jin_qiandao)
+                        self.run_task("日常任务", "领取邮件", self.task_mail)
+                        self.run_task("日常任务", "领取黑蛋", self.task_shang_dian_fu_li)
+                        self.run_task("日常任务", "友情点", self.task_you_qing_dian)
+                        self.run_task("日常任务", "领取寮资金", self.task_liao_zi_jin)
 
                     times -= 1
                     if 1 < self.clients and (self.window - 1) < self.clients:
@@ -440,11 +440,25 @@ class App:
     script_obj = None
     width = None
     height = None
-    tab1 = None
-    tab2 = None
     log = None
     start_button_text = None
     stop_button_text = None
+    settings_list = {
+        "日常任务": {
+            "Daily": [
+                "每日签到",
+                "黄金签到",
+                "领取邮件",
+                "领取黑蛋",
+                "友情点",
+                "领取寮资金",
+            ],
+            "TingYuan": [
+                "领取庭院寿司",
+                "领取庭院勾玉"
+            ],
+        },
+    }
     settings = {}
 
     def __init__(self, root, script_obj):
@@ -469,14 +483,19 @@ class App:
         # 标签页
         notebook = ttk.Notebook(root)
 
-        self.tab1 = tk.Frame(notebook)
-        notebook.add(self.tab1, text="日志信息")
-        self.init_tab1()
+        tab1 = tk.Frame(notebook)
+        notebook.add(tab1, text="日志信息")
+        self.init_tab1(tab1)
 
-        self.tab2 = tk.Frame(notebook)
-        notebook.add(self.tab2, text="基本设置")
-        self.tab2.config(padx=10, pady=10)
-        self.init_tab2()
+        tab2 = tk.Frame(notebook)
+        notebook.add(tab2, text="基本设置")
+        tab2.config(padx=10, pady=10)
+        self.init_tab2(tab2)
+
+        tab3 = tk.Frame(notebook)
+        notebook.add(tab3, text="日常任务")
+        tab3.config(padx=10, pady=10)
+        self.init_tab3(tab3)
 
         notebook.pack(expand=True, fill=tk.BOTH)
 
@@ -508,14 +527,21 @@ class App:
         self.settings["基本设置"] = {}
         self.settings["基本设置"]["客户端数"] = tk.StringVar()
         self.settings["基本设置"]["客户端数"].set("1")
+        self.settings["日常任务"] = {}
+        for value in self.settings_list["日常任务"]["Daily"]:
+            self.settings["日常任务"][value] = tk.StringVar()
+            self.settings["日常任务"][value].set("1")
+        for value in self.settings_list["日常任务"]['TingYuan']:
+            self.settings["日常任务"][value] = tk.StringVar()
+            self.settings["日常任务"][value].set("1")
 
         # 加载本地配置
         self.load_settings()
 
     # Tab: 日志信息
-    def init_tab1(self):
+    def init_tab1(self, tab):
         # 日志
-        self.log = tk.Text(self.tab1, state="disabled", padx=0, pady=0)
+        self.log = tk.Text(tab, state="disabled", padx=0, pady=0)
         self.log.place(x=-1, y=-1, width=self.width, height=400)
         # 设置系统日志样式 tag
         self.log.tag_add("sys", "end")
@@ -524,28 +550,48 @@ class App:
         # 日志页 - 底部按钮
         self.start_button_text = tk.StringVar()
         self.start_button_text.set("运行 F10")
-        tk.Button(self.tab1, textvariable=self.start_button_text, command=lambda: self.script_obj.run()) \
+        tk.Button(tab, textvariable=self.start_button_text, command=lambda: self.script_obj.run()) \
             .place(x=200, y=420, width=80, height=30)
 
         self.stop_button_text = tk.StringVar()
         self.stop_button_text.set("结束")
-        tk.Button(self.tab1, textvariable=self.stop_button_text, command=lambda: self.script_obj.kill("手动结束")) \
+        tk.Button(tab, textvariable=self.stop_button_text, command=lambda: self.script_obj.kill("手动结束")) \
             .place(x=320, y=420, width=80, height=30)
 
     # Tab: 基本设置
-    def init_tab2(self):
-        tk.Label(self.tab2, text="客户端数", anchor='e').place(x=0, y=0, width=60, height=20)
-        tk.Radiobutton(self.tab2, text="单开", value="1", variable=self.settings["基本设置"]["客户端数"]) \
+    def init_tab2(self, tab):
+        tk.Label(tab, text="客户端数", anchor='e').place(x=0, y=0, width=60, height=20)
+        tk.Radiobutton(tab, text="单开", value="1", variable=self.settings["基本设置"]["客户端数"]) \
             .place(x=60, y=0, width=50, height=20)
-        tk.Radiobutton(self.tab2, text="双开", value="2", variable=self.settings["基本设置"]["客户端数"]) \
+        tk.Radiobutton(tab, text="双开", value="2", variable=self.settings["基本设置"]["客户端数"]) \
             .place(x=110, y=0, width=50, height=20)
-        tk.Radiobutton(self.tab2, text="三开", value="3", variable=self.settings["基本设置"]["客户端数"]) \
+        tk.Radiobutton(tab, text="三开", value="3", variable=self.settings["基本设置"]["客户端数"]) \
             .place(x=160, y=0, width=50, height=20)
         # 底部 配置按钮
-        tk.Button(self.tab2, text="保存配置", command=lambda: self.save_settings()) \
+        tk.Button(tab, text="保存配置", command=lambda: self.save_settings()) \
             .place(x=190, y=410, width=80, height=30)
-        tk.Button(self.tab2, text="读取配置", command=lambda: self.load_settings()) \
+        tk.Button(tab, text="读取配置", command=lambda: self.load_settings()) \
             .place(x=310, y=410, width=80, height=30)
+
+    # 日常任务
+    def init_tab3(self, tab):
+        daily = tk.LabelFrame(tab, text="每日一次")
+        daily.place(x=0, y=0, width=130, height=200)
+        for i, val in enumerate(self.settings_list["日常任务"]['Daily']):
+            tk.Checkbutton(daily,
+                           text=val, anchor="w",
+                           offvalue="0", onvalue="1",
+                           variable=self.settings["日常任务"][val]) \
+                .place(x=0, y=i * 30, width=120, height=20)
+
+        ting_yuan = tk.LabelFrame(tab, text="回庭院时监测")
+        ting_yuan.place(x=0, y=210, width=130, height=80)
+        for i, val in enumerate(self.settings_list["日常任务"]['TingYuan']):
+            tk.Checkbutton(ting_yuan,
+                           text=val, anchor="w",
+                           offvalue="0", onvalue="1",
+                           variable=self.settings["日常任务"][val]) \
+                .place(x=0, y=i * 30, width=120, height=20)
 
 
 if __name__ == "__main__":
