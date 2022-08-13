@@ -298,6 +298,13 @@ class Script:
             self.random_sleep()
             self.click_100()
 
+    def action_ting_yuan_yu_hun(self):
+        if self.find_pic("yuhun.jpg", click=True):
+            self.log("[动作] 领取庭院御魂")
+            self.find_pic("querenlingqu.jpg", click=True, times=4)
+            self.random_sleep()
+            self.click_100()
+
     def action_hui_ting_yuan(self):
         button = [
             "close2.jpg",
@@ -329,6 +336,7 @@ class Script:
             self.log("[状态] 在庭院")
             self.run_task("日常任务", "领取庭院寿司", self.action_ting_yuan_shou_si, False)
             self.run_task("日常任务", "领取庭院勾玉", self.action_ting_yuan_gou_yu, False)
+            self.run_task("日常任务", "领取庭院御魂", self.action_ting_yuan_yu_hun, False)
             return True
         else:
             return False
@@ -455,7 +463,8 @@ class App:
             ],
             "TingYuan": [
                 "领取庭院寿司",
-                "领取庭院勾玉"
+                "领取庭院勾玉",
+                "领取庭院御魂",
             ],
         },
     }
@@ -585,7 +594,7 @@ class App:
                 .place(x=0, y=i * 30, width=120, height=20)
 
         ting_yuan = tk.LabelFrame(tab, text="回庭院时监测")
-        ting_yuan.place(x=0, y=210, width=130, height=80)
+        ting_yuan.place(x=0, y=210, width=130, height=110)
         for i, val in enumerate(self.settings_list["日常任务"]['TingYuan']):
             tk.Checkbutton(ting_yuan,
                            text=val, anchor="w",
