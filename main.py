@@ -223,7 +223,7 @@ class Script:
         self.log_tag = None
 
     def run_task(self, setting_section, setting_key, task_func, msg=True):
-        if self.app.settings[setting_section][setting_key].get() == "1":
+        if self.app.settings[setting_section][setting_key].get() == 1:
             if msg:
                 self.log("[任务] %s" % setting_key)
             task_func()
@@ -372,7 +372,7 @@ class Script:
         else:
             self.init_mumu_window()
             if self.init == 0:
-                self.clients = int(app.settings['基本设置']['客户端数'].get())
+                self.clients = app.settings['基本设置']['客户端数'].get()
                 self.window_info = []
                 # 多开, 重置窗口为第一个游戏窗口
                 if self.clients > 1:
@@ -514,7 +514,7 @@ class App:
             if self.conf.has_section(_key) is False:
                 self.conf.add_section(_key)
             for __key in self.settings[_key]:
-                self.conf.set(_key, __key, self.settings[_key][__key].get())
+                self.conf.set(_key, __key, str(self.settings[_key][__key].get()))
         self.conf.write(open('config.ini', 'w'))
 
     def load_settings(self):
@@ -527,8 +527,13 @@ class App:
             if self.conf.has_section(_key) is False:
                 continue
             for __key in self.settings[_key]:
-                if self.conf.get(_key, __key):
-                    self.settings[_key][__key].set(self.conf.get(_key, __key))
+                if self.conf.has_option(_key, __key):
+                    try:
+                        self.settings[_key][__key].set(self.conf.getint(_key, __key))
+                    except ValueError:
+                        self.settings[_key][__key].set(self.conf.get(_key, __key))
+
+        self.clear_conf_daily_record()
 
     def set_conf(self, section, key, val):
         if self.conf.has_section(section) is False:
@@ -542,17 +547,36 @@ class App:
             result = self.conf.get(section, key)
         return result
 
+    def clear_conf_daily_record(self):
+        now = datetime.now()
+        today = now.strftime("%Y%m%d")
+        if self.conf.has_section("DailyRecord"):
+            if self.conf.get("DailyRecord", "date") != today:
+                self.conf.remove_section("DailyRecord")
+                self.conf.add_section("DailyRecord")
+                self.conf.set("DailyRecord", "date", today)
+
+    def get_daily_record(self, window, key):
+        opt = "window_%s_%s" % (window, key)
+        return self.conf.get("DailyRecord", opt)
+
+    def set_daily_record(self, window, key, val):
+        opt = "window_%s_%s" % (window, key)
+        self.conf.set("DailyRecord", opt, val)
+
     def init_setting(self):
         self.settings["基本设置"] = {}
-        self.settings["基本设置"]["客户端数"] = tk.StringVar()
-        self.settings["基本设置"]["客户端数"].set("1")
+        self.settings["基本设置"]["客户端数"] = tk.IntVar()
+        self.settings["基本设置"]["客户端数"].set(1)
+        self.settings["基本设置"]["测试"] = tk.StringVar()
+        self.settings["基本设置"]["测试"].set("name")
         self.settings["日常任务"] = {}
         for value in self.settings_list["日常任务"]["Daily"]:
-            self.settings["日常任务"][value] = tk.StringVar()
-            self.settings["日常任务"][value].set("1")
+            self.settings["日常任务"][value] = tk.IntVar()
+            self.settings["日常任务"][value].set(1)
         for value in self.settings_list["日常任务"]['TingYuan']:
-            self.settings["日常任务"][value] = tk.StringVar()
-            self.settings["日常任务"][value].set("1")
+            self.settings["日常任务"][value] = tk.IntVar()
+            self.settings["日常任务"][value].set(1)
 
         # 加载本地配置
         self.load_settings()
@@ -580,12 +604,13 @@ class App:
     # Tab: 基本设置
     def init_tab2(self, tab):
         tk.Label(tab, text="客户端数", anchor='e').place(x=0, y=0, width=60, height=20)
-        tk.Radiobutton(tab, text="单开", value="1", variable=self.settings["基本设置"]["客户端数"]) \
+        tk.Radiobutton(tab, text="单开", value=1, variable=self.settings["基本设置"]["客户端数"]) \
             .place(x=60, y=0, width=50, height=20)
-        tk.Radiobutton(tab, text="双开", value="2", variable=self.settings["基本设置"]["客户端数"]) \
+        tk.Radiobutton(tab, text="双开", value=2, variable=self.settings["基本设置"]["客户端数"]) \
             .place(x=110, y=0, width=50, height=20)
-        tk.Radiobutton(tab, text="三开", value="3", variable=self.settings["基本设置"]["客户端数"]) \
+        tk.Radiobutton(tab, text="三开", value=3, variable=self.settings["基本设置"]["客户端数"]) \
             .place(x=160, y=0, width=50, height=20)
+        tk.Entry(tab, textvariable=self.settings["基本设置"]["测试"]).place(x=0, y=50, width=100, height=20)
         # 底部 配置按钮
         tk.Button(tab, text="保存配置", command=lambda: self.save_settings()) \
             .place(x=190, y=410, width=80, height=30)
@@ -599,7 +624,7 @@ class App:
         for i, val in enumerate(self.settings_list["日常任务"]['Daily']):
             tk.Checkbutton(daily,
                            text=val, anchor="w",
-                           offvalue="0", onvalue="1",
+                           offvalue=0, onvalue=1,
                            variable=self.settings["日常任务"][val]) \
                 .place(x=0, y=i * 30, width=120, height=20)
 
@@ -608,7 +633,7 @@ class App:
         for i, val in enumerate(self.settings_list["日常任务"]['TingYuan']):
             tk.Checkbutton(ting_yuan,
                            text=val, anchor="w",
-                           offvalue="0", onvalue="1",
+                           offvalue=0, onvalue=1,
                            variable=self.settings["日常任务"][val]) \
                 .place(x=0, y=i * 30, width=120, height=20)
 
