@@ -445,6 +445,7 @@ class HotkeyThread(Thread):  # 创建一个Thread.threading的扩展类
 
 
 class App:
+    conf = None
     script_obj = None
     width = None
     height = None
@@ -509,28 +510,37 @@ class App:
         notebook.pack(expand=True, fill=tk.BOTH)
 
     def save_settings(self):
-        conf = ConfigParser()
-        conf.read('config.ini')
-
         for _key in self.settings:
-            if conf.has_section(_key) is False:
-                conf.add_section(_key)
+            if self.conf.has_section(_key) is False:
+                self.conf.add_section(_key)
             for __key in self.settings[_key]:
-                conf.set(_key, __key, self.settings[_key][__key].get())
-        conf.write(open('config.ini', 'w'))
+                self.conf.set(_key, __key, self.settings[_key][__key].get())
+        self.conf.write(open('config.ini', 'w'))
 
     def load_settings(self):
-        conf = ConfigParser()
-        conf.read('config.ini')
-        if len(conf.sections()) == 0:
+        self.conf = ConfigParser()
+        self.conf.read('config.ini')
+        if len(self.conf.sections()) == 0:
             return
 
         for _key in self.settings:
-            if conf.has_section(_key) is False:
+            if self.conf.has_section(_key) is False:
                 continue
             for __key in self.settings[_key]:
-                if conf.get(_key, __key):
-                    self.settings[_key][__key].set(conf.get(_key, __key))
+                if self.conf.get(_key, __key):
+                    self.settings[_key][__key].set(self.conf.get(_key, __key))
+
+    def set_conf(self, section, key, val):
+        if self.conf.has_section(section) is False:
+            self.conf.add_section(section)
+        self.conf.set(section, key, val)
+        self.conf.write(open('config.ini', 'w'))
+
+    def get_conf(self, section, key):
+        result = None
+        if self.conf.has_section(section):
+            result = self.conf.get(section, key)
+        return result
 
     def init_setting(self):
         self.settings["基本设置"] = {}
