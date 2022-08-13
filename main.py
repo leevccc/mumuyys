@@ -292,6 +292,11 @@ class Script:
                 self.click_100()
         self.action_hui_ting_yuan()
 
+    def action_open_di_zang_xiang(self):
+        self.click(1, 452, 35, 66)
+        if self.find_pic("dizangxiang.jpg")[0] is not None:
+            self.log("[动作] 打开地藏像")
+
     def action_ting_yuan_shou_si(self):
         if self.find_pic("shousi.jpg", confidence=0.95, click=True):
             self.log("[动作] 领取庭院寿司")
