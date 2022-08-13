@@ -549,7 +549,7 @@ class App:
 
     def get_conf(self, section, key):
         result = None
-        if self.conf.has_section(section):
+        if self.conf.has_section(section) and self.conf.has_option(section, key):
             result = self.conf.get(section, key)
         return result
 
@@ -567,13 +567,11 @@ class App:
 
     def get_daily_record(self, window, key):
         opt = "window_%s_%s" % (window, key)
-        if self.conf.has_option("DailyRecord", opt) is False:
-            return None
-        return self.conf.get("DailyRecord", opt)
+        return self.get_conf("DailyRecord", opt)
 
     def set_daily_record(self, window, key, val):
         opt = "window_%s_%s" % (window, key)
-        self.conf.set("DailyRecord", opt, val)
+        self.set_conf("DailyRecord", opt, val)
 
     def init_setting(self):
         self.settings["基本设置"] = {}
