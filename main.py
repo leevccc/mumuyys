@@ -117,7 +117,7 @@ class Script:
         """
         match_result = None
         for i in range(0, times):
-            Script.print_screen(self)
+            self.print_screen()
             screenshot = aircv.imread(self.path + "\\temp\\screenshot.jpg")
             img = aircv.imread(self.path + path)
 
@@ -128,7 +128,7 @@ class Script:
             #   'rectangle': ((1298, 682), (1298, 781), (1372, 682), (1372, 781)),
             #   'confidence': 0.993413507938385
             # }
-
+            self.log("找图 [%s] - 结果: %s" % (path, match_result))
             if match_result is None:
                 time.sleep(0.5)
                 continue
@@ -139,7 +139,6 @@ class Script:
             return False if click is True else (None, None)
 
         x, y = match_result["result"]
-        module_logger.warning("找图 [%s] - 结果: %s" % (path, match_result))
         if click:
             x = match_result["rectangle"][0][0]
             y = match_result["rectangle"][0][1]
@@ -286,12 +285,108 @@ class Script:
         self.action_hui_ting_yuan()
 
     def task_liao_zi_jin(self):
-        self.click(530, 674, 66, 73)
+        self.action_open_yin_yang_liao()
         if self.find_pic("zijinlingqu.jpg", click=True, confidence=0.99, times=4):
             if self.find_pic("lingqu.jpg", click=True, times=4):
                 self.random_sleep()
                 self.click_100()
         self.action_hui_ting_yuan()
+
+    def task_jie_jie(self):
+        if self.zt_zai_ting_yuan():
+            self.action_open_yin_yang_liao()
+        x, y = self.find_pic("xinxi2.jpg", times=4)
+        if x is not None or self.find_pic("xinxi.jpg", click=True, times=4):
+            self.action_open_jie_jie()
+            if self.zt_zai_jie_jie():
+                self.action_ling_qu_ti_li_shi_he()
+                self.action_ling_qu_jing_yan_jiu_hu()
+                self.action_ling_qu_ji_yang_exp()
+                self.action_ling_qu_jie_jie_jiang_li()
+                self.action_open_jie_jie_ka()
+                if self.zt_jie_jie_ka_is_empty():
+                    self.action_change_jie_jie_ka_sort()
+                    self.action_change_jie_jie_ka_type()
+                    self.action_use_jie_jie_ka()
+                # todo: 更换结界式神和好友式神
+                self.action_hui_ting_yuan()
+
+    def action_open_yin_yang_liao(self):
+        self.log("打开阴阳寮")
+        self.click(530, 674, 66, 73)
+
+    def action_open_jie_jie(self):
+        self.log("打开结界")
+        self.find_pic("jiejie.jpg", click=True)
+
+    def action_ling_qu_ti_li_shi_he(self):
+        if self.find_pic("tilishihe.jpg", click=True):
+            self.log("领取体力食盒")
+            self.find_pic("quchu.jpg", click=True, times=4)
+            self.random_sleep()
+            self.click_100()
+            self.random_sleep()
+            self.click_100()
+
+    def action_ling_qu_jing_yan_jiu_hu(self):
+        if self.find_pic("jingyanjiuhu.jpg", click=True):
+            self.log("领取经验酒壶")
+            self.find_pic("tiqu.jpg", click=True, times=4)
+            self.random_sleep()
+
+    def action_ling_qu_ji_yang_exp(self):
+        if self.find_pic("jiyangjingyan.jpg", click=True):
+            self.log("领取寄养经验")
+            self.random_sleep()
+            self.click_100()
+
+    def action_ling_qu_jie_jie_jiang_li(self):
+        self.log("领取结界卡奖励")
+        self.click(1004, 169, 55, 55)
+        self.random_sleep()
+
+    def action_open_jie_jie_ka(self):
+        self.log("打开结界卡界面")
+        self.click(1000, 333, 40, 135)
+
+    def action_change_jie_jie_ka_sort(self):
+        sort = self.app.settings["window%s" % self.window]["星级"].get()
+        pic = "xingjishengxu.jpg"
+        if sort == "升序":
+            pic = "xingjijiangxu.jpg"
+        if self.find_pic(pic, click=True):
+            self.log("调整星级排序为 %s" % sort)
+
+    def action_change_jie_jie_ka_type(self):
+        j_type = self.app.settings["window%s" % self.window]["结界卡"].get()
+        if j_type == "全部":
+            return
+
+        self.log("更换结界卡类型")
+        self.find_pic("quanbu.jpg", click=True)
+        pic = ""
+        if j_type == "太鼓":
+            pic = "taigu.jpg"
+        elif j_type == "斗鱼":
+            pic = "douyu.jpg"
+        elif j_type == "伞室内":
+            pic = "sanshinei.jpg"
+        elif j_type == "太阴符咒":
+            pic = "taiyinfuzhou.jpg"
+        elif j_type == "特殊变异":
+            pic = "teshubianyi.jpg"
+
+        self.find_pic(pic, click=True, times=2)
+
+    def action_use_jie_jie_ka(self):
+        self.log("激活结界卡")
+        self.click(213, 206, 364, 109)
+        self.random_sleep()
+        self.find_pic("jihuo.jpg", click=True)
+        self.random_sleep()
+        self.find_pic("queding.jpg", click=True, times=4)
+        self.random_sleep()
+        self.find_pic("close2.jpg", click=True, times=4)
 
     def action_open_di_zang_xiang(self):
         self.click(1, 452, 35, 66)
@@ -353,6 +448,22 @@ class Script:
         else:
             return False
 
+    def zt_zai_jie_jie(self):
+        x, y = self.find_pic("fanhui2.jpg", times=10)
+        result = False
+        if x is not None:
+            self.log("[状态] 在结界")
+            result = True
+        return result
+
+    def zt_jie_jie_ka_is_empty(self):
+        x, y = self.find_pic("kongjiejieka.jpg", times=4)
+        result = False
+        if x is not None:
+            self.log("[状态] 结界卡为空")
+            result = True
+        return result
+
     def task(self):
         while True:
             if self.task_status:
@@ -366,6 +477,7 @@ class Script:
                         self.run_task("日常任务", "领取黑蛋", self.task_shang_dian_fu_li, daily=True)
                         self.run_task("日常任务", "友情点", self.task_you_qing_dian, daily=True)
                         self.run_task("日常任务", "领取寮资金", self.task_liao_zi_jin, daily=True)
+                        self.run_task("日常任务", "结界", self.task_jie_jie)
 
                     times -= 1
                     if 1 < self.clients and (self.window - 1) < self.clients:
@@ -464,9 +576,11 @@ class App:
     log = None
     start_button_text = None
     stop_button_text = None
+    jie_jie_ka_options = ["全部", "太鼓", "斗鱼", "伞室内", "太阴符咒", "特殊变异"]
     settings_list = {
         "日常任务": {
-            "Daily": [
+            "常规任务": ["结界", ],
+            "每日一次": [
                 "每日签到",
                 "黄金签到",
                 "领取邮件",
@@ -474,7 +588,7 @@ class App:
                 "友情点",
                 "领取寮资金",
             ],
-            "TingYuan": [
+            "庭院发现": [
                 "领取庭院寿司",
                 "领取庭院勾玉",
                 "领取庭院御魂",
@@ -518,6 +632,12 @@ class App:
         notebook.add(tab3, text="日常任务")
         tab3.config(padx=10, pady=10)
         self.init_tab3(tab3)
+
+        for i in range(2, 5):
+            _tab = tk.Frame(notebook)
+            notebook.add(_tab, text="窗口%s" % i)
+            _tab.config(padx=10, pady=10)
+            self.init_window_tab(_tab, "window%s" % i)
 
         notebook.pack(expand=True, fill=tk.BOTH)
 
@@ -584,12 +704,22 @@ class App:
         self.settings["基本设置"]["客户端数"] = tk.IntVar()
         self.settings["基本设置"]["客户端数"].set(1)
         self.settings["日常任务"] = {}
-        for value in self.settings_list["日常任务"]["Daily"]:
+        for value in self.settings_list["日常任务"]["常规任务"]:
             self.settings["日常任务"][value] = tk.IntVar()
             self.settings["日常任务"][value].set(1)
-        for value in self.settings_list["日常任务"]['TingYuan']:
+        for value in self.settings_list["日常任务"]["每日一次"]:
             self.settings["日常任务"][value] = tk.IntVar()
             self.settings["日常任务"][value].set(1)
+        for value in self.settings_list["日常任务"]['庭院发现']:
+            self.settings["日常任务"][value] = tk.IntVar()
+            self.settings["日常任务"][value].set(1)
+
+        for i in range(2, 5):
+            self.settings["window%s" % i] = {}
+            self.settings["window%s" % i]["结界卡"] = tk.StringVar()
+            self.settings["window%s" % i]["结界卡"].set("全部")
+            self.settings["window%s" % i]["星级"] = tk.StringVar()
+            self.settings["window%s" % i]["星级"].set("降序")
 
         # 加载本地配置
         self.load_settings()
@@ -616,13 +746,13 @@ class App:
 
     # Tab: 基本设置
     def init_tab2(self, tab):
-        tk.Label(tab, text="客户端数", anchor='e').place(x=0, y=0, width=60, height=20)
+        tk.Label(tab, text="客户端数", anchor='e').place(x=0, y=0, width=70, height=20)
         tk.Radiobutton(tab, text="单开", value=1, variable=self.settings["基本设置"]["客户端数"]) \
-            .place(x=60, y=0, width=50, height=20)
+            .place(x=80, y=0, width=50, height=20)
         tk.Radiobutton(tab, text="双开", value=2, variable=self.settings["基本设置"]["客户端数"]) \
-            .place(x=110, y=0, width=50, height=20)
+            .place(x=140, y=0, width=50, height=20)
         tk.Radiobutton(tab, text="三开", value=3, variable=self.settings["基本设置"]["客户端数"]) \
-            .place(x=160, y=0, width=50, height=20)
+            .place(x=200, y=0, width=50, height=20)
         # 底部 配置按钮
         tk.Button(tab, text="保存配置", command=lambda: self.save_settings()) \
             .place(x=190, y=410, width=80, height=30)
@@ -633,21 +763,41 @@ class App:
     def init_tab3(self, tab):
         daily = tk.LabelFrame(tab, text="每日一次")
         daily.place(x=0, y=0, width=130, height=200)
-        for i, val in enumerate(self.settings_list["日常任务"]['Daily']):
+        for i, val in enumerate(self.settings_list["日常任务"]['每日一次']):
             tk.Checkbutton(daily,
                            text=val, anchor="w",
                            offvalue=0, onvalue=1,
                            variable=self.settings["日常任务"][val]) \
                 .place(x=0, y=i * 30, width=120, height=20)
 
-        ting_yuan = tk.LabelFrame(tab, text="回庭院时监测")
+        common = tk.LabelFrame(tab, text="常规任务")
+        common.place(x=140, y=0, width=130, height=200)
+        for i, val in enumerate(self.settings_list["日常任务"]['常规任务']):
+            tk.Checkbutton(common,
+                           text=val, anchor="w",
+                           offvalue=0, onvalue=1,
+                           variable=self.settings["日常任务"][val]) \
+                .place(x=0, y=i * 30, width=120, height=20)
+
+        ting_yuan = tk.LabelFrame(tab, text="庭院发现")
         ting_yuan.place(x=0, y=210, width=130, height=110)
-        for i, val in enumerate(self.settings_list["日常任务"]['TingYuan']):
+        for i, val in enumerate(self.settings_list["日常任务"]['庭院发现']):
             tk.Checkbutton(ting_yuan,
                            text=val, anchor="w",
                            offvalue=0, onvalue=1,
                            variable=self.settings["日常任务"][val]) \
                 .place(x=0, y=i * 30, width=120, height=20)
+
+    # 游戏窗口页面
+    def init_window_tab(self, tab, window):
+        tk.Label(tab, text="结界卡", anchor="e").place(x=0, y=0, width=60, height=30)
+        ttk.Combobox(tab, textvariable=self.settings[window]["结界卡"], values=self.jie_jie_ka_options,
+                     state='readonly').place(x=60, y=0, width=120, height=30)
+        tk.Label(tab, text="星级").place(x=180, y=0, width=40, height=30)
+        tk.Radiobutton(tab, text="降序", value="降序", variable=self.settings[window]["星级"]) \
+            .place(x=220, y=0, width=50, height=30)
+        tk.Radiobutton(tab, text="升序", value="升序", variable=self.settings[window]["星级"]) \
+            .place(x=280, y=0, width=50, height=30)
 
 
 if __name__ == "__main__":
