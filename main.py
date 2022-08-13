@@ -222,11 +222,17 @@ class Script:
         module_logger.info("%s (系统): %s" % (now.strftime("%H:%M:%S"), text))
         self.log_tag = None
 
-    def run_task(self, setting_section, setting_key, task_func, msg=True):
+    def run_task(self, setting_section, setting_key, task_func, msg=True, daily=False):
+        if daily and self.app.get_daily_record(self.window, setting_key) == "finish":
+            self.log("[任务] %s 今日已完成,跳过" % setting_key)
+            return
         if self.app.settings[setting_section][setting_key].get() == 1:
             if msg:
                 self.log("[任务] %s" % setting_key)
             task_func()
+            if daily:
+                # 每日任务完成标记
+                self.app.set_daily_record(self.window, setting_key, "finish")
 
     def task_qiandao(self):
         if self.find_pic("qiandao.jpg", click=True):
@@ -348,12 +354,12 @@ class Script:
                 while times > 0:
                     if self.zt_zai_ting_yuan():
                         self.action_kai_juan_zhou()
-                        self.run_task("日常任务", "每日签到", self.task_qiandao)
-                        self.run_task("日常任务", "黄金签到", self.task_huang_jin_qiandao)
-                        self.run_task("日常任务", "领取邮件", self.task_mail)
-                        self.run_task("日常任务", "领取黑蛋", self.task_shang_dian_fu_li)
-                        self.run_task("日常任务", "友情点", self.task_you_qing_dian)
-                        self.run_task("日常任务", "领取寮资金", self.task_liao_zi_jin)
+                        self.run_task("日常任务", "每日签到", self.task_qiandao, daily=True)
+                        self.run_task("日常任务", "黄金签到", self.task_huang_jin_qiandao, daily=True)
+                        self.run_task("日常任务", "领取邮件", self.task_mail, daily=True)
+                        self.run_task("日常任务", "领取黑蛋", self.task_shang_dian_fu_li, daily=True)
+                        self.run_task("日常任务", "友情点", self.task_you_qing_dian, daily=True)
+                        self.run_task("日常任务", "领取寮资金", self.task_liao_zi_jin, daily=True)
 
                     times -= 1
                     if 1 < self.clients and (self.window - 1) < self.clients:
@@ -555,9 +561,14 @@ class App:
                 self.conf.remove_section("DailyRecord")
                 self.conf.add_section("DailyRecord")
                 self.conf.set("DailyRecord", "date", today)
+        else:
+            self.conf.add_section("DailyRecord")
+            self.conf.set("DailyRecord", "date", today)
 
     def get_daily_record(self, window, key):
         opt = "window_%s_%s" % (window, key)
+        if self.conf.has_option("DailyRecord", opt) is False:
+            return None
         return self.conf.get("DailyRecord", opt)
 
     def set_daily_record(self, window, key, val):
@@ -568,8 +579,6 @@ class App:
         self.settings["基本设置"] = {}
         self.settings["基本设置"]["客户端数"] = tk.IntVar()
         self.settings["基本设置"]["客户端数"].set(1)
-        self.settings["基本设置"]["测试"] = tk.StringVar()
-        self.settings["基本设置"]["测试"].set("name")
         self.settings["日常任务"] = {}
         for value in self.settings_list["日常任务"]["Daily"]:
             self.settings["日常任务"][value] = tk.IntVar()
@@ -610,7 +619,6 @@ class App:
             .place(x=110, y=0, width=50, height=20)
         tk.Radiobutton(tab, text="三开", value=3, variable=self.settings["基本设置"]["客户端数"]) \
             .place(x=160, y=0, width=50, height=20)
-        tk.Entry(tab, textvariable=self.settings["基本设置"]["测试"]).place(x=0, y=50, width=100, height=20)
         # 底部 配置按钮
         tk.Button(tab, text="保存配置", command=lambda: self.save_settings()) \
             .place(x=190, y=410, width=80, height=30)
