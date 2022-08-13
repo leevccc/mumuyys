@@ -139,6 +139,7 @@ class Script:
             return False if click is True else (None, None)
 
         x, y = match_result["result"]
+        module_logger.warning("找图 [%s] - 结果: %s" % (path, match_result))
         if click:
             x = match_result["rectangle"][0][0]
             y = match_result["rectangle"][0][1]
