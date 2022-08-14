@@ -246,7 +246,8 @@ class Script:
             self.click_100()
 
     def task_mail(self):
-        if self.find_pic("mail.jpg", click=True):
+        if self.find_pic("xinyoujian.jpg", confidence=0.99, click=True):
+            self.log("[任务] 领取新邮件")
             if self.find_pic("receivemail.jpg", click=True, times=6):
                 if self.find_pic("confirm.jpg", click=True, times=6):
                     self.random_sleep(1500, 1000)
@@ -286,7 +287,7 @@ class Script:
 
     def task_liao_zi_jin(self):
         self.action_open_yin_yang_liao()
-        if self.find_pic("zijinlingqu.jpg", click=True, confidence=0.99, times=4):
+        if self.find_pic("zijinlingqu.jpg", click=True, confidence=0.985, times=4):
             if self.find_pic("lingqu.jpg", click=True, times=4):
                 self.random_sleep()
                 self.click_100()
@@ -441,6 +442,7 @@ class Script:
         x, y = self.find_pic("feng.jpg")
         if x is not None:
             self.log("[状态] 在庭院")
+            self.run_task("日常任务", "领取新邮件", self.task_mail)
             self.run_task("日常任务", "领取庭院寿司", self.action_ting_yuan_shou_si, False)
             self.run_task("日常任务", "领取庭院勾玉", self.action_ting_yuan_gou_yu, False)
             self.run_task("日常任务", "领取庭院御魂", self.action_ting_yuan_yu_hun, False)
@@ -473,7 +475,6 @@ class Script:
                         self.action_kai_juan_zhou()
                         self.run_task("日常任务", "每日签到", self.task_qiandao, daily=True)
                         self.run_task("日常任务", "黄金签到", self.task_huang_jin_qiandao, daily=True)
-                        self.run_task("日常任务", "领取邮件", self.task_mail, daily=True)
                         self.run_task("日常任务", "领取黑蛋", self.task_shang_dian_fu_li, daily=True)
                         self.run_task("日常任务", "友情点", self.task_you_qing_dian, daily=True)
                         self.run_task("日常任务", "领取寮资金", self.task_liao_zi_jin, daily=True)
@@ -583,12 +584,12 @@ class App:
             "每日一次": [
                 "每日签到",
                 "黄金签到",
-                "领取邮件",
                 "领取黑蛋",
                 "友情点",
                 "领取寮资金",
             ],
             "庭院发现": [
+                "领取新邮件",
                 "领取庭院寿司",
                 "领取庭院勾玉",
                 "领取庭院御魂",
@@ -780,7 +781,7 @@ class App:
                 .place(x=0, y=i * 30, width=120, height=20)
 
         ting_yuan = tk.LabelFrame(tab, text="庭院发现")
-        ting_yuan.place(x=0, y=210, width=130, height=110)
+        ting_yuan.place(x=0, y=210, width=130, height=140)
         for i, val in enumerate(self.settings_list["日常任务"]['庭院发现']):
             tk.Checkbutton(ting_yuan,
                            text=val, anchor="w",
