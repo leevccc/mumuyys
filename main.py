@@ -20,7 +20,7 @@ import pyautogui
 import win32con
 import win32gui
 
-version = "v1.1.1"
+version = "v1.1.2"
 module_logger = logging.getLogger(__name__)
 user32 = ctypes.windll.user32  # 加载user32.dll
 
@@ -253,7 +253,7 @@ class Script:
     def is_time_expired(self, key):
         result = False
         now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        last = self.app.get_daily_record("normal", key + "执行")
+        last = self.app.get_daily_record(self.window, key + "执行")
         interval = self.app.settings["基本设置"][key + "间隔"].get()
         if last is None:
             result = True
@@ -267,7 +267,7 @@ class Script:
 
     def set_task_execute_time(self, key):
         now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        self.app.set_daily_record("normal", key + "执行", now)
+        self.app.set_daily_record(self.window, key + "执行", now)
 
     def task_qiandao(self):
         if self.find_pic("qiandao.jpg", click=True):
