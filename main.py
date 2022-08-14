@@ -585,6 +585,7 @@ class Script:
                     time.sleep(sleep_time * 60)
                     # 发出运行命令 并进入新的循环
                     self.run()
+            time.sleep(1)
 
     def run(self):
         if self.task_status:
