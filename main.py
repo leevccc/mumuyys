@@ -249,6 +249,25 @@ class Script:
                 # 每日任务完成标记
                 self.app.set_daily_record(self.window, setting_key, "finish")
 
+    def is_time_expired(self, key):
+        result = False
+        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        last = self.app.get_daily_record("normal", key + "执行")
+        interval = self.app.settings["基本设置"][key + "间隔"]
+        if last is None:
+            result = True
+        else:
+            diff = datetime.strptime(now, "%Y-%m-%d %H:%M:%S") - datetime.strptime(last, "%Y-%m-%d %H:%M:%S")
+            diff_hour = int(diff.seconds / 3600)
+            if diff_hour > interval:
+                result = True
+
+        return result
+
+    def set_task_execute_time(self, key):
+        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        self.app.set_daily_record("normal", key + "执行", now)
+
     def task_qiandao(self):
         if self.find_pic("qiandao.jpg", click=True):
             self.find_pic("qiandao2.jpg", click=True, times=30)
@@ -309,6 +328,8 @@ class Script:
         self.action_hui_ting_yuan()
 
     def task_jie_jie(self):
+        if self.is_time_expired("结界") is False:
+            return
         if self.zt_zai_ting_yuan():
             self.action_open_yin_yang_liao()
         x, y = self.find_pic("xinxi2.jpg", times=4)
@@ -329,6 +350,7 @@ class Script:
                     self.action_change_full_shi_shen()
                     self.action_change_ji_yang()
                 self.action_hui_ting_yuan()
+            self.set_task_execute_time("结界")
 
     def action_open_yin_yang_liao(self):
         self.log("打开阴阳寮")
@@ -764,6 +786,8 @@ class App:
         self.settings["基本设置"] = {}
         self.settings["基本设置"]["客户端数"] = tk.IntVar()
         self.settings["基本设置"]["客户端数"].set(1)
+        self.settings["基本设置"]["结界间隔"] = tk.IntVar()
+        self.settings["基本设置"]["结界间隔"].set(1)
         self.settings["日常任务"] = {}
         for value in self.settings_list["日常任务"]["常规任务"]:
             self.settings["日常任务"][value] = tk.IntVar()
@@ -807,13 +831,18 @@ class App:
 
     # Tab: 基本设置
     def init_tab2(self, tab):
-        tk.Label(tab, text="客户端数", anchor='e').place(x=0, y=0, width=70, height=20)
+        tk.Label(tab, text="客户端数", anchor='e').place(x=0, y=0, width=80, height=20)
         tk.Radiobutton(tab, text="单开", value=1, variable=self.settings["基本设置"]["客户端数"]) \
-            .place(x=80, y=0, width=50, height=20)
+            .place(x=90, y=0, width=50, height=20)
         tk.Radiobutton(tab, text="双开", value=2, variable=self.settings["基本设置"]["客户端数"]) \
-            .place(x=140, y=0, width=50, height=20)
+            .place(x=150, y=0, width=50, height=20)
         tk.Radiobutton(tab, text="三开", value=3, variable=self.settings["基本设置"]["客户端数"]) \
-            .place(x=200, y=0, width=50, height=20)
+            .place(x=210, y=0, width=50, height=20)
+
+        ttk.Label(tab, text="结界任务间隔", anchor="e").place(x=0, y=30, width=80, height=30)
+        ttk.Combobox(tab, textvariable=self.settings["基本设置"]["结界间隔"], values=["1", "2", "3", "4", "5", "6"],
+                     state='readonly').place(x=90, y=30, width=60, height=30)
+        ttk.Label(tab, text="小时", anchor="w").place(x=160, y=30, width=40, height=30)
         # 底部 配置按钮
         tk.Button(tab, text="保存配置", command=lambda: self.save_settings()) \
             .place(x=190, y=410, width=80, height=30)
