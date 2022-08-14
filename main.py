@@ -20,7 +20,7 @@ import pyautogui
 import win32con
 import win32gui
 
-version = "v1.1.3"
+version = "v1.1.4"
 module_logger = logging.getLogger(__name__)
 user32 = ctypes.windll.user32  # 加载user32.dll
 
@@ -462,6 +462,7 @@ class Script:
 
     def action_change_ji_yang(self):
         if self.find_pic("haoyoujiyang.jpg", click=True) is True:
+            self.random_sleep(1500, 1000)
             self.log("好友寄养")
             pics = ["6xtaigu.jpg", "6xdouyu.jpg", "5xtaigu.jpg", "5xdouyu.jpg", "4xtaigu.jpg", "4xdouyu.jpg"]
             for pic in pics:
@@ -475,7 +476,8 @@ class Script:
                     self.click(193, 590, 100, 118)
                     self.find_pic("queding.jpg", click=True, times=4)
                     # 候补式神再确定
-                    self.find_pic("queding.jpg", click=True, times=4)
+                    self.random_sleep()
+                    self.find_pic("queding.jpg", click=True, times=4, ux=469, uy=271, uwidth=492, uheight=260)
 
             self.action_hui_ting_yuan()
 
