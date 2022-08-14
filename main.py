@@ -20,6 +20,7 @@ import pyautogui
 import win32con
 import win32gui
 
+version = "v1.0.0"
 module_logger = logging.getLogger(__name__)
 user32 = ctypes.windll.user32  # 加载user32.dll
 
@@ -572,8 +573,18 @@ class Script:
                         self.switch_window()
 
                 self.log("所有任务执行完毕")
+                # 发出暂停命令
                 self.run()
+                # 设置需要初始化
                 self.init = 0
+                if self.app.settings["基本设置"]["任务循环"].get() == 1:
+                    min_sleep_time = self.app.settings["基本设置"]["最小休息时间"].get()
+                    max_sleep_time = self.app.settings["基本设置"]["最大休息时间"].get()
+                    sleep_time = min_sleep_time + self.random_max(max_sleep_time - min_sleep_time)
+                    self.syslog("休息 %s 分钟" % sleep_time)
+                    time.sleep(sleep_time * 60)
+                    # 发出运行命令 并进入新的循环
+                    self.run()
 
     def run(self):
         if self.task_status:
@@ -693,7 +704,7 @@ class App:
         script_obj.set_app(self)
 
         # 助手界面
-        root.title("mumu阴阳师助手")
+        root.title("mumu阴阳师助手 %s" % version)
         self.width = 600
         self.height = 500
         screenwidth = root.winfo_screenwidth()
@@ -786,6 +797,12 @@ class App:
         self.settings["基本设置"] = {}
         self.settings["基本设置"]["客户端数"] = tk.IntVar()
         self.settings["基本设置"]["客户端数"].set(1)
+        self.settings["基本设置"]["任务循环"] = tk.IntVar()
+        self.settings["基本设置"]["任务循环"].set(0)
+        self.settings["基本设置"]["最小休息时间"] = tk.IntVar()
+        self.settings["基本设置"]["最小休息时间"].set(15)
+        self.settings["基本设置"]["最大休息时间"] = tk.IntVar()
+        self.settings["基本设置"]["最大休息时间"].set(30)
         self.settings["基本设置"]["结界间隔"] = tk.IntVar()
         self.settings["基本设置"]["结界间隔"].set(1)
         self.settings["日常任务"] = {}
@@ -821,37 +838,50 @@ class App:
         # 日志页 - 底部按钮
         self.start_button_text = tk.StringVar()
         self.start_button_text.set("运行 F10")
-        tk.Button(tab, textvariable=self.start_button_text, command=lambda: self.script_obj.run()) \
+        ttk.Button(tab, textvariable=self.start_button_text, command=lambda: self.script_obj.run()) \
             .place(x=200, y=420, width=80, height=30)
 
         self.stop_button_text = tk.StringVar()
         self.stop_button_text.set("结束")
-        tk.Button(tab, textvariable=self.stop_button_text, command=lambda: self.script_obj.kill("手动结束")) \
+        ttk.Button(tab, textvariable=self.stop_button_text, command=lambda: self.script_obj.kill("手动结束")) \
             .place(x=320, y=420, width=80, height=30)
 
     # Tab: 基本设置
     def init_tab2(self, tab):
-        tk.Label(tab, text="客户端数", anchor='e').place(x=0, y=0, width=80, height=20)
-        tk.Radiobutton(tab, text="单开", value=1, variable=self.settings["基本设置"]["客户端数"]) \
-            .place(x=90, y=0, width=50, height=20)
-        tk.Radiobutton(tab, text="双开", value=2, variable=self.settings["基本设置"]["客户端数"]) \
-            .place(x=150, y=0, width=50, height=20)
-        tk.Radiobutton(tab, text="三开", value=3, variable=self.settings["基本设置"]["客户端数"]) \
-            .place(x=210, y=0, width=50, height=20)
+        ttk.Label(tab, text="客户端数", anchor='e').place(x=0, y=0, width=80, height=30)
+        ttk.Radiobutton(tab, text="单开", value=1, variable=self.settings["基本设置"]["客户端数"]) \
+            .place(x=90, y=0, width=50, height=30)
+        ttk.Radiobutton(tab, text="双开", value=2, variable=self.settings["基本设置"]["客户端数"]) \
+            .place(x=150, y=0, width=50, height=30)
+        ttk.Radiobutton(tab, text="三开", value=3, variable=self.settings["基本设置"]["客户端数"]) \
+            .place(x=210, y=0, width=50, height=30)
 
-        ttk.Label(tab, text="结界任务间隔", anchor="e").place(x=0, y=30, width=80, height=30)
+        ttk.Label(tab, text="任务循环", anchor="e").place(x=0, y=40, width=80, height=30)
+        ttk.Radiobutton(tab, text="开启", value=1, variable=self.settings["基本设置"]["任务循环"]) \
+            .place(x=90, y=40, width=50, height=30)
+        ttk.Radiobutton(tab, text="禁用", value=0, variable=self.settings["基本设置"]["任务循环"]) \
+            .place(x=140, y=40, width=50, height=30)
+        ttk.Label(tab, text="休息时间(分钟)", anchor="e").place(x=190, y=40, width=90, height=30)
+        ttk.Entry(tab, textvariable=self.settings["基本设置"]["最小休息时间"]) \
+            .place(x=290, y=40, width=50, height=30)
+        ttk.Label(tab, text="-", anchor="center").place(x=340, y=40, width=10, height=30)
+        ttk.Entry(tab, textvariable=self.settings["基本设置"]["最大休息时间"]) \
+            .place(x=350, y=40, width=50, height=30)
+
+        ttk.Label(tab, text="结界任务间隔", anchor="e").place(x=0, y=80, width=80, height=30)
         ttk.Combobox(tab, textvariable=self.settings["基本设置"]["结界间隔"], values=["1", "2", "3", "4", "5", "6"],
-                     state='readonly').place(x=90, y=30, width=60, height=30)
-        ttk.Label(tab, text="小时", anchor="w").place(x=160, y=30, width=40, height=30)
+                     state='readonly').place(x=90, y=80, width=60, height=30)
+        ttk.Label(tab, text="小时", anchor="w").place(x=160, y=80, width=40, height=30)
+
         # 底部 配置按钮
-        tk.Button(tab, text="保存配置", command=lambda: self.save_settings()) \
+        ttk.Button(tab, text="保存配置", command=lambda: self.save_settings()) \
             .place(x=190, y=410, width=80, height=30)
-        tk.Button(tab, text="读取配置", command=lambda: self.load_settings()) \
+        ttk.Button(tab, text="读取配置", command=lambda: self.load_settings()) \
             .place(x=310, y=410, width=80, height=30)
 
     # 日常任务
     def init_tab3(self, tab):
-        daily = tk.LabelFrame(tab, text="每日一次")
+        daily = ttk.LabelFrame(tab, text="每日一次")
         daily.place(x=0, y=0, width=130, height=200)
         for i, val in enumerate(self.settings_list["日常任务"]['每日一次']):
             tk.Checkbutton(daily,
@@ -860,7 +890,7 @@ class App:
                            variable=self.settings["日常任务"][val]) \
                 .place(x=0, y=i * 30, width=120, height=20)
 
-        common = tk.LabelFrame(tab, text="常规任务")
+        common = ttk.LabelFrame(tab, text="常规任务")
         common.place(x=140, y=0, width=130, height=200)
         for i, val in enumerate(self.settings_list["日常任务"]['常规任务']):
             tk.Checkbutton(common,
@@ -869,7 +899,7 @@ class App:
                            variable=self.settings["日常任务"][val]) \
                 .place(x=0, y=i * 30, width=120, height=20)
 
-        ting_yuan = tk.LabelFrame(tab, text="庭院发现")
+        ting_yuan = ttk.LabelFrame(tab, text="庭院发现")
         ting_yuan.place(x=0, y=210, width=130, height=140)
         for i, val in enumerate(self.settings_list["日常任务"]['庭院发现']):
             tk.Checkbutton(ting_yuan,
@@ -880,13 +910,13 @@ class App:
 
     # 游戏窗口页面
     def init_window_tab(self, tab, window):
-        tk.Label(tab, text="结界卡", anchor="e").place(x=0, y=0, width=60, height=30)
+        ttk.Label(tab, text="结界卡", anchor="e").place(x=0, y=0, width=60, height=30)
         ttk.Combobox(tab, textvariable=self.settings[window]["结界卡"], values=self.jie_jie_ka_options,
                      state='readonly').place(x=60, y=0, width=120, height=30)
-        tk.Label(tab, text="星级").place(x=180, y=0, width=40, height=30)
-        tk.Radiobutton(tab, text="降序", value="降序", variable=self.settings[window]["星级"]) \
+        ttk.Label(tab, text="星级").place(x=180, y=0, width=40, height=30)
+        ttk.Radiobutton(tab, text="降序", value="降序", variable=self.settings[window]["星级"]) \
             .place(x=220, y=0, width=50, height=30)
-        tk.Radiobutton(tab, text="升序", value="升序", variable=self.settings[window]["星级"]) \
+        ttk.Radiobutton(tab, text="升序", value="升序", variable=self.settings[window]["星级"]) \
             .place(x=280, y=0, width=50, height=30)
 
 
