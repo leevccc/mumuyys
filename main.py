@@ -342,8 +342,8 @@ class Script:
             if self.zt_zai_jie_jie():
                 self.action_ling_qu_ti_li_shi_he()
                 self.action_ling_qu_jing_yan_jiu_hu()
-                self.action_ling_qu_ji_yang_exp()
                 self.action_ling_qu_jie_jie_jiang_li()
+                self.action_ling_qu_ji_yang_exp()
                 self.action_open_jie_jie_ka()
                 if self.zt_jie_jie_ka_is_empty():
                     self.action_change_jie_jie_ka_sort()
