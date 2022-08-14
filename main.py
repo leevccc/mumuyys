@@ -30,7 +30,7 @@ class Script:
     task_status = False
     x = None
     y = None
-    weight = 1440
+    width = 1440
     height = 810
     hwnd = None
     path = os.getcwd() + "\\img\\"
@@ -78,7 +78,7 @@ class Script:
         self.syslog("窗口坐标: 宽 " + str(right) + " 高 " + str(bottom) + " 顶 " + str(top) + " 左 " + str(
             left) + " 分辨率 1440 x 810")
 
-    def print_screen(self):
+    def print_screen(self, ux=None, uy=None, uwidth=None, uheight=None):
         """
         窗口截图
         """
@@ -94,8 +94,14 @@ class Script:
 
         x = self.x
         y = self.y
-        rx = self.x + self.weight
+        rx = self.x + self.width
         ry = self.y + self.height
+
+        if uheight is not None:
+            x += ux
+            y += uy
+            rx = x + uwidth
+            ry = y + uheight
 
         # 截图前把鼠标移除出游戏界面
         mouse_x, mouse_y = pyautogui.position()
@@ -105,19 +111,23 @@ class Script:
         screen = pyautogui.screenshot(region=(x, y, rx, ry))
         screen.save(self.path + "\\temp\\screenshot.jpg")
 
-    def find_pic(self, path, confidence=0.8, click=False, times=1):
+    def find_pic(self, path, confidence=0.8, click=False, times=1, ux=None, uy=None, uwidth=None, uheight=None):
         """
-        查找图片, 每隔 0.5 秒读取一次
+        查找图片, 每隔 0.5 秒读取一次, 默认截图完整游戏窗口, 也可指定截图区域(ux, uy...)
 
         :param path: 图片相对地址
         :param confidence: 匹配度
         :param click: 识别后是否点击
         :param times: 次数
+        :param ux: 游戏窗口的相对 x
+        :param uy: 游戏窗口的相对 y
+        :param uwidth: 截图宽度, 须配合ux
+        :param uheight: 截图高度, 须配合uy
         :return: 按匹配结果依次返回: 失败 - None, None; 成功 - int(x), int(Y); 成功且需要点击 - True
         """
         match_result = None
         for i in range(0, times):
-            self.print_screen()
+            self.print_screen(ux=ux, uy=uy, uwidth=uwidth, uheight=uheight)
             screenshot = aircv.imread(self.path + "\\temp\\screenshot.jpg")
             img = aircv.imread(self.path + path)
 
@@ -139,6 +149,11 @@ class Script:
             return False if click is True else (None, None)
 
         x, y = match_result["result"]
+
+        if uheight is not None:
+            x += ux
+            y += uy
+
         if click:
             x = match_result["rectangle"][0][0]
             y = match_result["rectangle"][0][1]
@@ -169,7 +184,7 @@ class Script:
         pyautogui.click()
 
     def click_100(self):
-        self.click(10, 10, 190, 90)
+        self.click(120, 10, 80, 90)
 
     @staticmethod
     def random_max(num):
@@ -309,7 +324,10 @@ class Script:
                     self.action_change_jie_jie_ka_sort()
                     self.action_change_jie_jie_ka_type()
                     self.action_use_jie_jie_ka()
-                # todo: 更换结界式神和好友式神
+                self.action_close_jie_jie_ka()
+                if self.action_open_shi_shen_yu_cheng() is True:
+                    self.action_change_full_shi_shen()
+                    self.action_change_ji_yang()
                 self.action_hui_ting_yuan()
 
     def action_open_yin_yang_liao(self):
@@ -387,7 +405,53 @@ class Script:
         self.random_sleep()
         self.find_pic("queding.jpg", click=True, times=4)
         self.random_sleep()
+
+    def action_close_jie_jie_ka(self):
+        self.log("关闭结界卡界面")
+        self.click(1000, 333, 40, 135)
         self.find_pic("close2.jpg", click=True, times=4)
+        self.random_sleep()
+
+    def action_open_shi_shen_yu_cheng(self):
+        self.log("打开式神育成")
+        self.click(672, 350, 38, 112)
+        x, y = self.find_pic("shishenyucheng.jpg", times=4)
+        return x is not None
+
+    def action_change_full_shi_shen(self):
+        self.log("更换满级式神")
+        count = 0
+        while self.find_pic("man.jpg", click=True) is True:
+            count += 1
+        if count == 0:
+            return
+        self.random_sleep()
+        self.find_pic("quanbu2.jpg", click=True)
+        self.random_sleep()
+        self.find_pic("sucai.jpg", click=True)
+        self.random_sleep()
+        for i in range(0, count):
+            self.find_pic("baidan.jpg", confidence=0.95, click=True, ux=156, uy=551, uwidth=1107, uheight=237)
+            self.random_sleep()
+
+    def action_change_ji_yang(self):
+        if self.find_pic("haoyoujiyang.jpg", click=True) is True:
+            self.log("好友寄养")
+            pics = ["6xtaigu.jpg", "6xdouyu.jpg", "5xtaigu.jpg", "5xdouyu.jpg", "4xtaigu.jpg", "4xdouyu.jpg"]
+            for pic in pics:
+                if self.find_pic(pic, confidence=0.95, click=True) is True:
+                    break
+            self.random_sleep()
+            if self.find_pic("jinrujiejie.jpg", click=True) is True:
+                x, y = self.find_pic("shishenyucheng.jpg", times=4)
+                if x is not None:
+                    self.random_sleep()
+                    self.click(193, 590, 100, 118)
+                    self.find_pic("queding.jpg", click=True, times=4)
+                    # 候补式神再确定
+                    self.find_pic("queding.jpg", click=True, times=4)
+
+            self.action_hui_ting_yuan()
 
     def action_open_di_zang_xiang(self):
         self.click(1, 452, 35, 66)
@@ -653,8 +717,6 @@ class App:
     def load_settings(self):
         self.conf = ConfigParser()
         self.conf.read('config.ini')
-        if len(self.conf.sections()) == 0:
-            return
 
         for _key in self.settings:
             if self.conf.has_section(_key) is False:
@@ -684,13 +746,11 @@ class App:
         now = datetime.now()
         today = now.strftime("%Y%m%d")
         if self.conf.has_section("DailyRecord"):
-            if self.conf.get("DailyRecord", "date") != today:
+            if self.conf.get("DailyRecord", "日期") != today:
                 self.conf.remove_section("DailyRecord")
-                self.conf.add_section("DailyRecord")
-                self.conf.set("DailyRecord", "date", today)
+                self.set_conf("DailyRecord", "日期", today)
         else:
-            self.conf.add_section("DailyRecord")
-            self.conf.set("DailyRecord", "date", today)
+            self.set_conf("DailyRecord", "日期", today)
 
     def get_daily_record(self, window, key):
         opt = "window_%s_%s" % (window, key)
