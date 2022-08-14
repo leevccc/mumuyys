@@ -20,7 +20,7 @@ import pyautogui
 import win32con
 import win32gui
 
-version = "v1.1.0"
+version = "v1.1.1"
 module_logger = logging.getLogger(__name__)
 user32 = ctypes.windll.user32  # 加载user32.dll
 
@@ -254,7 +254,7 @@ class Script:
         result = False
         now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         last = self.app.get_daily_record("normal", key + "执行")
-        interval = self.app.settings["基本设置"][key + "间隔"]
+        interval = self.app.settings["基本设置"][key + "间隔"].get()
         if last is None:
             result = True
         else:
