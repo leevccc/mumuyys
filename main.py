@@ -20,7 +20,7 @@ import pyautogui
 import win32con
 import win32gui
 
-version = "v1.1.2"
+version = "v1.1.3"
 module_logger = logging.getLogger(__name__)
 user32 = ctypes.windll.user32  # 加载user32.dll
 
@@ -160,6 +160,9 @@ class Script:
             y = match_result["rectangle"][0][1]
             width = match_result["rectangle"][3][0] - x
             height = match_result["rectangle"][3][1] - y
+            if uheight is not None:
+                x += ux
+                y += uy
             self.click(x, y, width, height)
             return True
 
