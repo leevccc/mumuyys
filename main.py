@@ -20,7 +20,7 @@ import pyautogui
 import win32con
 import win32gui
 
-version = "v1.1.4"
+version = "v1.2.0"
 module_logger = logging.getLogger(__name__)
 user32 = ctypes.windll.user32  # 加载user32.dll
 
@@ -38,7 +38,7 @@ class Script:
     window = 2
     init = 0
     clients = 1
-    window_info = []
+    window_info = {}
 
     # 初始化
     # def __init__(self):
@@ -222,6 +222,8 @@ class Script:
         """
         if num is None:
             num = self.window + 1
+            if (num - 1) > self.clients:  # 下个游戏窗口超出设置的客户端数, 重置回到第一个游戏窗口
+                num = 2
         num = int(num)
         if num < 1 or num > 9:
             num = 2
@@ -271,6 +273,28 @@ class Script:
     def set_task_execute_time(self, key):
         now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         self.app.set_daily_record(self.window, key + "执行", now)
+
+    def get_window_info(self, key, window=None):
+        if window is None:
+            win = "window%s" % self.window
+        else:
+            win = "window%s" % window
+
+        result = None if win not in self.window_info else self.window_info[win]
+        if result is not None:
+            result = None if key not in result else result[key]
+        return result
+
+    def set_window_info(self, key, val):
+        window = "window%s" % self.window
+        if window not in self.window_info:
+            self.window_info[window] = {}
+
+        self.window_info[window][key] = val
+        return val
+
+    def init_window_info(self):
+        self.window_info = {}
 
     def task_qiandao(self):
         if self.find_pic("qiandao.jpg", click=True):
@@ -355,6 +379,166 @@ class Script:
                     self.action_change_ji_yang()
                 self.action_hui_ting_yuan()
             self.set_task_execute_time("结界")
+
+    def task_liao_tu_po(self):
+        # windows_info
+        # 当前位置 - None / 寮突破
+        # 状态 - None(空闲) / 战斗中
+        # 完成(当前页已全部挑战过, 没可能继续挑战了) - None / True
+        # 可能完成(寻找战斗失败, 已全部完成/没有次数了, 依据此决定寮突破任务是否完成) - None / True
+        finish = False
+        while finish is False:
+            # 统计可能完成的窗口数
+            finish_count = 0
+            for i in range(0, self.clients):
+                if self.get_window_info("可能完成", i + 2) is True:
+                    finish_count += 1
+            # 全部完成
+            if finish_count == self.clients:
+                finish = True
+                continue
+
+            # 位置判定
+            local = self.get_window_info("当前位置")
+            if local is None and self.zt_zai_ting_yuan() is True:
+                self.action_open_tan_suo()
+            if local is None and self.zt_zai_tan_suo() is True:
+                self.action_open_jie_jie_tu_po()
+            if local is None and self.zt_zai_ge_ren_tu_po() is True:
+                self.action_open_liao_tu_po()
+            if local is None and self.zt_zai_liao_tu_po() is True:
+                local = self.set_window_info("当前位置", "寮突破")
+                self.action_unlock_zhen_rong()
+
+            if local != "寮突破":
+                self.syslog("进入寮突破界面失败, 请手动进入寮突破界面, 并按 F10 继续")
+
+            current_finish = self.get_window_info("完成")
+            if current_finish is True:  # 当前窗口已无寮突破可打
+                self.switch_window()
+                continue
+
+            status = self.get_window_info("状态")
+            if status is None:  # 空闲
+                # 寻找未挑战的对象
+                num = self.find_liao_tu_po_obj(x=465, y=147, width=379, height=151)
+
+                # 战斗
+                if num > 0:
+                    x = 581 + (num - 1) % 2 * 380
+                    y = 186 + int((num - 1) / 2) * 152
+                    self.click(x, y, 220, 76)
+                    if self.action_attack() is False:
+                        self.set_window_info("可能完成", True)
+                        self.switch_window()
+                        continue
+                    self.action_fight_ready()
+                    self.random_sleep(500, 200)
+                    self.action_switch_auto_fight()
+                    self.action_fight_mark("结界突破绿标位置")
+                    self.set_window_info("状态", "战斗中")
+                    self.switch_window()
+                    self.set_window_info("可能完成", False)
+            elif status == "战斗中":
+                result = self.action_fight_handle()
+                if result == "进行中":
+                    self.switch_window()
+                else:
+                    self.set_window_info("状态", None)
+
+        # 清空 window_info 存留的信息
+        self.init_window_info()
+
+    def task_jie_jie_tu_po(self):
+        self.log("尚未完成")
+
+    def find_liao_tu_po_obj(self, x, y, width, height):
+        num = 0
+        for i in range(0, 8):
+            cx = x + i % 2 * 380
+            cy = y + int(i / 2) * 152
+            if self.zt_tu_po_yi_tiao_zhan(cx, cy, width, height) is False:
+                num = i + 1
+                break
+            elif i == 7:
+                self.set_window_info("完成", True)
+                self.set_window_info("可能完成", True)
+        return num
+
+    def action_fight_handle(self):
+        result = "进行中"
+        if self.find_pic("victory2.jpg", click=True):
+            result = "胜利"
+        elif self.find_pic("victory.jpg", confidence=0.98, click=True):
+            self.random_sleep(2000, 1500)
+            self.find_pic("victory2.jpg", click=True)
+            result = "胜利"
+        elif self.find_pic("failure.jpg", confidence=0.98, click=True):
+            result = "失败"
+        self.log("[状态] 战斗%s" % result)
+        return result
+
+    def action_fight_mark(self, config_key):
+        num = self.get_window_info(config_key)
+        x, y, width, height = 0, 0, 45, 110
+        if num == 0:
+            return
+        elif num == 1:
+            x, y = 254, 522
+        elif num == 2:
+            x, y = 489, 452
+        elif num == 3:
+            x, y = 684, 427
+        elif num == 4:
+            x, y = 879, 452
+        elif num == 5:
+            x, y = 1129, 522
+
+        # 点击范围缩小
+        x += 5
+        y += 5
+        width -= 10
+        height -= 10
+        self.click(x, y, width, height)
+        self.log("[动作] 绿标 %s 号位式神" % num)
+
+    def action_attack(self):
+        self.log("进攻")
+        result = True
+        if self.find_pic("attack.jpg", confidence=0.98, click=True, times=6) is False:
+            self.syslog("找不到进攻按钮")
+            result = False
+        return result
+
+    def action_fight_ready(self):
+        if self.find_pic("ready.jpg", click=True, times=10) is True:
+            self.log("[动作] 准备")
+
+    def action_switch_auto_fight(self):
+        if self.find_pic("shoudong.jpg", click=True) is True:
+            self.log("[动作] 切换到自动战斗")
+
+    def action_unlock_zhen_rong(self):
+        self.log("解除阵容锁")
+        self.find_pic("suo.jpg", click=True)
+
+    def action_open_liao_tu_po(self):
+        self.log("[动作] 打开寮突破界面")
+        if self.find_pic("yinyangliao.jpg", click=True, times=10) is False:
+            self.syslog("失败, 请手动进入寮突破界面并按 F10 继续")
+            self.run()
+
+    def action_open_jie_jie_tu_po(self):
+        self.log("[动作] 打开结界突破界面")
+        if self.find_pic("jiejietupo.jpg", click=True, times=10) is False:
+            self.syslog("失败, 请手动进入结界突破界面并按 F10 继续")
+            self.run()
+
+    def action_open_tan_suo(self):
+        self.log("[动作] 进入探索界面")
+        if self.find_pic("tansuo.jpg", click=True, times=10) is False:
+            self.syslog("失败, 请手动进入探索界面并按 F10 继续")
+            self.run()
 
     def action_open_yin_yang_liao(self):
         self.log("打开阴阳寮")
@@ -525,13 +709,25 @@ class Script:
         if self.find_pic("tingyuanjuanzhou.jpg", click=True):
             self.log("[动作] 开启底部导航卷轴")
 
+    def zt_tu_po_yi_tiao_zhan(self, x, y, width, height):
+        cx, cy = self.find_pic("po.jpg", ux=x, uy=y, uwidth=width, uheight=height)
+        if cx is not None:
+            return True
+        cx, cy = self.find_pic("po2.jpg", ux=x, uy=y, uwidth=width, uheight=height)
+        if cx is not None:
+            return True
+        cx, cy = self.find_pic("shibaibiaoji.jpg", ux=x, uy=y, uwidth=width, uheight=height)
+        if cx is not None:
+            return True
+        return False
+
     def zt_zai_ting_yuan(self):
         """
         判断是否在庭院
 
         :return: True / False
         """
-        x, y = self.find_pic("feng.jpg")
+        x, y = self.find_pic("feng.jpg", times=4)
         if x is not None:
             self.log("[状态] 在庭院")
             self.run_task("日常任务", "领取新邮件", self.task_mail)
@@ -541,6 +737,30 @@ class Script:
             return True
         else:
             return False
+
+    def zt_zai_tan_suo(self):
+        result = False
+        x, y = self.find_pic("yao.jpg", times=4)
+        if x is not None:
+            self.log("[状态] 在探索界面")
+            result = True
+        return result
+
+    def zt_zai_ge_ren_tu_po(self):
+        result = False
+        x, y = self.find_pic("fangshoujilu.jpg", times=6)
+        if x is not None:
+            self.log("[状态] 在个人突破界面")
+            result = True
+        return result
+
+    def zt_zai_liao_tu_po(self):
+        result = False
+        x, y = self.find_pic("tupojilu.jpg", times=6)
+        if x is not None:
+            self.log("[状态] 在寮突破突破")
+            result = True
+        return result
 
     def zt_zai_jie_jie(self):
         x, y = self.find_pic("fanhui2.jpg", times=10)
@@ -571,6 +791,8 @@ class Script:
                         self.run_task("日常任务", "友情点", self.task_you_qing_dian, daily=True)
                         self.run_task("日常任务", "领取寮资金", self.task_liao_zi_jin, daily=True)
                         self.run_task("日常任务", "结界", self.task_jie_jie)
+                    self.run_task("日常任务", "寮突破", self.task_liao_tu_po)
+                    self.run_task("日常任务", "结界突破", self.task_jie_jie_tu_po)
 
                     times -= 1
                     if 1 < self.clients and (self.window - 1) < self.clients:
@@ -601,7 +823,7 @@ class Script:
             self.init_mumu_window()
             if self.init == 0:
                 self.clients = app.settings['基本设置']['客户端数'].get()
-                self.window_info = []
+                self.init_window_info()
                 # 多开, 重置窗口为第一个游戏窗口
                 if self.clients > 1:
                     self.switch_window(2)
@@ -683,7 +905,7 @@ class App:
     jie_jie_ka_options = ["全部", "太鼓", "斗鱼", "伞室内", "太阴符咒", "特殊变异"]
     settings_list = {
         "日常任务": {
-            "常规任务": ["结界", ],
+            "常规任务": ["结界", "寮突破", "结界突破"],
             "每日一次": [
                 "每日签到",
                 "黄金签到",
@@ -845,6 +1067,8 @@ class App:
             self.settings["window%s" % i]["结界卡"].set("全部")
             self.settings["window%s" % i]["星级"] = tk.StringVar()
             self.settings["window%s" % i]["星级"].set("降序")
+            self.settings["window%s" % i]["结界突破绿标位置"] = tk.IntVar()
+            self.settings["window%s" % i]["结界突破绿标位置"].set(0)
 
         # 加载本地配置
         self.load_settings()
@@ -919,11 +1143,16 @@ class App:
         ttk.Label(tab, text="结界卡", anchor="e").place(x=0, y=0, width=60, height=30)
         ttk.Combobox(tab, textvariable=self.settings[window]["结界卡"], values=self.jie_jie_ka_options,
                      state='readonly').place(x=65, y=0, width=110, height=30)
+
         ttk.Label(tab, text="星级").place(x=200, y=0, width=40, height=30)
         ttk.Radiobutton(tab, text="降序", value="降序", variable=self.settings[window]["星级"]) \
             .place(x=240, y=0, width=60, height=30)
         ttk.Radiobutton(tab, text="升序", value="升序", variable=self.settings[window]["星级"]) \
             .place(x=300, y=0, width=60, height=30)
+
+        ttk.Label(tab, text="结界突破绿标位置").place(x=0, y=40, width=100, height=30)
+        ttk.Combobox(tab, textvariable=self.settings[window]["结界突破绿标位置"], values=["0", "1", "2", "3", "4", "5"],
+                     state='readonly').place(x=110, y=40, width=60, height=30)
 
 
 if __name__ == "__main__":
