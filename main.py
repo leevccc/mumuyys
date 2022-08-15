@@ -20,7 +20,7 @@ import pyautogui
 import win32con
 import win32gui
 
-version = "v1.2.0"
+version = "v1.3.0"
 module_logger = logging.getLogger(__name__)
 user32 = ctypes.windll.user32  # 加载user32.dll
 
@@ -112,7 +112,8 @@ class Script:
         screen = pyautogui.screenshot(region=(x, y, rx, ry))
         screen.save(self.path + "\\temp\\screenshot.jpg")
 
-    def find_pic(self, path, confidence=0.8, click=False, times=1, ux=None, uy=None, uwidth=None, uheight=None):
+    def find_pic(self, path, confidence=0.8, click=False, times=1, ux=None, uy=None, uwidth=None, uheight=None,
+                 color=None, delay=0):
         """
         查找图片, 每隔 0.5 秒读取一次, 默认截图完整游戏窗口, 也可指定截图区域(ux, uy...)
 
@@ -139,7 +140,7 @@ class Script:
             #   'rectangle': ((1298, 682), (1298, 781), (1372, 682), (1372, 781)),
             #   'confidence': 0.993413507938385
             # }
-            self.log("找图 [%s] - 结果: %s" % (path, match_result))
+            # self.log("找图 [%s] - 结果: %s" % (path, match_result))
             if match_result is None:
                 time.sleep(0.5)
                 continue
@@ -163,8 +164,16 @@ class Script:
             if uheight is not None:
                 x += ux
                 y += uy
+            if color is not None and pyautogui.pixelMatchesColor(self.x + x, self.y + y, color) is False:
+                return False
+
+            if delay > 0:
+                time.sleep(delay)
             self.click(x, y, width, height)
             return True
+
+        if color is not None and pyautogui.pixelMatchesColor(self.x + x, self.y + y, color) is False:
+            x, y = None, None
 
         return int(x), int(y)
 
@@ -429,6 +438,11 @@ class Script:
                     y = 186 + int((num - 1) / 2) * 152
                     self.click(x, y, 220, 76)
                     if self.action_attack() is False:
+                        # 次数用尽进攻按钮变灰， 先返回探索界面，下次重新进入寮界面，以免被别人击破目标
+                        self.click_100()
+                        self.set_window_info("当前位置", None)
+                        self.find_pic("close2.jpg", click=True, times=4)
+                        self.log("返回探索界面")
                         self.set_window_info("可能完成", True)
                         self.switch_window()
                         continue
@@ -448,6 +462,9 @@ class Script:
 
         # 清空 window_info 存留的信息
         self.init_window_info()
+        # 多开切换回窗口2
+        if self.clients > 1:
+            self.switch_window(2)
 
     def task_jie_jie_tu_po(self):
         self.log("尚未完成")
@@ -467,19 +484,25 @@ class Script:
 
     def action_fight_handle(self):
         result = "进行中"
-        if self.find_pic("victory2.jpg", click=True):
+        times = 1
+        if self.find_pic("fanhui3.jpg", ux=0, uy=0, uwidth=100, uheight=100)[0] is None:
+            result = "未进行"
+            # 未进行也可能是结算动画正在挑战, 提高结算判定的查找次数
+            times = 4
+
+        if self.find_pic("victory2.jpg", click=True, times=times):
             result = "胜利"
-        elif self.find_pic("victory.jpg", confidence=0.98, click=True):
+        elif self.find_pic("victory.jpg", confidence=0.98, click=True, times=times):
             self.random_sleep(2000, 1500)
             self.find_pic("victory2.jpg", click=True)
             result = "胜利"
-        elif self.find_pic("failure.jpg", confidence=0.98, click=True):
+        elif self.find_pic("failure.jpg", confidence=0.98, click=True, times=times):
             result = "失败"
         self.log("[状态] 战斗%s" % result)
         return result
 
     def action_fight_mark(self, config_key):
-        num = self.get_window_info(config_key)
+        num = self.app.settings["window%s" % self.window][config_key].get()
         x, y, width, height = 0, 0, 45, 110
         if num == 0:
             return
@@ -505,13 +528,13 @@ class Script:
     def action_attack(self):
         self.log("进攻")
         result = True
-        if self.find_pic("attack.jpg", confidence=0.98, click=True, times=6) is False:
+        if self.find_pic("attack.jpg", click=True, times=6, color=(244, 178, 95)) is False:
             self.syslog("找不到进攻按钮")
             result = False
         return result
 
     def action_fight_ready(self):
-        if self.find_pic("ready.jpg", click=True, times=10) is True:
+        if self.find_pic("ready.jpg", confidence=0.95, click=True, times=10, delay=2) is True:
             self.log("[动作] 准备")
 
     def action_switch_auto_fight(self):
@@ -519,8 +542,8 @@ class Script:
             self.log("[动作] 切换到自动战斗")
 
     def action_unlock_zhen_rong(self):
-        self.log("解除阵容锁")
-        self.find_pic("suo.jpg", click=True)
+        if self.find_pic("suo.jpg", click=True) is True:
+            self.log("解除阵容锁")
 
     def action_open_liao_tu_po(self):
         self.log("[动作] 打开寮突破界面")
@@ -559,6 +582,10 @@ class Script:
 
     def action_ling_qu_jing_yan_jiu_hu(self):
         if self.find_pic("jingyanjiuhu.jpg", click=True):
+            self.log("领取经验酒壶")
+            self.find_pic("tiqu.jpg", click=True, times=4)
+            self.random_sleep()
+        elif self.find_pic("jingyanjiuhu2.jpg", click=True):
             self.log("领取经验酒壶")
             self.find_pic("tiqu.jpg", click=True, times=4)
             self.random_sleep()
@@ -690,20 +717,21 @@ class Script:
             self.click_100()
 
     def action_hui_ting_yuan(self):
-        button = [
-            "close2.jpg",
+        close_button = [
+            "close2.jpg"
+        ]
+        fanhui_button = [
             "fanhui.jpg",
             "fanhui2.jpg",
         ]
 
-        i = 0
         while self.zt_zai_ting_yuan() is False:
-            self.log("[动作] 回庭院")
-            self.find_pic(button[i], click=True)
-            i += 1
-            if i == len(button):
-                i = 0
-            time.sleep(1)
+            for i in range(0, len(close_button)):
+                if self.find_pic(close_button[i], click=True) is True:
+                    self.log("[动作] 关闭界面")
+            for i in range(0, len(fanhui_button)):
+                if self.find_pic(fanhui_button[i], click=True, ux=0, uy=0, uwidth=100, uheight=100) is True:
+                    self.log("[动作] 返回上一级")
 
     def action_kai_juan_zhou(self):
         if self.find_pic("tingyuanjuanzhou.jpg", click=True):
@@ -730,7 +758,7 @@ class Script:
         x, y = self.find_pic("feng.jpg", times=4)
         if x is not None:
             self.log("[状态] 在庭院")
-            self.run_task("日常任务", "领取新邮件", self.task_mail)
+            self.run_task("日常任务", "领取新邮件", self.task_mail, False)
             self.run_task("日常任务", "领取庭院寿司", self.action_ting_yuan_shou_si, False)
             self.run_task("日常任务", "领取庭院勾玉", self.action_ting_yuan_gou_yu, False)
             self.run_task("日常任务", "领取庭院御魂", self.action_ting_yuan_yu_hun, False)
@@ -758,7 +786,7 @@ class Script:
         result = False
         x, y = self.find_pic("tupojilu.jpg", times=6)
         if x is not None:
-            self.log("[状态] 在寮突破突破")
+            self.log("[状态] 在寮突破界面")
             result = True
         return result
 
@@ -782,6 +810,7 @@ class Script:
         while True:
             if self.task_status:
                 times = self.clients
+                # 单人任务开始
                 while times > 0:
                     if self.zt_zai_ting_yuan():
                         self.action_kai_juan_zhou()
@@ -791,13 +820,17 @@ class Script:
                         self.run_task("日常任务", "友情点", self.task_you_qing_dian, daily=True)
                         self.run_task("日常任务", "领取寮资金", self.task_liao_zi_jin, daily=True)
                         self.run_task("日常任务", "结界", self.task_jie_jie)
-                    self.run_task("日常任务", "寮突破", self.task_liao_tu_po)
-                    self.run_task("日常任务", "结界突破", self.task_jie_jie_tu_po)
+                    self.action_hui_ting_yuan()
 
                     times -= 1
                     if 1 < self.clients and (self.window - 1) < self.clients:
                         # 最大客户端数大于 1 且当前窗口未超出客户端范围, 切换到下个窗口
                         self.switch_window()
+                # 同步交叉进行的任务开始, 如果多开, 重置到窗口2
+                if self.clients > 1:
+                    self.switch_window(2)
+                self.run_task("日常任务", "寮突破", self.task_liao_tu_po)
+                self.run_task("日常任务", "结界突破", self.task_jie_jie_tu_po)
 
                 self.log("所有任务执行完毕")
                 # 发出暂停命令
