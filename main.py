@@ -20,7 +20,7 @@ import pyautogui
 import win32con
 import win32gui
 
-version = "v1.3.1"
+version = "v1.3.2"
 module_logger = logging.getLogger(__name__)
 user32 = ctypes.windll.user32  # 加载user32.dll
 
@@ -97,19 +97,23 @@ class Script:
         y = self.y
         rx = self.x + self.width
         ry = self.y + self.height
+        w = self.width
+        h = self.height
 
         if uheight is not None:
             x += ux
             y += uy
             rx = x + uwidth
             ry = y + uheight
+            w = uwidth
+            h = uheight
 
         # 截图前把鼠标移除出游戏界面
         mouse_x, mouse_y = pyautogui.position()
         if x < mouse_x < rx and y < mouse_y < ry:
             pyautogui.moveTo(rx, ry)
 
-        screen = pyautogui.screenshot(region=(x, y, rx, ry))
+        screen = pyautogui.screenshot(region=(x, y, w, h))
         screen.save(self.path + "\\temp\\screenshot.jpg")
 
     def find_pic(self, path, confidence=0.8, click=False, times=1, ux=None, uy=None, uwidth=None, uheight=None,
