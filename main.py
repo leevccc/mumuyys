@@ -428,6 +428,7 @@ class Script:
 
             current_finish = self.get_window_info("完成")
             if current_finish is True:  # 当前窗口已无寮突破可打
+                self.log("当前窗口已无寮突破可打")
                 self.switch_window()
                 continue
 
@@ -438,15 +439,17 @@ class Script:
 
                 # 战斗
                 if num > 0:
+                    self.log("进攻第 %s 个对象" % num)
                     x = 581 + (num - 1) % 2 * 380
                     y = 186 + int((num - 1) / 2) * 152
                     self.click(x, y, 220, 76)
                     if self.action_attack() is False:
                         # 次数用尽进攻按钮变灰， 先返回探索界面，下次重新进入寮界面，以免被别人击破目标
                         self.click_100()
-                        self.set_window_info("当前位置", None)
                         self.find_pic("close2.jpg", click=True, times=4)
                         self.log("返回探索界面")
+                        self.set_window_info("当前位置", None)
+                        self.set_window_info("状态", None)
                         self.set_window_info("可能完成", True)
                         self.switch_window()
                         continue
@@ -455,14 +458,17 @@ class Script:
                     self.action_switch_auto_fight()
                     self.action_fight_mark("结界突破绿标位置")
                     self.set_window_info("状态", "战斗中")
+                    self.set_window_info("可能完成", None)
                     self.switch_window()
-                    self.set_window_info("可能完成", False)
             elif status == "战斗中":
                 result = self.action_fight_handle()
                 if result == "进行中":
                     self.switch_window()
                 else:
                     self.set_window_info("状态", None)
+                if result == "胜利":
+                    # 给攻破动画一点时间
+                    self.random_sleep(2000, 1500)
 
         # 清空 window_info 存留的信息
         self.init_window_info()
