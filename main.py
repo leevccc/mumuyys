@@ -371,8 +371,10 @@ class Script:
     def task_jie_jie(self):
         if self.is_time_expired("结界") is False:
             return
-        if self.zt_zai_ting_yuan():
-            self.action_open_yin_yang_liao()
+        if self.zt_zai_ting_yuan() is False:
+            self.action_hui_ting_yuan()
+        self.action_open_yin_yang_liao()
+
         x, y = self.find_pic("xinxi2.jpg", times=4)
         if x is not None or self.find_pic("xinxi.jpg", click=True, times=4):
             self.action_open_jie_jie()
@@ -831,7 +833,7 @@ class Script:
                         self.run_task("日常任务", "领取黑蛋", self.task_shang_dian_fu_li, daily=True)
                         self.run_task("日常任务", "友情点", self.task_you_qing_dian, daily=True)
                         self.run_task("日常任务", "领取寮资金", self.task_liao_zi_jin, daily=True)
-                        self.run_task("日常任务", "结界", self.task_jie_jie)
+                    self.run_task("日常任务", "结界", self.task_jie_jie)
                     self.action_hui_ting_yuan()
 
                     times -= 1
