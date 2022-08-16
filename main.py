@@ -20,7 +20,7 @@ import pyautogui
 import win32con
 import win32gui
 
-version = "v1.4.0"
+version = "v1.5.0"
 module_logger = logging.getLogger(__name__)
 user32 = ctypes.windll.user32  # 加载user32.dll
 
@@ -370,6 +370,7 @@ class Script:
 
     def task_jie_jie(self):
         if self.is_time_expired("结界") is False:
+            self.syslog("时间间隔不足， 跳过")
             return
         if self.zt_zai_ting_yuan() is False:
             self.action_hui_ting_yuan()
@@ -392,8 +393,8 @@ class Script:
                 if self.action_open_shi_shen_yu_cheng() is True:
                     self.action_change_full_shi_shen()
                     self.action_change_ji_yang()
-                self.action_hui_ting_yuan()
             self.set_task_execute_time("结界")
+        self.action_hui_ting_yuan()
 
     def task_liao_tu_po(self):
         # windows_info
@@ -458,6 +459,7 @@ class Script:
                     self.action_fight_ready()
                     self.random_sleep(500, 200)
                     self.action_switch_auto_fight()
+                    self.random_sleep()
                     self.action_fight_mark("结界突破绿标位置")
                     self.set_window_info("状态", "战斗中")
                     self.set_window_info("可能完成", None)
@@ -496,20 +498,31 @@ class Script:
 
     def action_fight_handle(self):
         result = "进行中"
-        times = 1
-        if self.find_pic("fanhui3.jpg", ux=0, uy=0, uwidth=100, uheight=100)[0] is None:
-            result = "未进行"
-            # 未进行也可能是结算动画正在挑战, 提高结算判定的查找次数
-            times = 4
 
-        if self.find_pic("victory2.jpg", click=True, times=times):
-            result = "胜利"
-        elif self.find_pic("victory.jpg", confidence=0.98, click=True, times=times):
+        if self.find_pic("victory.jpg", confidence=0.98, click=True):
             self.random_sleep(2000, 1500)
             self.find_pic("victory2.jpg", click=True)
             result = "胜利"
-        elif self.find_pic("failure.jpg", confidence=0.98, click=True, times=times):
+        elif self.find_pic("failure.jpg", confidence=0.98, click=True):
             result = "失败"
+        elif self.find_pic("victory2.jpg", click=True):
+            result = "胜利"
+
+        if result == "进行中" and self.find_pic("fanhui3.jpg", ux=0, uy=0, uwidth=100, uheight=100)[0] is None:
+            # 没找到结束标志， 也没找到战斗的退出按钮， 可能没进入战斗， 也可能在结算
+            result = "未进行"
+            # 给一个时间缓冲，结束动画
+            self.random_sleep(5000, 5000)
+            # 重新寻找结束标志， 找不到就是未进行
+            if self.find_pic("victory.jpg", confidence=0.98, click=True):
+                self.random_sleep(2000, 1500)
+                self.find_pic("victory2.jpg", click=True)
+                result = "胜利"
+            elif self.find_pic("failure.jpg", confidence=0.98, click=True):
+                result = "失败"
+            elif self.find_pic("victory2.jpg", click=True):
+                result = "胜利"
+
         self.log("[状态] 战斗%s" % result)
         return result
 
@@ -834,7 +847,6 @@ class Script:
                         self.run_task("日常任务", "友情点", self.task_you_qing_dian, daily=True)
                         self.run_task("日常任务", "领取寮资金", self.task_liao_zi_jin, daily=True)
                     self.run_task("日常任务", "结界", self.task_jie_jie)
-                    self.action_hui_ting_yuan()
 
                     times -= 1
                     if 1 < self.clients and (self.window - 1) < self.clients:
