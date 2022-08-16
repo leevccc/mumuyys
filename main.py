@@ -20,7 +20,7 @@ import pyautogui
 import win32con
 import win32gui
 
-version = "v1.3.2"
+version = "v1.4.0"
 module_logger = logging.getLogger(__name__)
 user32 = ctypes.windll.user32  # 加载user32.dll
 
@@ -413,6 +413,12 @@ class Script:
                 finish = True
                 continue
 
+            current_finish = self.get_window_info("完成")
+            if current_finish is True:  # 当前窗口已无寮突破可打
+                self.log("当前窗口已无寮突破可打")
+                self.switch_window()
+                continue
+
             # 位置判定
             local = self.get_window_info("当前位置")
             if local is None and self.zt_zai_ting_yuan() is True:
@@ -427,12 +433,6 @@ class Script:
 
             if local != "寮突破":
                 self.syslog("进入寮突破界面失败, 请手动进入寮突破界面, 并按 F10 继续")
-
-            current_finish = self.get_window_info("完成")
-            if current_finish is True:  # 当前窗口已无寮突破可打
-                self.log("当前窗口已无寮突破可打")
-                self.switch_window()
-                continue
 
             status = self.get_window_info("状态")
             if status is None:  # 空闲
