@@ -1199,9 +1199,9 @@ class App:
 
     # 游戏窗口页面
     def init_window_tab(self, tab, window):
-        ttk.Label(tab, text="结界卡", anchor="e").place(x=0, y=0, width=60, height=30)
+        ttk.Label(tab, text="结界卡").place(x=0, y=0, width=50, height=30)
         ttk.Combobox(tab, textvariable=self.settings[window]["结界卡"], values=self.jie_jie_ka_options,
-                     state='readonly').place(x=65, y=0, width=110, height=30)
+                     state='readonly').place(x=60, y=0, width=110, height=30)
 
         ttk.Label(tab, text="星级").place(x=200, y=0, width=40, height=30)
         ttk.Radiobutton(tab, text="降序", value="降序", variable=self.settings[window]["星级"]) \
@@ -1209,9 +1209,9 @@ class App:
         ttk.Radiobutton(tab, text="升序", value="升序", variable=self.settings[window]["星级"]) \
             .place(x=300, y=0, width=60, height=30)
 
-        ttk.Label(tab, text="结界突破绿标位置").place(x=0, y=40, width=100, height=30)
+        ttk.Label(tab, text="结界突破绿标位置").place(x=0, y=40, width=130, height=30)
         ttk.Combobox(tab, textvariable=self.settings[window]["结界突破绿标位置"], values=["0", "1", "2", "3", "4", "5"],
-                     state='readonly').place(x=110, y=40, width=60, height=30)
+                     state='readonly').place(x=140, y=40, width=60, height=30)
 
 
 if __name__ == "__main__":
