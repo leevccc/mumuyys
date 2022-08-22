@@ -20,7 +20,7 @@ import pyautogui
 import win32con
 import win32gui
 
-version = "v1.8.0"
+version = "v1.9.0"
 module_logger = logging.getLogger(__name__)
 user32 = ctypes.windll.user32  # 加载user32.dll
 
@@ -1129,6 +1129,10 @@ class App:
         notebook.add(tab1, text="日志信息")
         self.init_tab1(tab1)
 
+        tips_tab = ttk.Frame(notebook)
+        notebook.add(tips_tab, text="使用说明")
+        self.init_tips_tab(tips_tab)
+
         tab2 = ttk.Frame(notebook)
         notebook.add(tab2, text="基本设置")
         tab2.config(padding=10)
@@ -1261,6 +1265,14 @@ class App:
         # 设置系统日志样式 tag
         self.log.tag_add("sys", "end")
         self.log.tag_config("sys", foreground="blue", background="pink")
+
+    def init_tips_tab(self, tab):
+        tips = tk.Text(tab, padx=0, pady=0)
+        tips.place(x=-1, y=-1, width=self.width, height=400)
+        file = open(os.getcwd() + "\\tips.txt", "r", encoding="utf-8")
+        for txt in file:
+            tips.insert("insert", txt)
+        file.close()
 
     # Tab: 基本设置
     def init_tab2(self, tab):

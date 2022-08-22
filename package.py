@@ -75,6 +75,7 @@ if __name__ == "__main__":
     os.mkdir(mumuyys)
     # 复制文件
     copy(dist + "\\main.exe", mumuyys)
+    copy(script_path + "\\tips.txt", mumuyys)
     copy(img, mumuyys + "\\img")
     # bandizip 压缩 -l:9 最大效率
     os.system("bz c -l:9 %s %s" % (archive, mumuyys))
