@@ -20,7 +20,7 @@ import pyautogui
 import win32con
 import win32gui
 
-version = "v1.7.0"
+version = "v1.8.0"
 module_logger = logging.getLogger(__name__)
 user32 = ctypes.windll.user32  # 加载user32.dll
 
@@ -967,11 +967,17 @@ class Script:
                     if 1 < self.clients and (self.window - 1) < self.clients:
                         # 最大客户端数大于 1 且当前窗口未超出客户端范围, 切换到下个窗口
                         self.switch_window()
+
                 # 同步交叉进行的任务开始, 如果多开, 重置到窗口2
                 if self.clients > 1:
                     self.switch_window(2)
                 self.run_task("日常任务", "寮突破", self.task_liao_tu_po)
                 self.run_task("日常任务", "结界突破", self.task_jie_jie_tu_po)
+
+                # 全部窗口返回到庭院
+                for i in range(0, self.clients):
+                    self.switch_window(i + 2)
+                    self.action_hui_ting_yuan()
 
                 self.log("所有任务执行完毕")
                 # 发出暂停命令
