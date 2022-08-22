@@ -20,7 +20,7 @@ import pyautogui
 import win32con
 import win32gui
 
-version = "v1.5.0"
+version = "v1.5.1"
 module_logger = logging.getLogger(__name__)
 user32 = ctypes.windll.user32  # 加载user32.dll
 
@@ -324,12 +324,12 @@ class Script:
         if self.find_pic("xinyoujian.jpg", confidence=0.99, click=True):
             self.log("[任务] 领取新邮件")
             if self.find_pic("receivemail.jpg", click=True, times=6):
-                if self.find_pic("confirm.jpg", click=True, times=6):
+                if self.find_pic("queding.jpg", click=True, times=6):
                     self.random_sleep(1500, 1000)
                     self.click_100()
                     self.action_hui_ting_yuan()
                 else:
-                    self.kill("找不到确认按钮")
+                    self.kill("找不到确定按钮")
             else:
                 self.log("没有邮件, 返回庭院")
                 self.action_hui_ting_yuan()
