@@ -20,7 +20,7 @@ import pyautogui
 import win32con
 import win32gui
 
-version = "v1.6.0"
+version = "v1.7.0"
 module_logger = logging.getLogger(__name__)
 user32 = ctypes.windll.user32  # 加载user32.dll
 
@@ -235,6 +235,8 @@ class Script:
 
         :param num: 切换到第 num 个模拟器窗口, 不填默认为下个窗口
         """
+        if self.clients == 1:
+            return
         if num is None:
             num = self.window + 1
             if (num - 1) > self.clients:  # 下个游戏窗口超出设置的客户端数, 重置回到第一个游戏窗口
@@ -448,6 +450,7 @@ class Script:
                     x = 581 + (num - 1) % 2 * 380
                     y = 186 + int((num - 1) / 2) * 152
                     self.click(x, y, 220, 76)
+                    self.random_sleep()
                     if self.action_attack() is False:
                         # 次数用尽进攻按钮变灰， 先返回探索界面，下次重新进入寮界面，以免被别人击破目标
                         self.click_100()
@@ -483,7 +486,78 @@ class Script:
             self.switch_window(2)
 
     def task_jie_jie_tu_po(self):
-        self.log("尚未完成")
+        # windows_info
+        # 状态 - None(空闲) / 战斗中
+        # 完成 - None / True
+        # 需刷新 - None / True
+        # 当前挑战 - Int
+        finish = False
+        while finish is False:
+            # 统计可能完成的窗口数
+            finish_count = 0
+            for i in range(0, self.clients):
+                if self.get_window_info("完成", i + 2) is True:
+                    finish_count += 1
+            # 全部完成结束循环
+            if finish_count == self.clients:
+                finish = True
+                continue
+
+            # 当前窗口已完成, 跳过
+            if self.get_window_info("完成") is True:
+                self.log("当前窗口已完成, 跳过")
+                self.switch_window()
+
+            # 打开个人结界突破
+            if self.zt_zai_ting_yuan() is True:
+                self.action_open_tan_suo()
+            if self.zt_zai_tan_suo() is True:
+                self.action_open_jie_jie_tu_po()
+            if self.zt_zai_liao_tu_po() is True:
+                self.action_open_ge_ren_tu_po()
+            if self.zt_zai_ge_ren_tu_po() is True:
+                self.action_unlock_zhen_rong()
+
+            # 判断是否完成
+            x, y = self.find_pic("gerentupowancheng.jpg", confidence=0.95, ux=1200, uy=0, uwidth=260, uheight=70)
+            if x is not None:
+                self.log("剩余突破次数为 0")
+                self.set_window_info("完成", True)
+                continue
+
+            status = self.get_window_info("状态")
+            if status is None:  # 空闲
+                # 寻找未挑战的对象
+                num = self.find_ge_ren_tu_po_obj(x=154, y=149, width=383, height=162)
+
+                # 战斗
+                self.log("进攻第 %s 个对象" % num)
+                x = 277 + (num - 1) % 3 * 374
+                y = 196 + int((num - 1) / 3) * 152
+                self.click(x, y, 225, 84)
+                self.random_sleep()
+                if self.action_attack() is False:
+                    self.log("找不到进攻按钮, 请手动点击, 并按 F10 继续")
+                    self.run()
+                self.action_fight_ready()
+                self.random_sleep(500, 200)
+                self.action_switch_auto_fight()
+                self.random_sleep()
+                self.action_fight_mark("结界突破绿标位置")
+                self.set_window_info("状态", "战斗中")
+                self.switch_window()
+            elif status == "战斗中":
+                result = self.action_fight_handle()
+                if result == "进行中":
+                    self.switch_window()
+                else:
+                    self.set_window_info("状态", None)
+
+        # 清空 window_info 存留的信息
+        self.init_window_info()
+        # 多开切换回窗口2
+        if self.clients > 1:
+            self.switch_window(2)
 
     def find_liao_tu_po_obj(self, x, y, width, height):
         num = 0
@@ -497,6 +571,40 @@ class Script:
                 self.set_window_info("完成", True)
                 self.set_window_info("可能完成", True)
         return num
+
+    def find_ge_ren_tu_po_obj(self, x, y, width, height):
+        # 初始化当前挑战位置
+        if self.get_window_info("当前挑战") is None:
+            self.set_window_info("当前挑战", 1)
+        num = self.get_window_info("当前挑战")
+
+        # 查找未挑战的结界
+        while True:
+            # 判断当前位置状态 未挑战/ 已挑战(失败)/ 已攻破
+            cx = x + (num - 1) % 3 * 374
+            cy = y + int((num - 1) / 3) * 152
+            status = self.zt_tu_po_yi_tiao_zhan(cx, cy, width, height, detail=True)
+            if status == "未挑战":
+                break  # 结束查找
+            elif status == "已挑战":
+                self.set_window_info("需刷新", True)  # 当前有失败, 等全部找完需要刷新列表
+            # 已攻破, 无需特殊处理
+            num += 1  # 当前位置无法挑战, 切换下一个位置
+            if num > 9:  # 位置超标, 重置当前位置
+                num = 1
+                if self.get_window_info("需刷新") is True:
+                    self.action_refresh_jie_jie_list()
+
+        # 保存位置信息, 并返回
+        self.set_window_info("当前挑战", num)
+        return num
+
+    def action_refresh_jie_jie_list(self):
+        self.log("[动作] 刷新结界列表")
+        self.find_pic("refresh.jpg", click=True)
+        self.random_sleep(1500, 1000)
+        self.find_pic("queding.jpg", click=True)
+        self.random_sleep()
 
     def action_fight_handle(self):
         result = "进行中"
@@ -574,6 +682,12 @@ class Script:
         self.log("[动作] 打开寮突破界面")
         if self.find_pic("yinyangliao.jpg", click=True, times=10) is False:
             self.syslog("失败, 请手动进入寮突破界面并按 F10 继续")
+            self.run()
+
+    def action_open_ge_ren_tu_po(self):
+        self.log("[动作] 打开个人突破界面")
+        if self.find_pic("geren.jpg", click=True, times=10) is False:
+            self.syslog("失败, 请手动进入个人突破界面并按 F10 继续")
             self.run()
 
     def action_open_jie_jie_tu_po(self):
@@ -764,17 +878,17 @@ class Script:
         if self.find_pic("tingyuanjuanzhou.jpg", click=True):
             self.log("[动作] 开启底部导航卷轴")
 
-    def zt_tu_po_yi_tiao_zhan(self, x, y, width, height):
+    def zt_tu_po_yi_tiao_zhan(self, x, y, width, height, detail=False):
         cx, cy = self.find_pic("po.jpg", ux=x, uy=y, uwidth=width, uheight=height)
         if cx is not None:
-            return True
+            return True if detail is False else "已攻破"
         cx, cy = self.find_pic("po2.jpg", ux=x, uy=y, uwidth=width, uheight=height)
         if cx is not None:
-            return True
+            return True if detail is False else "已攻破"
         cx, cy = self.find_pic("shibaibiaoji.jpg", ux=x, uy=y, uwidth=width, uheight=height)
         if cx is not None:
-            return True
-        return False
+            return True if detail is False else "已挑战"
+        return False if detail is False else "未挑战"
 
     def zt_zai_ting_yuan(self):
         """
