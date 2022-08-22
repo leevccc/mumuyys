@@ -20,7 +20,7 @@ import pyautogui
 import win32con
 import win32gui
 
-version = "v1.9.0"
+version = "v1.10.0"
 module_logger = logging.getLogger(__name__)
 user32 = ctypes.windll.user32  # 加载user32.dll
 
@@ -1149,6 +1149,10 @@ class App:
             _tab.config(padding=10)
             self.init_window_tab(_tab, "window%s" % i)
 
+        update_tab = ttk.Frame(notebook)
+        notebook.add(update_tab, text="更新日志")
+        self.init_update_tab(update_tab)
+
         # notebook.pack(expand=True, fill=tk.BOTH)
         notebook.place(x=0, y=0, width=self.width, height=430)
 
@@ -1266,6 +1270,7 @@ class App:
         self.log.tag_add("sys", "end")
         self.log.tag_config("sys", foreground="blue", background="pink")
 
+    # Tab: 使用说明
     def init_tips_tab(self, tab):
         tips = tk.Text(tab, padx=0, pady=0)
         tips.place(x=-1, y=-1, width=self.width, height=400)
@@ -1345,6 +1350,16 @@ class App:
         ttk.Label(tab, text="结界突破绿标位置").place(x=0, y=40, width=130, height=30)
         ttk.Combobox(tab, textvariable=self.settings[window]["结界突破绿标位置"], values=["0", "1", "2", "3", "4", "5"],
                      state='readonly').place(x=140, y=40, width=60, height=30)
+
+
+    # Tab: 更新日志
+    def init_update_tab(self, tab):
+        tips = tk.Text(tab, padx=0, pady=0)
+        tips.place(x=-1, y=-1, width=self.width, height=400)
+        file = open(os.getcwd() + "\\update.txt", "r", encoding="utf-8")
+        for txt in file:
+            tips.insert("insert", txt)
+        file.close()
 
 
 if __name__ == "__main__":
