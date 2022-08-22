@@ -454,8 +454,9 @@ class Script:
                     if self.action_attack() is False:
                         # 次数用尽进攻按钮变灰， 先返回探索界面，下次重新进入寮界面，以免被别人击破目标
                         self.click_100()
-                        self.find_pic("close2.jpg", click=True, times=4)
-                        self.log("返回探索界面")
+                        if self.clients > 1:  # 下次切换进来要重新打开界面刷新数据, 否则多开可能同个寮, 其他窗口把你的目标突破了, 而你没刷新, 导致无法进攻
+                            self.find_pic("close2.jpg", click=True, times=4)
+                            self.log("返回探索界面")
                         self.set_window_info("当前位置", None)
                         self.set_window_info("状态", None)
                         self.set_window_info("可能完成", True)
