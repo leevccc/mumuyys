@@ -20,7 +20,7 @@ import pyautogui
 import win32con
 import win32gui
 
-version = "v1.10.0"
+version = "v1.11.0"
 module_logger = logging.getLogger(__name__)
 user32 = ctypes.windll.user32  # 加载user32.dll
 
@@ -1257,6 +1257,8 @@ class App:
             self.settings["window%s" % i]["星级"].set("降序")
             self.settings["window%s" % i]["结界突破绿标位置"] = tk.IntVar()
             self.settings["window%s" % i]["结界突破绿标位置"].set(0)
+            self.settings["window%s" % i]["探索关卡"] = tk.IntVar()
+            self.settings["window%s" % i]["探索关卡"].set(28)
 
         # 加载本地配置
         self.load_settings()
@@ -1351,6 +1353,12 @@ class App:
         ttk.Combobox(tab, textvariable=self.settings[window]["结界突破绿标位置"], values=["0", "1", "2", "3", "4", "5"],
                      state='readonly').place(x=140, y=40, width=60, height=30)
 
+        ttk.Label(tab, text="探索关卡").place(x=0, y=80, width=40, height=30)
+        guan = []
+        for i in range(0, 28):
+            guan.insert(i, str(i + 1))
+        ttk.Combobox(tab, textvariable=self.settings[window]["探索关卡"], values=guan,
+                     state='readonly').place(x=50, y=80, width=60, height=30)
 
     # Tab: 更新日志
     def init_update_tab(self, tab):
