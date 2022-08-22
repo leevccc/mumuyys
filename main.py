@@ -20,7 +20,7 @@ import pyautogui
 import win32con
 import win32gui
 
-version = "v1.5.1"
+version = "v1.6.0"
 module_logger = logging.getLogger(__name__)
 user32 = ctypes.windll.user32  # 加载user32.dll
 
@@ -129,6 +129,8 @@ class Script:
         :param uy: 游戏窗口的相对 y
         :param uwidth: 截图宽度, 须配合ux
         :param uheight: 截图高度, 须配合uy
+        :param color: 格式 (255,255,255), 对找到的区域左上角进行颜色二次确认
+        :param delay: 秒, 延迟后才点击
         :return: 按匹配结果依次返回: 失败 - None, None; 成功 - int(x), int(Y); 成功且需要点击 - True
         """
         match_result = None
@@ -145,7 +147,7 @@ class Script:
             #   'confidence': 0.993413507938385
             # }
             # self.log("找图 [%s] - 结果: %s" % (path, match_result))
-            if match_result is None:
+            if match_result is None and times > 1:
                 time.sleep(0.5)
                 continue
             else:
@@ -511,10 +513,8 @@ class Script:
         if result == "进行中" and self.find_pic("fanhui3.jpg", ux=0, uy=0, uwidth=100, uheight=100)[0] is None:
             # 没找到结束标志， 也没找到战斗的退出按钮， 可能没进入战斗， 也可能在结算
             result = "未进行"
-            # 给一个时间缓冲，结束动画
-            self.random_sleep(5000, 5000)
             # 重新寻找结束标志， 找不到就是未进行
-            if self.find_pic("victory.jpg", confidence=0.98, click=True):
+            if self.find_pic("victory.jpg", confidence=0.98, click=True, times=10):
                 self.random_sleep(2000, 1500)
                 self.find_pic("victory2.jpg", click=True)
                 result = "胜利"
