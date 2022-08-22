@@ -237,16 +237,28 @@ class Script:
         """
         if self.clients == 1:
             return
-        if num is None:
+
+        auto = True if num is None else False
+        if auto is True:  # 未指定窗口, 自动分配下个窗口
             num = self.window + 1
             if (num - 1) > self.clients:  # 下个游戏窗口超出设置的客户端数, 重置回到第一个游戏窗口
                 num = 2
+
         num = int(num)
-        if num < 1 or num > 9:
-            num = 2
-        pyautogui.hotkey("ctrl", str(num))
-        self.window = num
-        self.syslog("切换到窗口 " + str(num))
+        while True:
+            if num < 2 or num > (self.clients + 1):  # 限制窗口范围
+                num = 2
+
+            if auto is True and self.get_window_info("完成", num) is True:  # 自动分配的窗口, 有完成标记的就跳过
+                num += 1
+                continue
+            if num == self.window:  # 要切换的窗口为当前窗口, 跳过
+                break
+
+            pyautogui.hotkey("ctrl", str(num))
+            self.window = num
+            self.syslog("切换到窗口 " + str(num))
+            break
 
     def log(self, text, window=None):
         if window is None:
@@ -261,10 +273,10 @@ class Script:
         self.log_tag = None
 
     def run_task(self, setting_section, setting_key, task_func, msg=True, daily=False):
-        if daily and self.app.get_daily_record(self.window, setting_key) == "finish":
-            self.log("[任务] %s 今日已完成,跳过" % setting_key)
-            return
         if self.app.settings[setting_section][setting_key].get() == 1:
+            if daily and self.app.get_daily_record(self.window, setting_key) == "finish":
+                self.log("[任务] %s 今日已完成,跳过" % setting_key)
+                return
             if msg:
                 self.log("[任务] %s" % setting_key)
             task_func()
@@ -446,7 +458,7 @@ class Script:
 
                 # 战斗
                 if num > 0:
-                    self.log("进攻第 %s 个对象" % num)
+                    self.log("进攻第 %s 个结界" % num)
                     x = 581 + (num - 1) % 2 * 380
                     y = 186 + int((num - 1) / 2) * 152
                     self.click(x, y, 220, 76)
@@ -492,6 +504,8 @@ class Script:
         # 完成 - None / True
         # 需刷新 - None / True
         # 当前挑战 - Int
+        # 攻破数 - Int
+        # 位置 - None / 个人突破
         finish = False
         while finish is False:
             # 统计可能完成的窗口数
@@ -508,31 +522,34 @@ class Script:
             if self.get_window_info("完成") is True:
                 self.log("当前窗口已完成, 跳过")
                 self.switch_window()
-
-            # 打开个人结界突破
-            if self.zt_zai_ting_yuan() is True:
-                self.action_open_tan_suo()
-            if self.zt_zai_tan_suo() is True:
-                self.action_open_jie_jie_tu_po()
-            if self.zt_zai_liao_tu_po() is True:
-                self.action_open_ge_ren_tu_po()
-            if self.zt_zai_ge_ren_tu_po() is True:
-                self.action_unlock_zhen_rong()
-
-            # 判断是否完成
-            x, y = self.find_pic("gerentupowancheng.jpg", confidence=0.95, ux=1200, uy=0, uwidth=260, uheight=70)
-            if x is not None:
-                self.log("剩余突破次数为 0")
-                self.set_window_info("完成", True)
                 continue
+
+            local = self.get_window_info("位置")
+            # 打开个人结界突破
+            if local is None and self.zt_zai_ting_yuan() is True:
+                self.action_open_tan_suo()
+            if local is None and self.zt_zai_tan_suo() is True:
+                self.action_open_jie_jie_tu_po()
+            if local is None and self.zt_zai_liao_tu_po() is True:
+                self.action_open_ge_ren_tu_po()
+            if local is None and self.zt_zai_ge_ren_tu_po() is True:
+                self.action_unlock_zhen_rong()
+                self.set_window_info("位置", "个人突破")
 
             status = self.get_window_info("状态")
             if status is None:  # 空闲
+                # 判断是否完成
+                x, y = self.find_pic("gerentupowancheng.jpg", confidence=0.95, times=2, ux=1200, uy=0, uwidth=260,
+                                     uheight=70)
+                if x is not None:
+                    self.log("剩余突破次数为 0")
+                    self.set_window_info("完成", True)
+                    continue
                 # 寻找未挑战的对象
                 num = self.find_ge_ren_tu_po_obj(x=154, y=149, width=383, height=162)
 
                 # 战斗
-                self.log("进攻第 %s 个对象" % num)
+                self.log("进攻第 %s 个结界" % num)
                 x = 277 + (num - 1) % 3 * 374
                 y = 196 + int((num - 1) / 3) * 152
                 self.click(x, y, 225, 84)
@@ -552,7 +569,21 @@ class Script:
                 if result == "进行中":
                     self.switch_window()
                 else:
+                    # 胜利或失败 清空战斗状态
                     self.set_window_info("状态", None)
+                    # 当前挑战后移
+                    self.set_window_info("当前挑战", self.get_window_info("当前挑战") + 1)
+                    # 胜利额外处理
+                    if result == "胜利":
+                        # 结界突破额外处理, 个人结界突破第 3,6,9 次攻破胜利会有额外奖励
+                        self.set_window_info("攻破数", self.get_window_info("攻破数") + 1)
+                        if self.get_window_info("攻破数") in [3, 6, 9]:
+                            self.log("领取额外奖励")
+                            self.random_sleep(2000, 1500)
+                            self.find_pic("victory2.jpg", confidence=0.98, click=True, times=10)
+                    elif result == "失败":
+                        self.set_window_info("需刷新", True)
+                    self.random_sleep(2000, 1500)
 
         # 清空 window_info 存留的信息
         self.init_window_info()
@@ -577,7 +608,13 @@ class Script:
         # 初始化当前挑战位置
         if self.get_window_info("当前挑战") is None:
             self.set_window_info("当前挑战", 1)
+            self.set_window_info("攻破数", 0)
         num = self.get_window_info("当前挑战")
+        if num > 9:  # 位置超标, 重置当前位置
+            num = 1
+            if self.get_window_info("需刷新") is True:
+                self.action_refresh_jie_jie_list()
+                self.set_window_info("攻破数", 0)
 
         # 查找未挑战的结界
         while True:
@@ -589,12 +626,15 @@ class Script:
                 break  # 结束查找
             elif status == "已挑战":
                 self.set_window_info("需刷新", True)  # 当前有失败, 等全部找完需要刷新列表
-            # 已攻破, 无需特殊处理
+            elif status == "已攻破":
+                self.set_window_info("攻破数", self.get_window_info("攻破数") + 1)
+            self.log("第 %s 号位: %s" % (str(num), status))
             num += 1  # 当前位置无法挑战, 切换下一个位置
             if num > 9:  # 位置超标, 重置当前位置
                 num = 1
                 if self.get_window_info("需刷新") is True:
                     self.action_refresh_jie_jie_list()
+                    self.set_window_info("攻破数", 0)
 
         # 保存位置信息, 并返回
         self.set_window_info("当前挑战", num)
@@ -608,29 +648,16 @@ class Script:
         self.random_sleep()
 
     def action_fight_handle(self):
-        result = "进行中"
-
-        if self.find_pic("victory.jpg", confidence=0.98, click=True):
-            self.random_sleep(2000, 1500)
-            self.find_pic("victory2.jpg", click=True)
+        result = "进行中"  # 转场动画, 如好友协战/刚结束战斗, 会导致无法找到返回按钮, 所以要设置一个默认值
+        if self.find_pic("fanhui3.jpg", ux=0, uy=0, uwidth=100, uheight=100)[0] is not None:
+            result = "进行中"  # 找到返回按钮, 则跳过后面的战斗结果检测
+        elif self.find_pic("victory.jpg", confidence=0.98, click=True, times=10):
+            self.find_pic("victory2.jpg", confidence=0.98, click=True, times=4)
             result = "胜利"
         elif self.find_pic("failure.jpg", confidence=0.98, click=True):
             result = "失败"
-        elif self.find_pic("victory2.jpg", click=True):
+        elif self.find_pic("victory2.jpg", confidence=0.98, click=True):
             result = "胜利"
-
-        if result == "进行中" and self.find_pic("fanhui3.jpg", ux=0, uy=0, uwidth=100, uheight=100)[0] is None:
-            # 没找到结束标志， 也没找到战斗的退出按钮， 可能没进入战斗， 也可能在结算
-            result = "未进行"
-            # 重新寻找结束标志， 找不到就是未进行
-            if self.find_pic("victory.jpg", confidence=0.98, click=True, times=10):
-                self.random_sleep(2000, 1500)
-                self.find_pic("victory2.jpg", click=True)
-                result = "胜利"
-            elif self.find_pic("failure.jpg", confidence=0.98, click=True):
-                result = "失败"
-            elif self.find_pic("victory2.jpg", click=True):
-                result = "胜利"
 
         self.log("[状态] 战斗%s" % result)
         return result
