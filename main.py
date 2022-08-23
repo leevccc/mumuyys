@@ -20,7 +20,7 @@ import pyautogui
 import win32con
 import win32gui
 
-version = "v1.11.0"
+version = "v1.11.1"
 module_logger = logging.getLogger(__name__)
 user32 = ctypes.windll.user32  # 加载user32.dll
 
@@ -488,8 +488,7 @@ class Script:
                     self.switch_window()
                 else:
                     self.set_window_info("状态", None)
-                if result == "胜利":
-                    # 给攻破动画一点时间
+                    # 给攻破/失败动画一点时间
                     self.random_sleep(2000, 1500)
 
         # 清空 window_info 存留的信息
