@@ -20,7 +20,7 @@ import pyautogui
 import win32con
 import win32gui
 
-version = "v1.11.1"
+version = "v1.11.2"
 module_logger = logging.getLogger(__name__)
 user32 = ctypes.windll.user32  # 加载user32.dll
 
@@ -489,7 +489,8 @@ class Script:
                 else:
                     self.set_window_info("状态", None)
                     # 给攻破/失败动画一点时间
-                    self.random_sleep(2000, 1500)
+                    self.random_sleep(1500, 1000)
+                self.random_sleep()
 
         # 清空 window_info 存留的信息
         self.init_window_info()
@@ -582,7 +583,8 @@ class Script:
                             self.find_pic("victory2.jpg", confidence=0.98, click=True, times=10)
                     elif result == "失败":
                         self.set_window_info("需刷新", True)
-                    self.random_sleep(2000, 1500)
+                    self.random_sleep(1500, 1000)
+                self.random_sleep()
 
         # 清空 window_info 存留的信息
         self.init_window_info()
