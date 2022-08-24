@@ -1,5 +1,7 @@
 import os
 
+import main
+
 
 def copy(path_1, path_2):
     """
@@ -66,7 +68,7 @@ if __name__ == "__main__":
     dist = script_path + "\\dist"
     img = script_path + "\\img"
     mumuyys = dist + "\\mumuyys"
-    archive = dist + "\\mumuyys.7z"
+    archive = dist + "\\MuMu阴阳师助手%s.7z" % main.version
 
     os.system("pyinstaller -F main.py")  # 打包app
 
@@ -80,5 +82,8 @@ if __name__ == "__main__":
     copy(img, mumuyys + "\\img")
     # bandizip 压缩 -l:9 最大效率
     os.system("bz c -l:9 %s %s" % (archive, mumuyys))
+    # 移除临时文件
+    delete(mumuyys)
+    delete(dist + "\\main.exe")
     # 打开文件夹
     os.system("start %s" % dist)
