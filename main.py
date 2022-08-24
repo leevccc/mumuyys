@@ -20,7 +20,7 @@ import pyautogui
 import win32con
 import win32gui
 
-version = "v1.11.2"
+version = "v1.12.0"
 module_logger = logging.getLogger(__name__)
 user32 = ctypes.windll.user32  # 加载user32.dll
 
@@ -592,6 +592,70 @@ class Script:
         if self.clients > 1:
             self.switch_window(2)
 
+    def task_huo_dong(self):
+        finish = False
+        while finish is False:
+            # 解除阵容锁定
+            self.find_pic("\\huodong\\lock.jpg", click=True)
+            # 统计可能完成的窗口数
+            finish_count = 0
+            for i in range(0, self.clients):
+                if self.get_window_info("完成", i + 2) is True:
+                    finish_count += 1
+            # 全部完成结束循环
+            if finish_count == self.clients:
+                finish = True
+                continue
+
+            # 初始化活动次数
+            times = self.get_window_info("剩余次数")
+            if times is None:
+                times = app.settings["window%s" % self.window]["活动次数"].get()
+                self.set_window_info("剩余次数", times)
+
+            # 当前窗口已完成, 跳过
+            if times <= 0:
+                self.set_window_info("完成", True)
+                self.switch_window()
+                continue
+
+            status = self.get_window_info("状态")
+            if status is None:  # 空闲
+                # 战斗
+                self.log("战斗")
+                self.find_pic("\\huodong\\fight.jpg", click=True, times=4)
+                self.random_sleep()
+                self.action_fight_ready()
+                self.random_sleep(500, 200)
+                self.action_switch_auto_fight()
+                self.random_sleep()
+                self.action_fight_mark("活动绿标位置")
+                self.set_window_info("状态", "战斗中")
+                self.switch_window()
+            elif status == "战斗中":
+                result = self.action_fight_handle()
+                if result == "进行中":
+                    self.switch_window()
+                else:
+                    # 胜利或失败 清空战斗状态
+                    self.set_window_info("状态", None)
+                    # 胜利 减少一次
+                    if result == "胜利":
+                        times -= 1
+                        self.set_window_info("剩余次数", times)
+                        self.log("剩余次数 %s" % times)
+                    else:
+                        self.syslog("战斗失败, 脚本暂停, 可按 F10 继续")
+                        self.run()
+                self.random_sleep()
+                self.random_sleep()
+
+        # 清空 window_info 存留的信息
+        self.init_window_info()
+        # 多开切换回窗口2
+        if self.clients > 1:
+            self.switch_window(2)
+
     def find_liao_tu_po_obj(self, x, y, width, height):
         num = 0
         for i in range(0, 8):
@@ -1001,6 +1065,7 @@ class Script:
                     self.switch_window(2)
                 self.run_task("日常任务", "寮突破", self.task_liao_tu_po)
                 self.run_task("日常任务", "结界突破", self.task_jie_jie_tu_po)
+                self.run_task("日常任务", "活动", self.task_huo_dong)
 
                 # 全部窗口返回到庭院
                 for i in range(0, self.clients):
@@ -1267,6 +1332,8 @@ class App:
         self.settings["基本设置"]["结界间隔"] = tk.IntVar()
         self.settings["基本设置"]["结界间隔"].set(1)
         self.settings["日常任务"] = {}
+        self.settings["日常任务"]["活动"] = tk.IntVar()
+        self.settings["日常任务"]["活动"].set(1)
         for value in self.settings_list["日常任务"]["常规任务"]:
             self.settings["日常任务"][value] = tk.IntVar()
             self.settings["日常任务"][value].set(1)
@@ -1287,6 +1354,10 @@ class App:
             self.settings["window%s" % i]["结界突破绿标位置"].set(0)
             self.settings["window%s" % i]["探索关卡"] = tk.IntVar()
             self.settings["window%s" % i]["探索关卡"].set(28)
+            self.settings["window%s" % i]["活动次数"] = tk.IntVar()
+            self.settings["window%s" % i]["活动次数"].set(30)
+            self.settings["window%s" % i]["活动绿标位置"] = tk.IntVar()
+            self.settings["window%s" % i]["活动绿标位置"].set(0)
 
         # 加载本地配置
         self.load_settings()
@@ -1356,6 +1427,11 @@ class App:
                             variable=self.settings["日常任务"][val]) \
                 .place(x=0, y=i * 30, width=110, height=20)
 
+        hd = ttk.LabelFrame(tab, text="活动爬塔", padding=10)
+        hd.place(x=280, y=0, width=130, height=180)
+        ttk.Checkbutton(hd, text="活动", offvalue=0, onvalue=1, variable=self.settings["日常任务"]["活动"]) \
+            .place(x=0, y=0, width=110, height=20)
+
         ting_yuan = ttk.LabelFrame(tab, text="庭院发现", padding=10)
         ting_yuan.place(x=0, y=210, width=140, height=150)
         for i, val in enumerate(self.settings_list["日常任务"]['庭院发现']):
@@ -1381,12 +1457,17 @@ class App:
         ttk.Combobox(tab, textvariable=self.settings[window]["结界突破绿标位置"], values=["0", "1", "2", "3", "4", "5"],
                      state='readonly').place(x=140, y=40, width=60, height=30)
 
-        ttk.Label(tab, text="探索关卡").place(x=0, y=80, width=40, height=30)
-        guan = []
-        for i in range(0, 28):
-            guan.insert(i, str(i + 1))
-        ttk.Combobox(tab, textvariable=self.settings[window]["探索关卡"], values=guan,
-                     state='readonly').place(x=50, y=80, width=60, height=30)
+        # ttk.Label(tab, text="探索关卡").place(x=0, y=80, width=40, height=30)
+        # guan = []
+        # for i in range(0, 28):
+        #     guan.insert(i, str(i + 1))
+        # ttk.Combobox(tab, textvariable=self.settings[window]["探索关卡"], values=guan,
+        #              state='readonly').place(x=50, y=80, width=60, height=30)
+        ttk.Label(tab, text="活动次数").place(x=0, y=80, width=60, height=30)
+        ttk.Entry(tab, textvariable=self.settings[window]["活动次数"]).place(x=70, y=80, width=80, height=30)
+        ttk.Label(tab, text="活动绿标位置").place(x=0, y=120, width=80, height=30)
+        ttk.Combobox(tab, textvariable=self.settings[window]["活动绿标位置"], values=["0", "1", "2", "3", "4", "5"],
+                     state='readonly').place(x=90, y=120, width=60, height=30)
 
     # Tab: 更新日志
     def init_update_tab(self, tab):
