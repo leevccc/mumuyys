@@ -20,7 +20,7 @@ import pyautogui
 import win32con
 import win32gui
 
-version = "v1.12.0"
+version = "v1.12.1"
 module_logger = logging.getLogger(__name__)
 user32 = ctypes.windll.user32  # 加载user32.dll
 
@@ -626,10 +626,10 @@ class Script:
                 self.find_pic("\\huodong\\fight.jpg", click=True, times=4)
                 self.random_sleep()
                 self.action_fight_ready()
-                self.random_sleep(500, 200)
+                self.random_sleep()
                 self.action_switch_auto_fight()
                 self.random_sleep()
-                self.action_fight_mark("活动绿标位置")
+                self.action_fight_mark_2("活动绿标位置")
                 self.set_window_info("状态", "战斗中")
                 self.switch_window()
             elif status == "战斗中":
@@ -748,6 +748,25 @@ class Script:
         y += 5
         width -= 10
         height -= 10
+        self.click(x, y, width, height)
+        self.log("[动作] 绿标 %s 号位式神" % num)
+
+    def action_fight_mark_2(self, config_key):
+        num = self.app.settings["window%s" % self.window][config_key].get()
+        x, y, width, height = 0, 0, 45, 110
+        if num == 0:
+            return
+        elif num == 1:
+            x, y = 143, 545
+        elif num == 2:
+            x, y = 425, 462
+        elif num == 3:
+            x, y = 665, 435
+        elif num == 4:
+            x, y = 903, 475
+        elif num == 5:
+            x, y = 1180, 544
+
         self.click(x, y, width, height)
         self.log("[动作] 绿标 %s 号位式神" % num)
 
