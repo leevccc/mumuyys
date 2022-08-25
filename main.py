@@ -20,7 +20,7 @@ import pyautogui
 import win32con
 import win32gui
 
-version = "v1.12.1"
+version = "v1.13.0"
 module_logger = logging.getLogger(__name__)
 user32 = ctypes.windll.user32  # 加载user32.dll
 
@@ -117,7 +117,7 @@ class Script:
         screen.save(self.path + "\\temp\\screenshot.jpg")
 
     def find_pic(self, path, confidence=0.8, click=False, times=1, ux=None, uy=None, uwidth=None, uheight=None,
-                 color=None, delay=0):
+                 color=None, delay=0, double=False):
         """
         查找图片, 每隔 0.5 秒读取一次, 默认截图完整游戏窗口, 也可指定截图区域(ux, uy...)
 
@@ -131,6 +131,7 @@ class Script:
         :param uheight: 截图高度, 须配合uy
         :param color: 格式 (255,255,255), 对找到的区域左上角进行颜色二次确认
         :param delay: 秒, 延迟后才点击
+        :param double: True/False 是否双击
         :return: 按匹配结果依次返回: 失败 - None, None; 成功 - int(x), int(Y); 成功且需要点击 - True
         """
         match_result = None
@@ -175,7 +176,7 @@ class Script:
 
             if delay > 0:
                 time.sleep(delay)
-            self.click(x, y, width, height)
+            self.click(x, y, width, height, double)
             return True
 
         if color is not None and pyautogui.pixelMatchesColor(self.x + x, self.y + y, color) is False:
@@ -183,7 +184,7 @@ class Script:
 
         return int(x), int(y)
 
-    def click(self, x, y, width, height):
+    def click(self, x, y, width, height, double=False):
         """
         模拟鼠标点击
 
@@ -191,6 +192,7 @@ class Script:
         :param y: 纵坐标
         :param width: 横坐标偏移量
         :param height: 纵坐标偏移量
+        :param double: True/False 是否双击
         """
         # 脚本运行的本质是 识别图片+鼠标点击, 所以只需要在截图和点击功能里加入线程阻塞即可实现暂停功能
         while self.task_status is False:
@@ -199,8 +201,10 @@ class Script:
         x = self.x + x
         y = self.y + y
         pyautogui.moveTo(x + self.random_max(width), y + self.random_max(height))
-        Script.random_sleep()
+        self.random_sleep()
         pyautogui.click()
+        if double is True:
+            pyautogui.click()
 
     def click_100(self):
         self.click(120, 10, 80, 90)
@@ -252,7 +256,7 @@ class Script:
             if auto is True and self.get_window_info("完成", num) is True:  # 自动分配的窗口, 有完成标记的就跳过
                 num += 1
                 continue
-            if num == self.window:  # 要切换的窗口为当前窗口, 跳过
+            if auto is True and num == self.window:  # 要切换的窗口为当前窗口, 跳过
                 break
 
             pyautogui.hotkey("ctrl", str(num))
@@ -453,6 +457,20 @@ class Script:
 
             status = self.get_window_info("状态")
             if status is None:  # 空闲
+                self.zt_zai_liao_tu_po()  # 该方法可以卡最多3秒时间，避免战斗结束后回到突破界面过程太久，导致点击错误。
+                x, y = self.find_pic("liaotupowancheng.jpg", confidence=0.97)
+                if x is None:
+                    x, y = self.find_pic("liaotupowancheng2.jpg", confidence=0.97)
+                if x is not None:
+                    # 剩余次数为 0
+                    self.find_pic("close2.jpg", click=True, times=4)
+                    self.log("剩余次数为0，返回探索界面")
+                    self.set_window_info("当前位置", "探索")
+                    self.set_window_info("状态", None)
+                    self.set_window_info("可能完成", True)
+                    self.switch_window()
+                    continue
+
                 # 寻找未挑战的对象
                 num = self.find_liao_tu_po_obj(x=465, y=147, width=379, height=151)
 
@@ -461,20 +479,20 @@ class Script:
                     self.log("进攻第 %s 个结界" % num)
                     x = 581 + (num - 1) % 2 * 380
                     y = 186 + int((num - 1) / 2) * 152
-                    self.click(x, y, 220, 76)
+                    self.click(x, y, 220, 70, double=True)
                     self.random_sleep()
-                    if self.action_attack() is False:
-                        # 次数用尽进攻按钮变灰， 先返回探索界面，下次重新进入寮界面，以免被别人击破目标
+                    if self.action_attack() is False or self.action_fight_ready() is False:
+                        # 1. 次数用尽进攻按钮变灰， 先返回探索界面，下次重新进入寮界面，以免被别人击破目标（已前置判断）
+                        # 2. 结界已被攻破无法进入战斗界面
                         self.click_100()
                         if self.clients > 1:  # 下次切换进来要重新打开界面刷新数据, 否则多开可能同个寮, 其他窗口把你的目标突破了, 而你没刷新, 导致无法进攻
                             self.find_pic("close2.jpg", click=True, times=4)
                             self.log("返回探索界面")
-                        self.set_window_info("当前位置", None)
+                        self.set_window_info("当前位置", "探索")
                         self.set_window_info("状态", None)
                         self.set_window_info("可能完成", True)
                         self.switch_window()
                         continue
-                    self.action_fight_ready()
                     self.random_sleep(500, 200)
                     self.action_switch_auto_fight()
                     self.random_sleep()
@@ -488,9 +506,7 @@ class Script:
                     self.switch_window()
                 else:
                     self.set_window_info("状态", None)
-                    # 给攻破/失败动画一点时间
-                    self.random_sleep(1500, 1000)
-                self.random_sleep()
+                self.random_sleep(1500, 1000)
 
         # 清空 window_info 存留的信息
         self.init_window_info()
@@ -524,7 +540,7 @@ class Script:
                 self.switch_window()
                 continue
 
-            local = self.get_window_info("位置")
+            local = self.get_window_info("当前位置")
             # 打开个人结界突破
             if local is None and self.zt_zai_ting_yuan() is True:
                 self.action_open_tan_suo()
@@ -534,10 +550,12 @@ class Script:
                 self.action_open_ge_ren_tu_po()
             if local is None and self.zt_zai_ge_ren_tu_po() is True:
                 self.action_unlock_zhen_rong()
-                self.set_window_info("位置", "个人突破")
+                self.set_window_info("当前位置", "个人突破")
 
             status = self.get_window_info("状态")
             if status is None:  # 空闲
+                self.zt_zai_ge_ren_tu_po()  # 该方法可以卡最多3秒时间，避免战斗结束后回到突破界面过程太久，导致点击错误。
+
                 # 判断是否完成
                 x, y = self.find_pic("gerentupowancheng.jpg", confidence=0.95, times=2, ux=1200, uy=0, uwidth=260,
                                      uheight=70)
@@ -552,7 +570,7 @@ class Script:
                 self.log("进攻第 %s 个结界" % num)
                 x = 277 + (num - 1) % 3 * 374
                 y = 196 + int((num - 1) / 3) * 152
-                self.click(x, y, 225, 84)
+                self.click(x, y, 220, 80, double=True)
                 self.random_sleep()
                 if self.action_attack() is False:
                     self.log("找不到进攻按钮, 请手动点击, 并按 F10 继续")
@@ -581,6 +599,8 @@ class Script:
                             self.log("领取额外奖励")
                             self.random_sleep(2000, 1500)
                             self.find_pic("victory2.jpg", confidence=0.98, click=True, times=10)
+                        else:
+                            self.random_sleep(1500, 1000)
                     elif result == "失败":
                         self.set_window_info("需刷新", True)
                     self.random_sleep(1500, 1000)
@@ -716,7 +736,7 @@ class Script:
         result = "进行中"  # 转场动画, 如好友协战/刚结束战斗, 会导致无法找到返回按钮, 所以要设置一个默认值
         if self.find_pic("fanhui3.jpg", ux=0, uy=0, uwidth=100, uheight=100)[0] is not None:
             result = "进行中"  # 找到返回按钮, 则跳过后面的战斗结果检测
-        elif self.find_pic("victory.jpg", confidence=0.98, click=True, times=10):
+        elif self.find_pic("victory.jpg", confidence=0.98, click=True):
             self.find_pic("victory2.jpg", confidence=0.98, click=True, times=4)
             result = "胜利"
         elif self.find_pic("failure.jpg", confidence=0.98, click=True):
@@ -773,7 +793,7 @@ class Script:
     def action_attack(self):
         self.log("进攻")
         result = True
-        if self.find_pic("attack.jpg", click=True, times=6, color=(244, 178, 95)) is False:
+        if self.find_pic("attack.jpg", click=True, times=6, color=(244, 178, 95), double=True) is False:
             self.syslog("找不到进攻按钮")
             result = False
         return result
@@ -781,6 +801,9 @@ class Script:
     def action_fight_ready(self):
         if self.find_pic("ready.jpg", confidence=0.95, click=True, times=10, delay=2) is True:
             self.log("[动作] 准备")
+            return True
+        else:
+            return False
 
     def action_switch_auto_fight(self):
         if self.find_pic("shoudong.jpg", click=True) is True:
@@ -829,17 +852,19 @@ class Script:
             self.random_sleep()
             self.click_100()
             self.random_sleep()
-            self.click_100()
+            self.find_pic("close2.jpg", click=True)
 
     def action_ling_qu_jing_yan_jiu_hu(self):
         if self.find_pic("jingyanjiuhu.jpg", click=True):
             self.log("领取经验酒壶")
             self.find_pic("tiqu.jpg", click=True, times=4)
             self.random_sleep()
+            self.find_pic("close2.jpg", click=True)
         elif self.find_pic("jingyanjiuhu2.jpg", click=True):
             self.log("领取经验酒壶")
             self.find_pic("tiqu.jpg", click=True, times=4)
             self.random_sleep()
+            self.find_pic("close2.jpg", click=True)
 
     def action_ling_qu_ji_yang_exp(self):
         if self.find_pic("jiyangjingyan.jpg", click=True):
@@ -919,7 +944,7 @@ class Script:
         self.find_pic("sucai.jpg", click=True)
         self.random_sleep()
         for i in range(0, count):
-            self.find_pic("baidan.jpg", confidence=0.95, click=True, ux=156, uy=551, uwidth=1107, uheight=237)
+            self.find_pic("baidan.jpg", confidence=0.98, click=True, ux=156, uy=551, uwidth=1107, uheight=237)
             self.random_sleep()
             # 候补式神再确定
             self.find_pic("queding.jpg", click=True, times=4, ux=469, uy=271, uwidth=492, uheight=260)
