@@ -608,8 +608,10 @@ class Script:
                         self.set_window_info("攻破数", self.get_window_info("攻破数") + 1)
                         if self.get_window_info("攻破数") in [3, 6, 9]:
                             self.log("领取额外奖励")
-                            self.random_sleep(2000, 1500)
                             self.find_pic("victory2.jpg", confidence=0.98, click=True, times=10)
+                            self.random_sleep()
+                            self.find_pic("victory2.jpg", confidence=0.95, click=True)
+                            self.random_sleep()
                         else:
                             self.random_sleep(1500, 1000)
                     elif result == "失败":
