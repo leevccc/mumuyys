@@ -1043,7 +1043,7 @@ class Script:
 
         :return: True / False
         """
-        x, y = self.find_pic("feng.jpg", times=4)
+        x, y = self.find_pic("tansuo.jpg", times=4)
         if x is not None:
             self.log("[状态] 在庭院")
             self.run_task("日常任务", "领取新邮件", self.task_mail, False)
