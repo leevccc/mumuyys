@@ -748,6 +748,7 @@ class Script:
     def action_fight_handle(self):
         result = "进行中"  # 转场动画, 如好友协战/刚结束战斗, 会导致无法找到返回按钮, 所以要设置一个默认值
         if self.find_pic("fanhui3.jpg", ux=0, uy=0, uwidth=100, uheight=100)[0] is not None:
+            self.random_sleep(1500, 1000)
             result = "进行中"  # 找到返回按钮, 则跳过后面的战斗结果检测
         elif self.find_pic("victory.jpg", confidence=0.98, click=True):
             self.find_pic("victory2.jpg", confidence=0.98, click=True, times=4)
