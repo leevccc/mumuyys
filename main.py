@@ -948,7 +948,6 @@ class Script:
 
     def action_close_jie_jie_ka(self):
         self.log("关闭结界卡界面")
-        self.click(1000, 333, 40, 135)
         self.find_pic("close2.jpg", click=True, times=4)
         self.random_sleep()
 
