@@ -28,7 +28,6 @@ user32 = ctypes.windll.user32  # 加载user32.dll
 # v1.14.0 当前位置判断优化/寮突破加入早上5点开关,可避开这段时间(每天5点寮突破会重置,系统默认6点才自动开启)
 # todo: 所有open界面的方法改为 local_open_
 # todo: 所有判断当前位置的方法改为 local_zai_ 判断位置前先识别 当前位置
-# 自动处理悬赏邀请(状态为战斗中,不处理. 截图函数,截完图马上识别是否有悬赏邀请, 点击函数 点击前先识别一次)
 # 御魂/觉醒副本/百鬼夜行/探索/悬赏/逢魔之时
 # 调整助手界面,把状态 位置提取出来放界面上, 运行的时候自动调整助手的位置为游戏窗口边上,并切换到日志页
 # 日常任务和基本设置页合并, 并更改布局方式, 看看能不能适应DPI缩放, 日常任务加入全选框
@@ -88,7 +87,7 @@ class Script:
         self.syslog("窗口坐标: 宽 " + str(right) + " 高 " + str(bottom) + " 顶 " + str(top) + " 左 " + str(
             left) + " 分辨率 1440 x 810")
 
-    def print_screen(self, ux=None, uy=None, uwidth=None, uheight=None):
+    def print_screen(self, ux=None, uy=None, uwidth=None, uheight=None, file="screenshot.jpg"):
         """
         窗口截图
         """
@@ -123,7 +122,7 @@ class Script:
             pyautogui.moveTo(rx, ry)
 
         screen = pyautogui.screenshot(region=(x, y, w, h))
-        screen.save(self.path + "\\temp\\screenshot.jpg")
+        screen.save(self.path + "\\temp\\" + file)
 
     def find_pic(self, path, confidence=0.8, click=False, times=1, ux=None, uy=None, uwidth=None, uheight=None,
                  color=None, delay=0, double=False):
@@ -143,10 +142,14 @@ class Script:
         :param double: True/False 是否双击
         :return: 按匹配结果依次返回: 失败 - None, None; 成功 - int(x), int(Y); 成功且需要点击 - True
         """
+        # 脚本运行的本质是 识别图片+鼠标点击, 所以只需要在截图和点击功能里加入线程阻塞即可实现暂停功能
+        while self.task_status is False:
+            time.sleep(1)
+        self.action_xuan_shang_feng_yin_handle()  # 图片识别前，先处理悬赏邀请
         match_result = None
         for i in range(0, times):
             self.print_screen(ux=ux, uy=uy, uwidth=uwidth, uheight=uheight)
-            screenshot = aircv.imread(self.path + "\\temp\\screenshot.jpg")
+            screenshot = aircv.imread(self.path + "temp\\screenshot.jpg")
             img = aircv.imread(self.path + path)
 
             match_result = aircv.find_template(screenshot, img, confidence)
@@ -206,6 +209,7 @@ class Script:
         # 脚本运行的本质是 识别图片+鼠标点击, 所以只需要在截图和点击功能里加入线程阻塞即可实现暂停功能
         while self.task_status is False:
             time.sleep(1)
+        self.action_xuan_shang_feng_yin_handle()  # 点击操作前，先处理悬赏邀请
 
         x = self.x + x
         y = self.y + y
@@ -1037,6 +1041,31 @@ class Script:
     def action_kai_juan_zhou(self):
         if self.find_pic("tingyuanjuanzhou.jpg", click=True):
             self.log("[动作] 开启底部导航卷轴")
+
+    def action_xuan_shang_feng_yin_handle(self):
+        if self.get_window_info("状态") == "战斗中":
+            return
+        option = "关闭"
+        self.print_screen(ux=624, uy=161, uwidth=194, uheight=64, file="xuanshangfengyinHandle.jpg")
+        screenshot = aircv.imread(self.path + "\\temp\\xuanshangfengyinHandle.jpg")
+        img = aircv.imread(self.path + "xuanshangfengyin.jpg")
+        match_result = aircv.find_template(screenshot, img, 0.95)
+        if match_result is not None:
+            cx, cy, cw, ch = 0, 0, 0, 0
+            self.log("悬赏封印自动 %s" % option)
+            if option == "关闭":
+                cx, cy, cw, ch = 870, 129, 23, 25
+            elif option == "接受":
+                cx, cy, cw, ch = 935, 449, 50, 40
+            elif option == "拒绝":
+                cx, cy, cw, ch = 943, 565, 37, 39
+
+            cx = self.x + cx
+            cy = self.y + cy
+            pyautogui.moveTo(cx + self.random_max(cw), cy + self.random_max(ch))
+            self.random_sleep()
+            pyautogui.click()
+            self.random_sleep()
 
     def zt_tu_po_yi_tiao_zhan(self, x, y, width, height, detail=False):
         cx, cy = self.find_pic("po.jpg", ux=x, uy=y, uwidth=width, uheight=height)
