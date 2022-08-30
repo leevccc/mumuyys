@@ -728,7 +728,7 @@ class Script:
             num = 1
             if self.get_window_info("需刷新") is True:
                 self.action_refresh_jie_jie_list()
-                self.set_window_info("攻破数", 0)
+            self.set_window_info("攻破数", 0)
 
         # 查找未挑战的结界
         while True:
@@ -1048,8 +1048,8 @@ class Script:
         if self.get_window_info("状态") == "战斗中":
             return
         option = "关闭"
-        self.print_screen(ux=624, uy=161, uwidth=194, uheight=64, file="xuanshangfengyinHandle.jpg")
-        screenshot = aircv.imread(self.path + "\\temp\\xuanshangfengyinHandle.jpg")
+        self.print_screen(ux=624, uy=161, uwidth=194, uheight=64, file="xuanshangfengyinhandle.jpg")
+        screenshot = aircv.imread(self.path + "\\temp\\xuanshangfengyinhandle.jpg")
         img = aircv.imread(self.path + "xuanshangfengyin.jpg")
         match_result = aircv.find_template(screenshot, img, 0.95)
         if match_result is not None:
