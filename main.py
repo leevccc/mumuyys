@@ -393,9 +393,12 @@ class Script:
         self.click(1300, 714, 60, 60)
 
         self.log("点击黑蛋")
-        if self.find_pic("mianfei.jpg", click=True, times=6) is False:
+        mf = self.find_pic("mianfei.jpg", click=True, times=6)
+        if mf is False:
             self.find_pic("tuijian.jpg", click=True)
-            self.find_pic("mianfei.jpg", click=True, times=6)
+            mf = self.find_pic("mianfei.jpg", click=True, times=6)
+        if mf is False:
+            self.log("[!!!!!] 领取黑蛋失败")
         self.random_sleep(1500, 1000)
         self.click_100()
         self.action_hui_ting_yuan()
