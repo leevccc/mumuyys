@@ -148,8 +148,8 @@ class Script:
         self.action_xuan_shang_feng_yin_handle()  # 图片识别前，先处理悬赏邀请
         match_result = None
         for i in range(0, times):
-            self.print_screen(ux=ux, uy=uy, uwidth=uwidth, uheight=uheight)
-            screenshot = aircv.imread(self.path + "temp\\screenshot.jpg")
+            self.print_screen(ux=ux, uy=uy, uwidth=uwidth, uheight=uheight, file=path)
+            screenshot = aircv.imread(self.path + "temp\\" + path)
             img = aircv.imread(self.path + path)
 
             match_result = aircv.find_template(screenshot, img, confidence)
