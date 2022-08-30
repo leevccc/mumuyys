@@ -67,6 +67,7 @@ if __name__ == "__main__":
     script_path = os.getcwd()
     dist = script_path + "\\dist"
     img = script_path + "\\img"
+    img_temp = img + "\\temp"
     mumuyys = dist + "\\mumuyys"
     archive = dist + "\\MuMu阴阳师助手%s.7z" % main.version
 
@@ -85,5 +86,8 @@ if __name__ == "__main__":
     # 移除临时文件
     delete(mumuyys)
     delete(dist + "\\main.exe")
+    # 重置图片临时文件夹
+    delete(img_temp)
+    os.mkdir(img_temp)
     # 打开文件夹
     os.system("start %s" % dist)
