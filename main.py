@@ -125,7 +125,7 @@ class Script:
         screen.save(self.path + "\\temp\\" + file)
 
     def find_pic(self, path, confidence=0.8, click=False, times=1, ux=None, uy=None, uwidth=None, uheight=None,
-                 color=None, delay=0, double=False):
+                 color=None, delay=0.0, double=False):
         """
         查找图片, 每隔 0.5 秒读取一次, 默认截图完整游戏窗口, 也可指定截图区域(ux, uy...)
 
@@ -770,11 +770,11 @@ class Script:
             self.random_sleep(1500, 1000)
             result = "进行中"  # 找到返回按钮, 则跳过后面的战斗结果检测
         elif self.find_pic("victory.jpg", confidence=0.98, click=True):
-            self.find_pic("victory2.jpg", confidence=0.98, click=True, times=4)
+            self.find_pic("victory2.jpg", confidence=0.98, click=True, times=4, delay=0.5)
             result = "胜利"
         elif self.find_pic("failure.jpg", confidence=0.98, click=True):
             result = "失败"
-        elif self.find_pic("victory2.jpg", confidence=0.98, click=True):
+        elif self.find_pic("victory2.jpg", confidence=0.98, click=True, delay=0.5):
             result = "胜利"
 
         self.log("[状态] 战斗%s" % result)
