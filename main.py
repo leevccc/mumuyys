@@ -485,6 +485,7 @@ class Script:
 
             if local != "寮突破":
                 self.syslog("进入寮突破界面失败, 请手动进入寮突破界面, 并按 F10 继续")
+                self.run()
 
             status = self.get_window_info("状态")
             if status is None:  # 空闲
