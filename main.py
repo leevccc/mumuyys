@@ -473,13 +473,13 @@ class Script:
 
             # 位置判定
             local = self.get_window_info("当前位置")
-            if local is None and self.zt_zai_ting_yuan() is True:
+            if (local is None or local != "寮突破") and self.zt_zai_ting_yuan() is True:
                 self.action_open_tan_suo()
-            if local is None and self.zt_zai_tan_suo() is True:
+            if (local is None or local != "寮突破") and self.zt_zai_tan_suo() is True:
                 self.action_open_jie_jie_tu_po()
-            if local is None and self.zt_zai_ge_ren_tu_po() is True:
+            if (local is None or local != "寮突破") and self.zt_zai_ge_ren_tu_po() is True:
                 self.action_open_liao_tu_po()
-            if local is None and self.zt_zai_liao_tu_po() is True:
+            if (local is None or local != "寮突破") and self.zt_zai_liao_tu_po() is True:
                 local = self.set_window_info("当前位置", "寮突破")
                 self.action_unlock_zhen_rong()
 
@@ -576,13 +576,13 @@ class Script:
 
             local = self.get_window_info("当前位置")
             # 打开个人结界突破
-            if local is None and self.zt_zai_ting_yuan() is True:
+            if (local is None or local != "个人突破") and self.zt_zai_ting_yuan() is True:
                 self.action_open_tan_suo()
-            if local is None and self.zt_zai_tan_suo() is True:
+            if (local is None or local != "个人突破") and self.zt_zai_tan_suo() is True:
                 self.action_open_jie_jie_tu_po()
-            if local is None and self.zt_zai_liao_tu_po() is True:
+            if (local is None or local != "个人突破") and self.zt_zai_liao_tu_po() is True:
                 self.action_open_ge_ren_tu_po()
-            if local is None and self.zt_zai_ge_ren_tu_po() is True:
+            if (local is None or local != "个人突破") and self.zt_zai_ge_ren_tu_po() is True:
                 self.action_unlock_zhen_rong()
                 self.set_window_info("当前位置", "个人突破")
 
