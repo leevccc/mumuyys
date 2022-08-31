@@ -486,6 +486,8 @@ class Script:
             if local != "寮突破":
                 self.syslog("进入寮突破界面失败, 请手动进入寮突破界面, 并按 F10 继续")
                 self.run()
+                if self.zt_zai_liao_tu_po() is True:
+                    self.set_window_info("当前位置", "寮突破")
 
             status = self.get_window_info("状态")
             if status is None:  # 空闲
