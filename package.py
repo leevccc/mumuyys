@@ -65,29 +65,30 @@ def delete(path):
 
 if __name__ == "__main__":
     script_path = os.getcwd()
-    dist = script_path + "\\dist"
-    img = script_path + "\\img"
-    img_temp = img + "\\temp"
-    mumuyys = dist + "\\mumuyys"
-    archive = dist + "\\MuMu阴阳师助手%s.7z" % main.version
+    script_path_dist = script_path + "\\dist"
+    script_path_img = script_path + "\\img"
+    mmyys_path = script_path_dist + "\\mumuyys"
+    mmyys_path_img = mmyys_path + "\\img"
+    mmyys_path_img_temp = mmyys_path_img + "\\temp"
+    archive = script_path_dist + "\\MuMu阴阳师助手%s.7z" % main.version
 
     os.system("pyinstaller -F main.py")  # 打包app
 
     # 重建软件文件夹
-    delete(mumuyys)
-    os.mkdir(mumuyys)
+    delete(mmyys_path)
+    os.mkdir(mmyys_path)
     # 复制文件
-    copy(dist + "\\main.exe", mumuyys)
-    copy(script_path + "\\tips.txt", mumuyys)
-    copy(script_path + "\\update.txt", mumuyys)
-    copy(img, mumuyys + "\\img")
-    # bandizip 压缩 -l:9 最大效率
-    os.system("bz c -l:9 %s %s" % (archive, mumuyys))
-    # 移除临时文件
-    delete(mumuyys)
-    delete(dist + "\\main.exe")
+    copy(script_path_dist + "\\main.exe", mmyys_path)
+    copy(script_path + "\\tips.txt", mmyys_path)
+    copy(script_path + "\\update.txt", mmyys_path)
+    copy(script_path_img, mmyys_path_img)
     # 重置图片临时文件夹
-    delete(img_temp)
-    os.mkdir(img_temp)
+    delete(mmyys_path_img_temp)
+    os.mkdir(mmyys_path_img_temp)
+    # bandizip 压缩 -l:9 最大效率
+    os.system("bz c -l:9 %s %s" % (archive, mmyys_path))
+    # 移除临时文件
+    delete(mmyys_path)
+    delete(script_path_dist + "\\main.exe")
     # 打开文件夹
-    os.system("start %s" % dist)
+    os.system("start %s" % script_path_dist)
