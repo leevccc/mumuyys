@@ -1044,7 +1044,8 @@ class Script:
         elif self.find_pic("victory2.jpg", confidence=0.98, click=True, delay=0.5):
             result = "胜利"
 
-        self.log("[状态] 战斗%s" % result)
+        if result != "进行中":
+            self.log("[状态] 战斗%s" % result)
         return result
 
     def handle_xuan_shang_feng_yin(self):
