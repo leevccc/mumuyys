@@ -120,7 +120,7 @@ class Script:
             pyautogui.moveTo(rx, ry)
 
         screen = pyautogui.screenshot(region=(x, y, w, h))
-        screen.save(self.path + "\\temp\\" + file)
+        screen.save(self.path + "temp\\" + file.replace("\\", "_"))
 
     def find_pic(self, path, confidence=0.8, click=False, times=1, ux=None, uy=None, uwidth=None, uheight=None,
                  color=None, delay=0.0, double=False):
@@ -147,7 +147,7 @@ class Script:
         match_result = None
         for i in range(0, times):
             self.print_screen(ux=ux, uy=uy, uwidth=uwidth, uheight=uheight, file=path)
-            screenshot = aircv.imread(self.path + "temp\\" + path)
+            screenshot = aircv.imread(self.path + "temp\\" + path.replace("\\", "_"))
             img = aircv.imread(self.path + path)
 
             match_result = aircv.find_template(screenshot, img, confidence)
@@ -623,7 +623,7 @@ class Script:
         finish = False
         while finish is False:
             # 解除阵容锁定
-            self.find_pic("\\huodong\\lock.jpg", click=True)
+            self.find_pic("huodong\\lock.jpg", click=True)
             # 统计可能完成的窗口数
             finish_count = 0
             for i in range(0, self.clients):
@@ -1053,7 +1053,7 @@ class Script:
             return
         option = "关闭"
         self.print_screen(ux=624, uy=161, uwidth=194, uheight=64, file="xuanshangfengyinhandle.jpg")
-        screenshot = aircv.imread(self.path + "\\temp\\xuanshangfengyinhandle.jpg")
+        screenshot = aircv.imread(self.path + "temp\\xuanshangfengyinhandle.jpg")
         img = aircv.imread(self.path + "xuanshangfengyin.jpg")
         match_result = aircv.find_template(screenshot, img, 0.95)
         if match_result is not None:
