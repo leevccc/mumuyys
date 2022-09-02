@@ -476,7 +476,6 @@ class Script:
 
             status = self.get_window_info("状态")
             if status is None:  # 空闲
-                self.location_zai_liao_tu_po()  # 该方法可以卡最多3秒时间，避免战斗结束后回到突破界面过程太久，导致点击错误。
                 x, y = self.find_pic("liaotupowancheng.jpg", confidence=0.97)
                 if x is None:
                     x, y = self.find_pic("liaotupowancheng2.jpg", confidence=0.97)
@@ -563,8 +562,6 @@ class Script:
 
             status = self.get_window_info("状态")
             if status is None:  # 空闲
-                self.location_zai_jie_jie_tu_po()  # 该方法可以卡最多3秒时间，避免战斗结束后回到突破界面过程太久，导致点击错误。
-
                 # 判断是否完成
                 x, y = self.find_pic("gerentupowancheng.jpg", confidence=0.95, times=2, ux=1200, uy=0, uwidth=260,
                                      uheight=70)
