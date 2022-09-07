@@ -20,7 +20,7 @@ import pyautogui
 import win32con
 import win32gui
 
-version = "v1.14.1"
+version = "v1.15.0"
 module_logger = logging.getLogger(__name__)
 user32 = ctypes.windll.user32  # 加载user32.dll
 
@@ -1211,7 +1211,7 @@ class Script:
                     self.switch_window(2)
                 self.run_task("日常任务", "寮突破", self.task_liao_tu_po)
                 self.run_task("日常任务", "结界突破", self.task_jie_jie_tu_po)
-                self.run_task("日常任务", "活动", self.task_huo_dong)
+                # self.run_task("日常任务", "活动", self.task_huo_dong)
 
                 # 全部窗口返回到庭院
                 for i in range(0, self.clients):
@@ -1573,10 +1573,10 @@ class App:
                             variable=self.settings["日常任务"][val]) \
                 .place(x=0, y=i * 30, width=110, height=20)
 
-        hd = ttk.LabelFrame(tab, text="活动爬塔", padding=10)
-        hd.place(x=280, y=0, width=130, height=180)
-        ttk.Checkbutton(hd, text="活动", offvalue=0, onvalue=1, variable=self.settings["日常任务"]["活动"]) \
-            .place(x=0, y=0, width=110, height=20)
+        # hd = ttk.LabelFrame(tab, text="活动爬塔", padding=10)
+        # hd.place(x=280, y=0, width=130, height=180)
+        # ttk.Checkbutton(hd, text="活动", offvalue=0, onvalue=1, variable=self.settings["日常任务"]["活动"]) \
+        #     .place(x=0, y=0, width=110, height=20)
 
         ting_yuan = ttk.LabelFrame(tab, text="庭院发现", padding=10)
         ting_yuan.place(x=0, y=210, width=140, height=150)
@@ -1609,11 +1609,11 @@ class App:
         #     guan.insert(i, str(i + 1))
         # ttk.Combobox(tab, textvariable=self.settings[window]["探索关卡"], values=guan,
         #              state='readonly').place(x=50, y=80, width=60, height=30)
-        ttk.Label(tab, text="活动次数").place(x=0, y=80, width=60, height=30)
-        ttk.Entry(tab, textvariable=self.settings[window]["活动次数"]).place(x=70, y=80, width=80, height=30)
-        ttk.Label(tab, text="活动绿标位置").place(x=0, y=120, width=80, height=30)
-        ttk.Combobox(tab, textvariable=self.settings[window]["活动绿标位置"], values=["0", "1", "2", "3", "4", "5"],
-                     state='readonly').place(x=90, y=120, width=60, height=30)
+        # ttk.Label(tab, text="活动次数").place(x=0, y=80, width=60, height=30)
+        # ttk.Entry(tab, textvariable=self.settings[window]["活动次数"]).place(x=70, y=80, width=80, height=30)
+        # ttk.Label(tab, text="活动绿标位置").place(x=0, y=120, width=80, height=30)
+        # ttk.Combobox(tab, textvariable=self.settings[window]["活动绿标位置"], values=["0", "1", "2", "3", "4", "5"],
+        #              state='readonly').place(x=90, y=120, width=60, height=30)
 
     # Tab: 更新日志
     def init_update_tab(self, tab):
