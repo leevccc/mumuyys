@@ -1,3 +1,4 @@
+import ctypes
 import tkinter as tk
 from datetime import datetime
 
@@ -10,17 +11,26 @@ version = "v2.0.0"
 
 
 class App:
+    width = 600
+    height = 500
     log = None
     configs = None
     now = None
 
     def __init__(self, root):
+        # 告诉操作系统使用程序自身的dpi适配
+        ctypes.windll.shcore.SetProcessDpiAwareness(1)
+        # 获取屏幕的缩放因子
+        ScaleFactor = ctypes.windll.shcore.GetScaleFactorForDevice(0)
+        # 设置程序缩放
+        root.tk.call('tk', 'scaling', ScaleFactor / 75)
+        self.width *= (ScaleFactor / 100)
+        self.height *= (ScaleFactor / 100)
+
         configs = self.configs = config.Config()
         configs.init()
         # 助手界面
         root.title("阴阳师助手 %s" % version)
-        self.width = 600
-        self.height = 500
         screenwidth = root.winfo_screenwidth()
         screenheight = root.winfo_screenheight()
         align_str = '%dx%d+%d+%d' % \
