@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 
 module_logger = logging.getLogger(__name__)
 
@@ -24,3 +25,8 @@ def init(app):
     module_logger.addHandler(guiHandler)
     module_logger.setLevel(logging.INFO)
     module_logger.info("[日志信息]")
+
+
+def info(msg):
+    now = datetime.now()
+    module_logger.info("%s: %s" % (now.strftime("%H:%M:%S"), msg))

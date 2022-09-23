@@ -1,11 +1,17 @@
 import ctypes
+from ctypes import wintypes
 import tkinter as tk
 from datetime import datetime
+from threading import Thread
+from tkinter import messagebox
 
+import win32con
 from ttkbootstrap import ttk
 
 import config
 import logger
+import script
+from main import user32
 
 version = "v2.0.0"
 
@@ -13,9 +19,9 @@ version = "v2.0.0"
 class App:
     width = 600
     height = 500
-    log = None
-    configs = None
-    now = None
+    log = None  # 日志框
+    configs = None  # 配置表
+    now = None  # 当前时间
 
     def __init__(self, root):
         # 告诉操作系统使用程序自身的dpi适配
@@ -62,30 +68,49 @@ class App:
         notebook.grid(row=0, column=0, sticky=tk.NSEW)
 
     def regTab1(self, tab):
+        baseConfigs = self.configs.configs["基本设置"]
+        tempConfigs = self.configs.configs["临时"]
+
         # 日志
         logFrame = ttk.Frame(tab)
         logFrame.rowconfigure(0, weight=1)
         logFrame.columnconfigure(0, weight=1)
-        self.log = tk.Text(logFrame, state="disabled", width=40, height=25)
-        self.log.pack()
         logFrame.grid(row=0, column=0, sticky=tk.EW)
 
-        baseConfigs = self.configs.configs["基本设置"]
-        tempConfigs = self.configs.configs["临时"]
-        baseFrame = ttk.Frame(tab, padding=(5, 0, 0, 0))
-        ttk.Label(baseFrame, text="助手模式").grid(row=0, column=0)
-        ttk.Combobox(baseFrame, textvariable=baseConfigs["模式"], values=["单开养号", "组队刷刷"],
-                     state='readonly').grid(row=0, column=1, padx=5)
+        self.log = tk.Text(logFrame, state="disabled", width=40, height=25)
+        self.log.pack()
 
-        ttk.Label(baseFrame, text="当前时间").grid(row=1, column=0)
+        baseFrame = ttk.Frame(tab, padding=(5, 0, 0, 0))
+        baseFrame.grid(row=0, column=1, sticky=tk.NW)
+
+        ttk.Label(baseFrame, text="按 F10 切换运行状态") \
+            .grid(row=0, column=0, columnspan=99, sticky=tk.W)
+
+        ttk.Label(baseFrame, text="运行状态") \
+            .grid(row=1, column=0, pady=3)
+        running = ttk.Label(baseFrame, text="", foreground="white")
+        running \
+            .grid(row=1, column=1, sticky=tk.W, padx=5, pady=3)
+        self.running(tab, running)
+
+        ttk.Label(baseFrame, text="助手模式") \
+            .grid(row=2, column=0, pady=3)
+        ttk.Radiobutton(baseFrame, text="单开养号", value="单开养号", variable=baseConfigs["模式"]) \
+            .grid(row=2, column=1, padx=5, sticky=tk.W, pady=3)
+        ttk.Radiobutton(baseFrame, text="组队刷刷", value="组队刷刷", variable=baseConfigs["模式"]) \
+            .grid(row=2, column=2, padx=5, sticky=tk.W, pady=3)
+
+        ttk.Label(baseFrame, text="当前时间") \
+            .grid(row=3, column=0, pady=3)
         clock = ttk.Label(baseFrame, text="")
-        clock.grid(row=1, column=1, sticky=tk.W, padx=5)
+        clock \
+            .grid(row=3, column=1, sticky=tk.W, padx=5, columnspan=2, pady=3)
         self.clock(tab, clock)
 
-        ttk.Label(baseFrame, text="当前位置").grid(row=2, column=0)
-        ttk.Label(baseFrame, textvariable=tempConfigs["当前位置"]).grid(row=2, column=1, sticky=tk.W, padx=5)
-
-        baseFrame.grid(row=0, column=1, sticky=tk.NW)
+        ttk.Label(baseFrame, text="当前位置") \
+            .grid(row=4, column=0, pady=3)
+        ttk.Label(baseFrame, textvariable=tempConfigs["当前位置"]) \
+            .grid(row=4, column=1, sticky=tk.W, padx=5, pady=3)
 
     def regTab2(self, tab):
         dkConfigs = self.configs.configs["单开养号"]
@@ -163,8 +188,52 @@ class App:
         label.configure(text=self.now)
         root.after(1000, self.clock, root, label)
 
+    def running(self, root, label):
+        running = "运行中" if script.running else "休息中"
+        bg = "green" if script.running else "red"
+        label.configure(text=running, background=bg)
+        root.after(1000, self.running, root, label)
+
+
+class HotkeyThread(Thread):  # 创建一个Thread.threading的扩展类
+    f10 = 121
+
+    def __init__(self):
+        Thread.__init__(self)
+
+    def run(self):
+        # 注册快捷键F10并判断是否成功
+        if not user32.RegisterHotKey(None, self.f10, 0, win32con.VK_F10):
+            messagebox.showerror("注册热键失败", "F10 热键注册失败, 请检查是否被占用")
+
+        try:
+            # 监听热键
+            msg = ctypes.wintypes.MSG()
+            while True:
+                if user32.GetMessageA(ctypes.byref(msg), None, 0, 0) != 0:
+                    if msg.message == win32con.WM_HOTKEY:
+                        if msg.wParam == self.f10:
+                            script.run()
+
+                    user32.TranslateMessage(ctypes.byref(msg))
+                    user32.DispatchMessageA(ctypes.byref(msg))
+
+        finally:
+            # 释放热键
+            user32.UnregisterHotKey(None, "F10")
+
 
 if __name__ == "__main__":
+    # 注册线程
+    taskThread = script.TaskThread()
+    taskThread.daemon = True
+    taskThread.start()
+
+    # 注册快捷键
+    hotkeyThread = HotkeyThread()
+    hotkeyThread.daemon = True
+    hotkeyThread.start()
+
     # 注册界面
     tkinter = tk.Tk()
     app = App(tkinter)
