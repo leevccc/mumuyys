@@ -88,7 +88,72 @@ class App:
         baseFrame.grid(row=0, column=1, sticky=tk.NW)
 
     def regTab2(self, tab):
-        print(1)
+        dkConfigs = self.configs.configs["单开养号"]
+        row1 = tk.Frame(tab)
+        base = ttk.LabelFrame(row1, text="基本设置", padding=10)
+        ttk.Checkbutton(base, text="任务循环", offvalue=0, onvalue=1, variable=dkConfigs["任务循环"]) \
+            .grid(row=0, column=0, padx=5)
+        ttk.Label(base, text="休息时间 (分)").grid(row=0, column=1, padx=5)
+        ttk.Entry(base, textvariable=dkConfigs["休息时间min"]).grid(row=0, column=2, padx=5)
+        ttk.Label(base, text="-", anchor="center").grid(row=0, column=3, padx=5)
+        ttk.Entry(base, textvariable=dkConfigs["休息时间max"]).grid(row=0, column=4, padx=5)
+        base.grid(row=0, column=0, sticky=tk.W, pady=2)
+        row1.grid(row=0, column=0, sticky=tk.W, pady=2)
+
+        row2 = tk.Frame(tab)
+        tyjc = ttk.LabelFrame(row2, text="庭院检测", padding=10)
+        ttk.Checkbutton(tyjc, text="庭院御魂", offvalue=0, onvalue=1, variable=dkConfigs["庭院御魂"]) \
+            .grid(row=0, column=0, padx=5)
+        ttk.Checkbutton(tyjc, text="庭院寿司", offvalue=0, onvalue=1, variable=dkConfigs["庭院寿司"]) \
+            .grid(row=0, column=1, padx=5)
+        ttk.Checkbutton(tyjc, text="庭院勾玉", offvalue=0, onvalue=1, variable=dkConfigs["庭院勾玉"]) \
+            .grid(row=0, column=2, padx=5)
+        tyjc.grid(row=1, column=0, sticky=tk.W, pady=2)
+        row2.grid(row=1, column=0, sticky=tk.W, pady=2)
+
+        row3 = tk.Frame(tab)
+        mryc = ttk.LabelFrame(row3, text="每日一次", padding=10)
+        ttk.Checkbutton(mryc, text="每日签到", offvalue=0, onvalue=1, variable=dkConfigs["每日签到"]) \
+            .grid(row=0, column=0, padx=5)
+        ttk.Checkbutton(mryc, text="黄金签到", offvalue=0, onvalue=1, variable=dkConfigs["黄金签到"]) \
+            .grid(row=0, column=1, padx=5)
+        ttk.Checkbutton(mryc, text="领取黑蛋", offvalue=0, onvalue=1, variable=dkConfigs["领取黑蛋"]) \
+            .grid(row=0, column=2, padx=5)
+        ttk.Checkbutton(mryc, text="友情点", offvalue=0, onvalue=1, variable=dkConfigs["友情点"]) \
+            .grid(row=0, column=3, padx=5)
+        ttk.Checkbutton(mryc, text="领取寮资金", offvalue=0, onvalue=1, variable=dkConfigs["领取寮资金"]) \
+            .grid(row=0, column=4, padx=5)
+        mryc.grid(row=2, column=0, sticky=tk.W, pady=2)
+        row3.grid(row=2, column=0, sticky=tk.W, pady=2)
+
+        row4 = tk.Frame(tab)
+        jj = ttk.LabelFrame(row4, text="阴阳寮结界", padding=10)
+        ttk.Checkbutton(jj, text="开启", offvalue=0, onvalue=1, variable=dkConfigs["阴阳寮结界"]) \
+            .grid(row=0, column=0, sticky=tk.W, padx=5)
+        ttk.Label(jj, text="间隔 (时)", anchor="e").grid(row=1, column=0, sticky=tk.W, padx=5, pady=5)
+        ttk.Combobox(jj, textvariable=dkConfigs["结界间隔"], values=["1", "2", "3", "4", "5", "6"], state='readonly') \
+            .grid(row=1, column=1, columnspan=2, sticky=tk.W, padx=5, pady=5)
+        ttk.Label(jj, text="结界卡").grid(row=2, column=0, sticky=tk.W, padx=5, pady=5)
+        ttk.Combobox(jj, textvariable=dkConfigs["结界卡"],
+                     values=["全部", "太鼓", "斗鱼", "伞室内", "太阴符咒", "特殊变异"], state='readonly') \
+            .grid(row=2, column=1, columnspan=2, sticky=tk.W, padx=5, pady=5)
+        ttk.Label(jj, text="星级").grid(row=3, column=0, sticky=tk.W, padx=5, pady=5)
+        ttk.Radiobutton(jj, text="降序", value="降序", variable=dkConfigs["结界卡排序"]) \
+            .grid(row=3, column=1, sticky=tk.W, padx=5, pady=5)
+        ttk.Radiobutton(jj, text="升序", value="升序", variable=dkConfigs["结界卡排序"]) \
+            .grid(row=3, column=2, sticky=tk.W, padx=5, pady=5)
+        jj.grid(row=3, column=0, sticky=tk.NW, pady=2)
+
+        jjtp = ttk.LabelFrame(row4, text="结界突破", padding=10)
+        ttk.Checkbutton(jjtp, text="个人突破", offvalue=0, onvalue=1, variable=dkConfigs["个人突破"]) \
+            .grid(row=0, column=0, sticky=tk.W, padx=5)
+        ttk.Checkbutton(jjtp, text="寮突破", offvalue=0, onvalue=1, variable=dkConfigs["寮突破"]) \
+            .grid(row=0, column=1, sticky=tk.W, padx=5)
+        ttk.Label(jjtp, text="结界突破绿标位置").grid(row=1, column=0, sticky=tk.W, padx=5, pady=5)
+        ttk.Combobox(jjtp, textvariable=dkConfigs["突破绿标式神位"], values=["0", "1", "2", "3", "4", "5"],
+                     state='readonly').grid(row=1, column=1, sticky=tk.W, padx=5, pady=5)
+        jjtp.grid(row=3, column=1, sticky=tk.NW, pady=2, padx=10)
+        row4.grid(row=3, column=0, sticky=tk.W, pady=2)
 
     def regTab3(self, tab):
         print(2)

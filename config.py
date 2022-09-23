@@ -15,6 +15,48 @@ class Config:
         configs["基本设置"] = {}
         configs["基本设置"]["模式"] = tk.StringVar()
         configs["基本设置"]["模式"].set("单开养号")
+        configs["单开养号"] = {}
+
+        configs["单开养号"]["任务循环"] = tk.IntVar()
+        configs["单开养号"]["任务循环"].set(1)
+        configs["单开养号"]["休息时间min"] = tk.IntVar()
+        configs["单开养号"]["休息时间min"].set(15)
+        configs["单开养号"]["休息时间max"] = tk.IntVar()
+        configs["单开养号"]["休息时间max"].set(30)
+
+        configs["单开养号"]["庭院御魂"] = tk.IntVar()
+        configs["单开养号"]["庭院御魂"].set(1)
+        configs["单开养号"]["庭院寿司"] = tk.IntVar()
+        configs["单开养号"]["庭院寿司"].set(1)
+        configs["单开养号"]["庭院勾玉"] = tk.IntVar()
+        configs["单开养号"]["庭院勾玉"].set(1)
+
+        configs["单开养号"]["每日签到"] = tk.IntVar()
+        configs["单开养号"]["每日签到"].set(1)
+        configs["单开养号"]["黄金签到"] = tk.IntVar()
+        configs["单开养号"]["黄金签到"].set(1)
+        configs["单开养号"]["领取黑蛋"] = tk.IntVar()
+        configs["单开养号"]["领取黑蛋"].set(1)
+        configs["单开养号"]["友情点"] = tk.IntVar()
+        configs["单开养号"]["友情点"].set(1)
+        configs["单开养号"]["领取寮资金"] = tk.IntVar()
+        configs["单开养号"]["领取寮资金"].set(1)
+
+        configs["单开养号"]["阴阳寮结界"] = tk.IntVar()
+        configs["单开养号"]["阴阳寮结界"].set(1)
+        configs["单开养号"]["结界间隔"] = tk.IntVar()
+        configs["单开养号"]["结界间隔"].set(1)
+        configs["单开养号"]["结界卡"] = tk.StringVar()
+        configs["单开养号"]["结界卡"].set("全部")
+        configs["单开养号"]["结界卡排序"] = tk.StringVar()
+        configs["单开养号"]["结界卡排序"].set("降序")
+
+        configs["单开养号"]["个人突破"] = tk.IntVar()
+        configs["单开养号"]["个人突破"].set(1)
+        configs["单开养号"]["寮突破"] = tk.IntVar()
+        configs["单开养号"]["寮突破"].set(1)
+        configs["单开养号"]["突破绿标式神位"] = tk.IntVar()
+        configs["单开养号"]["突破绿标式神位"].set(0)
         configs["临时"] = {}
         configs["临时"]["当前位置"] = tk.StringVar()
         configs["临时"]["当前位置"].set("未知")
