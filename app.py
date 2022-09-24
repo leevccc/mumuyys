@@ -1,4 +1,5 @@
 import ctypes
+import os
 from ctypes import wintypes
 import tkinter as tk
 from datetime import datetime
@@ -14,6 +15,9 @@ import script
 from main import user32
 
 version = "v2.0.0"
+path = os.getcwd()
+imgPath = path + "\\img\\"
+tempImgPath = imgPath + "Temp\\"
 
 
 class App:
@@ -65,6 +69,11 @@ class App:
         tab3.config(padding=10)
         self.regTab3(tab3)
 
+        tab4 = ttk.Frame(notebook)
+        notebook.add(tab4, text="活动模式")
+        tab4.config(padding=10)
+        self.regTab4(tab4)
+
         notebook.grid(row=0, column=0, sticky=tk.NSEW)
 
     def regTab1(self, tab):
@@ -99,6 +108,8 @@ class App:
             .grid(row=2, column=1, padx=5, sticky=tk.W, pady=3)
         ttk.Radiobutton(baseFrame, text="组队刷刷", value="组队刷刷", variable=baseConfigs["模式"]) \
             .grid(row=2, column=2, padx=5, sticky=tk.W, pady=3)
+        ttk.Radiobutton(baseFrame, text="活动模式", value="活动模式", variable=baseConfigs["模式"]) \
+            .grid(row=2, column=3, padx=5, sticky=tk.W, pady=3)
 
         ttk.Label(baseFrame, text="当前时间") \
             .grid(row=3, column=0, pady=3)
@@ -181,7 +192,17 @@ class App:
         row4.grid(row=3, column=0, sticky=tk.W, pady=2)
 
     def regTab3(self, tab):
-        print(2)
+        logger.info("组队刷刷尚未制作")
+
+    def regTab4(self, tab):
+        hdConfigs = self.configs.configs["活动模式"]
+
+        ttk.Checkbutton(tab, text="开启", offvalue=0, onvalue=1, variable=hdConfigs["开启"]) \
+            .grid(row=0, column=0, sticky=tk.W, padx=5)
+        ttk.Label(tab, text="活动次数") \
+            .grid(row=0, column=1, sticky=tk.W, padx=5)
+        ttk.Entry(tab, textvariable=hdConfigs["次数"]) \
+            .grid(row=0, column=2, sticky=tk.W, padx=5)
 
     def clock(self, root, label):
         self.now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")

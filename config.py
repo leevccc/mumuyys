@@ -57,6 +57,13 @@ class Config:
         configs["单开养号"]["寮突破"].set(1)
         configs["单开养号"]["突破绿标式神位"] = tk.IntVar()
         configs["单开养号"]["突破绿标式神位"].set(0)
+
+        configs["活动模式"] = {}
+        configs["活动模式"]["开启"] = tk.IntVar()
+        configs["活动模式"]["开启"].set(1)
+        configs["活动模式"]["次数"] = tk.IntVar()
+        configs["活动模式"]["次数"].set(30)
+
         configs["临时"] = {}
         configs["临时"]["当前位置"] = tk.StringVar()
         configs["临时"]["当前位置"].set("未知")
@@ -115,7 +122,11 @@ class Config:
         :param key: 设置名
         """
         conf = self.conf
+        configs = self.configs
         result = None
         if conf.has_section(section) and conf.has_option(section, key):
             result = conf.get(section, key)
+        # 如果是App上的设置则取App上的当前设置
+        if section in configs and key in configs[section]:
+            result = configs[section][key].get()
         return result
