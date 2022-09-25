@@ -12,9 +12,9 @@ from ttkbootstrap import ttk
 import config
 import logger
 import script
-from main import user32
 
 version = "v2.0.0"
+user32 = ctypes.windll.user32  # 加载user32.dll
 path = os.getcwd()
 imgPath = path + "\\img\\"
 tempImgPath = imgPath + "Temp\\"
@@ -92,7 +92,7 @@ class App:
         baseFrame = ttk.Frame(tab, padding=(5, 0, 0, 0))
         baseFrame.grid(row=0, column=1, sticky=tk.NW)
 
-        ttk.Label(baseFrame, text="按 F10 切换运行状态") \
+        ttk.Label(baseFrame, text="按 F10 运行/暂停任务, F11 终止任务") \
             .grid(row=0, column=0, columnspan=99, sticky=tk.W)
 
         ttk.Label(baseFrame, text="运行状态") \
@@ -210,14 +210,21 @@ class App:
         root.after(1000, self.clock, root, label)
 
     def running(self, root, label):
-        running = "运行中" if script.running else "休息中"
-        bg = "green" if script.running else "red"
+        running = script.getRunning()
+        bg = "white"
+        if running == "未开始":
+            bg = "blue"
+        elif running == "暂停":
+            bg = "red"
+        elif running == "运行中":
+            bg = "green"
         label.configure(text=running, background=bg)
-        root.after(1000, self.running, root, label)
+        root.after(100, self.running, root, label)
 
 
 class HotkeyThread(Thread):  # 创建一个Thread.threading的扩展类
     f10 = 121
+    f11 = 122
 
     def __init__(self):
         Thread.__init__(self)
@@ -226,6 +233,8 @@ class HotkeyThread(Thread):  # 创建一个Thread.threading的扩展类
         # 注册快捷键F10并判断是否成功
         if not user32.RegisterHotKey(None, self.f10, 0, win32con.VK_F10):
             messagebox.showerror("注册热键失败", "F10 热键注册失败, 请检查是否被占用")
+        if not user32.RegisterHotKey(None, self.f11, 0, win32con.VK_F11):
+            messagebox.showerror("注册热键失败", "F11 热键注册失败, 请检查是否被占用")
 
         try:
             # 监听热键
@@ -235,6 +244,8 @@ class HotkeyThread(Thread):  # 创建一个Thread.threading的扩展类
                     if msg.message == win32con.WM_HOTKEY:
                         if msg.wParam == self.f10:
                             script.run()
+                        if msg.wParam == self.f11:
+                            script.restart()
 
                     user32.TranslateMessage(ctypes.byref(msg))
                     user32.DispatchMessageA(ctypes.byref(msg))
@@ -242,13 +253,12 @@ class HotkeyThread(Thread):  # 创建一个Thread.threading的扩展类
         finally:
             # 释放热键
             user32.UnregisterHotKey(None, "F10")
+            user32.UnregisterHotKey(None, "F11")
 
 
 if __name__ == "__main__":
     # 注册线程
-    taskThread = script.TaskThread()
-    taskThread.daemon = True
-    taskThread.start()
+    script.newThread()
 
     # 注册快捷键
     hotkeyThread = HotkeyThread()

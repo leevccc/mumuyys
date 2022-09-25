@@ -4,6 +4,7 @@ import win32con
 import win32gui
 
 import logger
+import script
 
 x, y, width, height = 0, 0, 1440, 810
 
@@ -24,7 +25,7 @@ def getHwnd():
 
     if window == 0:
         logger.info("找不到游戏窗口, 脚本退出")
-        sys.exit()
+        script.restart()
     return window
 
 
@@ -34,6 +35,8 @@ def initMuMuWindow():
     """
     global x, y
     hwnd = getHwnd()
+    if hwnd == 0:
+        return False
     # 还原窗口
     win32gui.SendMessage(hwnd, win32con.WM_SYSCOMMAND, win32con.SC_RESTORE, 0)
     # 激活窗口
@@ -44,5 +47,6 @@ def initMuMuWindow():
     left, top, right, bottom = win32gui.GetWindowRect(hwnd)
     x = left
     y = top + 36
-    logger.info("窗口坐标: 宽 " + str(right) + " 高 " + str(bottom) + " 顶 " + str(top) + " 左 " + str(
-        left) + " 分辨率 1440 x 810")
+    logger.info("窗口信息: 宽 " + str(right) + " 高 " + str(bottom) + " 顶 " + str(top) + " 左 " + str(
+        left))
+    logger.info("分辨率: 1440 x 810")
