@@ -179,7 +179,7 @@ class App:
         ttk.Checkbutton(jj, text="开启", offvalue=0, onvalue=1, variable=dkConfigs["阴阳寮结界"]) \
             .grid(row=0, column=0, sticky=tk.W, padx=5)
         ttk.Label(jj, text="间隔 (时)", anchor="e").grid(row=1, column=0, sticky=tk.W, padx=5, pady=5)
-        ttk.Combobox(jj, textvariable=dkConfigs["结界间隔"], values=["1", "2", "3", "4", "5", "6"], state='readonly') \
+        ttk.Combobox(jj, textvariable=dkConfigs["阴阳寮结界间隔"], values=["1", "2", "3", "4", "5", "6"], state='readonly') \
             .grid(row=1, column=1, columnspan=2, sticky=tk.W, padx=5, pady=5)
         ttk.Label(jj, text="结界卡").grid(row=2, column=0, sticky=tk.W, padx=5, pady=5)
         ttk.Combobox(jj, textvariable=dkConfigs["结界卡"],
@@ -217,7 +217,10 @@ class App:
             .grid(row=0, column=2, sticky=tk.W, padx=5)
 
     def clock(self, root, label):
-        self.now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        now = datetime.now()
+        if now.strftime("%H:%M:%S") == "00:00:00":
+            config.Config().clearDaily()
+        self.now = now
         label.configure(text=self.now)
         root.after(1000, self.clock, root, label)
 

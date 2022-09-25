@@ -13,10 +13,10 @@ def run():
     while times > 0:
         logger.info("[动作] 战斗")
         script.pic.click("huodong\\fight.jpg")
-        script.pic.find("ready.jpg", confidence=0.95, times=100)
+        script.pic.find("ready.jpg", confidence=0.95, times=10)
         script.random.sleep(1500, 2000)
         logger.info("[动作] 准备")
-        script.pic.click("ready.jpg", confidence=0.95, times=100)
+        script.pic.click("ready.jpg", confidence=0.95, times=10)
         script.pic.click("huodong\\reward.jpg", confidence=0.95, times=1000)
         logger.info("[动作] 领取奖励")
         script.mouse.click(10, 10, 100, 100)

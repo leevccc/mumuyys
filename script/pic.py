@@ -95,7 +95,7 @@ def get(img, confidence=0.9, times=1, ux=None, uy=None, uw=None, uh=None, detail
         x += ux
         y += uy
 
-    return int(x), int(y)
+    return [int(x), int(y)]
 
 
 def find(img, confidence=0.9, times=1, ux=None, uy=None, uw=None, uh=None):

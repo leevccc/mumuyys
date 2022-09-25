@@ -1,5 +1,6 @@
 from configparser import ConfigParser
 import tkinter as tk
+from datetime import datetime
 
 
 class Config:
@@ -44,8 +45,8 @@ class Config:
 
         configs["单开养号"]["阴阳寮结界"] = tk.IntVar()
         configs["单开养号"]["阴阳寮结界"].set(1)
-        configs["单开养号"]["结界间隔"] = tk.IntVar()
-        configs["单开养号"]["结界间隔"].set(1)
+        configs["单开养号"]["阴阳寮结界"] = tk.IntVar()
+        configs["单开养号"]["阴阳寮结界"].set(1)
         configs["单开养号"]["结界卡"] = tk.StringVar()
         configs["单开养号"]["结界卡"].set("全部")
         configs["单开养号"]["结界卡排序"] = tk.StringVar()
@@ -67,6 +68,8 @@ class Config:
         self.load()
         # 第一次运行的时候conf中没有任何值, 加载完再保存一遍确保conf中的值和内存中的值已同步
         self.save()
+        # 清理完成记录
+        self.clearDaily()
 
     def save(self):
         """
@@ -125,3 +128,13 @@ class Config:
         if section in configs and key in configs[section]:
             result = configs[section][key].get()
         return result
+
+    def clearDaily(self):
+        now = datetime.now()
+        today = now.strftime("%Y%m%d")
+        if self.conf.has_section("每日重置"):
+            if self.conf.get("每日重置", "日期") != today:
+                self.conf.remove_section("今日完成")
+                self.set("每日重置", "日期", today)
+        else:
+            self.set("每日重置", "日期", today)

@@ -25,3 +25,7 @@ def click(x, y, rw=0, rh=0):
     script.random.sleep()
     pyautogui.click()
     logger.info("click")
+
+
+def click_100():
+    click(120, 10, 80, 90)
