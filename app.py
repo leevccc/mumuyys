@@ -129,6 +129,12 @@ class App:
         times.grid(row=5, column=1, sticky=tk.W, padx=5, pady=3)
         self.getScriptStatus(tab, times, "times")
 
+        ttk.Label(baseFrame, text="延时") \
+            .grid(row=6, column=0, pady=3)
+        delay = ttk.Label(baseFrame, text="")
+        delay.grid(row=6, column=1, sticky=tk.W, padx=5, pady=3)
+        self.getScriptStatus(tab, delay, "delay")
+
     def regTab2(self, tab):
         dkConfigs = self.configs.configs["单开养号"]
         row1 = tk.Frame(tab)
