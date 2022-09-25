@@ -64,9 +64,6 @@ class Config:
         configs["活动模式"]["次数"] = tk.IntVar()
         configs["活动模式"]["次数"].set(30)
 
-        configs["临时"] = {}
-        configs["临时"]["当前位置"] = tk.StringVar()
-        configs["临时"]["当前位置"].set("未知")
         self.load()
         # 第一次运行的时候conf中没有任何值, 加载完再保存一遍确保conf中的值和内存中的值已同步
         self.save()
@@ -89,8 +86,6 @@ class Config:
         """
         configs = self.configs
         for _key in configs:
-            if _key == "临时":
-                continue
             if self.conf.has_section(_key) is False:
                 continue
             for __key in configs[_key]:

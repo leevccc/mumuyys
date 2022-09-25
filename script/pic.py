@@ -4,6 +4,7 @@ import aircv
 import pyautogui
 
 import app
+import logger
 import script
 from script import window
 
@@ -22,6 +23,8 @@ def printScreen(ux=None, uy=None, uw=None, uh=None, uf="screenshot.jpg"):
     # 脚本运行的本质是 识别图片+鼠标点击, 所以只需要在截图和点击功能里加入线程阻塞即可实现暂停功能
     while script.getRunning() != "运行中":
         time.sleep(1)
+
+    logger.info(script.currentTask)
 
     x = window.x
     y = window.y
@@ -46,35 +49,31 @@ def printScreen(ux=None, uy=None, uw=None, uh=None, uf="screenshot.jpg"):
     screen.save(app.tempImgPath + uf.replace("\\", "_"))
 
 
-def find(path, confidence=0.8, click=False, times=1, ux=None, uy=None, uw=None, uh=None, color=None, delay=0.0,
-         double=False):
+def get(img, confidence=0.9, times=1, ux=None, uy=None, uw=None, uh=None, details=False):
     """
-    查找图片, 每隔 0.5 秒读取一次, 默认截图完整游戏窗口, 也可指定截图区域(ux, uy...)
+    查找并获取图片的坐标, 返回游戏窗口的相对坐标, 且为目标的中心坐标
 
-    :param path: 图片相对地址
-    :param confidence: 匹配度
-    :param click: 识别后是否点击
-    :param times: 次数
-    :param ux: 游戏窗口的相对 x
-    :param uy: 游戏窗口的相对 y
-    :param uw: 截图宽度, 须配合ux
-    :param uh: 截图高度, 须配合uy
-    :param color: 格式 (255,255,255), 对找到的区域左上角进行颜色二次确认
-    :param delay: 秒, 延迟后才点击
-    :param double: True/False 是否双击
-    :return: 按匹配结果依次返回: 失败 - None, None; 成功 - int(x), int(Y); 成功且需要点击 - True
+    :param img: img目录中的图片相对地址
+    :param confidence: 匹配度 0~1
+    :param times: 查找次数, 大于1次时, 每次间隔 0.5 秒
+    :param ux: 游戏窗口的相对 x, 不指定则为整个游戏窗口
+    :param uy: 游戏窗口的相对 y, 不指定则为整个游戏窗口
+    :param uw: 截图宽度, 不指定则为整个游戏窗口
+    :param uh: 截图高度, 不指定则为整个游戏窗口
+    :param details: 是否返回坐标细节
+    :return: False / x,y / details
     """
     # 脚本运行的本质是 识别图片+鼠标点击, 所以只需要在截图和点击功能里加入线程阻塞即可实现暂停功能
-    while self.task_status is False:
+    while script.getRunning() != "运行中":
         time.sleep(1)
-    self.handle_xuan_shang_feng_yin()  # 图片识别前，先处理悬赏邀请
+
     match_result = None
     for i in range(0, times):
-        self.print_screen(ux=ux, uy=uy, uwidth=uw, uheight=uh, file=path)
-        screenshot = aircv.imread(self.path + "temp\\" + path.replace("\\", "_"))
-        img = aircv.imread(self.path + path)
+        printScreen(ux=ux, uy=uy, uw=uw, uh=uh, uf=img)
+        screenshot = aircv.imread(app.tempImgPath + img.replace("\\", "_"))
+        imgObject = aircv.imread(app.imgPath + "\\" + img)
 
-        match_result = aircv.find_template(screenshot, img, confidence)
+        match_result = aircv.find_template(screenshot, imgObject, confidence)
         # match_result
         # {
         #   'result': (1335.0, 731.5),
@@ -89,7 +88,9 @@ def find(path, confidence=0.8, click=False, times=1, ux=None, uy=None, uw=None, 
             break
 
     if match_result is None:
-        return False if click is True else (None, None)
+        return False
+    if details is True:
+        return match_result
 
     x, y = match_result["result"]
 
@@ -97,23 +98,50 @@ def find(path, confidence=0.8, click=False, times=1, ux=None, uy=None, uw=None, 
         x += ux
         y += uy
 
-    if click:
-        x = match_result["rectangle"][0][0]
-        y = match_result["rectangle"][0][1]
-        width = match_result["rectangle"][3][0] - x
-        height = match_result["rectangle"][3][1] - y
-        if uh is not None:
-            x += ux
-            y += uy
-        if color is not None and pyautogui.pixelMatchesColor(self.x + x, self.y + y, color) is False:
-            return False
-
-        if delay > 0:
-            time.sleep(delay)
-        self.click(x, y, width, height, double)
-        return True
-
-    if color is not None and pyautogui.pixelMatchesColor(self.x + x, self.y + y, color) is False:
-        x, y = None, None
-
     return int(x), int(y)
+
+
+def find(img, confidence=0.9, times=1, ux=None, uy=None, uw=None, uh=None):
+    """
+    查找图片
+
+    :param img: img目录中的图片相对地址
+    :param confidence: 匹配度 0~1
+    :param times: 查找次数, 大于1次时, 每次间隔 0.5 秒
+    :param ux: 游戏窗口的相对 x, 不指定则为整个游戏窗口
+    :param uy: 游戏窗口的相对 y, 不指定则为整个游戏窗口
+    :param uw: 截图宽度, 不指定则为整个游戏窗口
+    :param uh: 截图高度, 不指定则为整个游戏窗口
+    :return: True/False
+    """
+
+    return False if get(img, confidence, times, ux, uy, uw, uh) is False else True
+
+
+def click(img, confidence=0.9, times=1, ux=None, uy=None, uw=None, uh=None):
+    """
+    查找并点击
+
+    :param img: img目录中的图片相对地址
+    :param confidence: 匹配度 0~1
+    :param times: 查找次数, 大于1次时, 每次间隔 0.5 秒
+    :param ux: 游戏窗口的相对 x, 不指定则为整个游戏窗口
+    :param uy: 游戏窗口的相对 y, 不指定则为整个游戏窗口
+    :param uw: 截图宽度, 不指定则为整个游戏窗口
+    :param uh: 截图高度, 不指定则为整个游戏窗口
+    :return: True/False
+    """
+    details = get(img, confidence, times, ux, uy, uw, uh, True)
+    if details is False:
+        return False
+
+    x = details["rectangle"][0][0]
+    y = details["rectangle"][0][1]
+    width = details["rectangle"][3][0] - x
+    height = details["rectangle"][3][1] - y
+    if uh is not None:
+        x += ux
+        y += uy
+
+    script.mouse.click(x, y, width, height)
+    return True

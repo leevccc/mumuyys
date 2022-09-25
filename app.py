@@ -17,7 +17,7 @@ version = "v2.0.0"
 user32 = ctypes.windll.user32  # 加载user32.dll
 path = os.getcwd()
 imgPath = path + "\\img\\"
-tempImgPath = imgPath + "Temp\\"
+tempImgPath = imgPath + "temp\\"
 
 
 class App:
@@ -78,7 +78,6 @@ class App:
 
     def regTab1(self, tab):
         baseConfigs = self.configs.configs["基本设置"]
-        tempConfigs = self.configs.configs["临时"]
 
         # 日志
         logFrame = ttk.Frame(tab)
@@ -120,8 +119,15 @@ class App:
 
         ttk.Label(baseFrame, text="当前位置") \
             .grid(row=4, column=0, pady=3)
-        ttk.Label(baseFrame, textvariable=tempConfigs["当前位置"]) \
-            .grid(row=4, column=1, sticky=tk.W, padx=5, pady=3)
+        local = ttk.Label(baseFrame, text="")
+        local.grid(row=4, column=1, sticky=tk.W, padx=5, pady=3)
+        self.getScriptStatus(tab, local, "local")
+
+        ttk.Label(baseFrame, text="剩余次数") \
+            .grid(row=5, column=0, pady=3)
+        times = ttk.Label(baseFrame, text="")
+        times.grid(row=5, column=1, sticky=tk.W, padx=5, pady=3)
+        self.getScriptStatus(tab, times, "times")
 
     def regTab2(self, tab):
         dkConfigs = self.configs.configs["单开养号"]
@@ -220,6 +226,10 @@ class App:
             bg = "green"
         label.configure(text=running, background=bg)
         root.after(100, self.running, root, label)
+
+    def getScriptStatus(self, root, label, key):
+        label.configure(text=script.getInfo(key))
+        root.after(100, self.getScriptStatus, root, label, key)
 
 
 class HotkeyThread(Thread):  # 创建一个Thread.threading的扩展类
