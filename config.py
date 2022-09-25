@@ -45,8 +45,8 @@ class Config:
 
         configs["单开养号"]["阴阳寮结界"] = tk.IntVar()
         configs["单开养号"]["阴阳寮结界"].set(1)
-        configs["单开养号"]["阴阳寮结界"] = tk.IntVar()
-        configs["单开养号"]["阴阳寮结界"].set(1)
+        configs["单开养号"]["阴阳寮结界间隔"] = tk.IntVar()
+        configs["单开养号"]["阴阳寮结界间隔"].set(1)
         configs["单开养号"]["结界卡"] = tk.StringVar()
         configs["单开养号"]["结界卡"].set("全部")
         configs["单开养号"]["结界卡排序"] = tk.StringVar()

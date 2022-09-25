@@ -220,7 +220,7 @@ class App:
         now = datetime.now()
         if now.strftime("%H:%M:%S") == "00:00:00":
             config.Config().clearDaily()
-        self.now = now
+        self.now = now.strftime("%Y-%m-%d %H:%M:%S")
         label.configure(text=self.now)
         root.after(1000, self.clock, root, label)
 
