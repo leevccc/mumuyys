@@ -11,23 +11,23 @@ def get():
     """
     # 庭院
     result = "未知"
-    if ZaiTingYuan() is True:
+    if zaiTingYuan() is True:
         result = "庭院"
     return result
 
 
-def ZaiTingYuan():
+def zaiTingYuan():
     if script.getInfo("local") == "庭院":
         return True
     if pic.find("tansuo.jpg", times=2) is True:
-        tingyuan.LingYuHun()
-        tingyuan.LingShouSi()
-        tingyuan.LingGouYu()
+        tingyuan.lingYuHun()
+        tingyuan.lingShouSi()
+        tingyuan.lingGouYu()
         return True
     return False
 
 
-def QuTingYuan():
+def quTingYuan():
     close_button = [
         "close2.jpg"
     ]
@@ -36,7 +36,7 @@ def QuTingYuan():
         "fanhui2.jpg",
     ]
 
-    while ZaiTingYuan() is False:
+    while zaiTingYuan() is False:
         logger.info("[动作] 返回庭院")
         for i in range(0, len(close_button)):
             if pic.click(close_button[i]):
@@ -47,7 +47,7 @@ def QuTingYuan():
     script.setInfo("local", "庭院")
 
 
-def QuYinYangLiao():
+def quYinYangLiao():
     logger.info("[位置] 打开阴阳寮界面")
     mouse.click(530, 674, 66, 73)
     script.setInfo("local", "阴阳寮")

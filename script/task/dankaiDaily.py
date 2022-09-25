@@ -39,7 +39,7 @@ def ShangDianHeiDan():
         logger.info("[!!!!!] 领取黑蛋失败")
     random.sleep(1000, 1500)
     mouse.click_100()
-    local.QuTingYuan()
+    local.quTingYuan()
     return True
 
 
@@ -51,12 +51,12 @@ def ShouYouQingDian():
             random.sleep()
             mouse.click_100()
             result = True
-    local.QuTingYuan()
+    local.quTingYuan()
     return result
 
 
 def LingLiaoZiJin():
-    local.QuYinYangLiao()
+    local.quYinYangLiao()
     if pic.click("zijinlingqu.jpg", confidence=0.985, times=4):
         if pic.click("lingqu.jpg", times=4):
             random.sleep()
