@@ -1,6 +1,6 @@
 import os
 
-import main
+import app
 
 
 def copy(path_1, path_2):
@@ -70,15 +70,15 @@ if __name__ == "__main__":
     mmyys_path = script_path_dist + "\\mumuyys"
     mmyys_path_img = mmyys_path + "\\img"
     mmyys_path_img_temp = mmyys_path_img + "\\temp"
-    archive = script_path_dist + "\\MuMu阴阳师助手%s.7z" % main.version
+    archive = script_path_dist + "\\MuMu阴阳师助手%s.7z" % app.version
 
-    os.system("pyinstaller -F main.py")  # 打包app
+    os.system("pyinstaller -F app.py")  # 打包app
 
     # 重建软件文件夹
     delete(mmyys_path)
     os.mkdir(mmyys_path)
     # 复制文件
-    copy(script_path_dist + "\\main.exe", mmyys_path)
+    copy(script_path_dist + "\\app.exe", mmyys_path)
     copy(script_path + "\\tips.txt", mmyys_path)
     copy(script_path + "\\update.txt", mmyys_path)
     copy(script_path_img, mmyys_path_img)
@@ -89,6 +89,6 @@ if __name__ == "__main__":
     os.system("bz c -l:9 %s %s" % (archive, mmyys_path))
     # 移除临时文件
     delete(mmyys_path)
-    delete(script_path_dist + "\\main.exe")
+    delete(script_path_dist + "\\app.exe")
     # 打开文件夹
     os.system("start %s" % script_path_dist)
