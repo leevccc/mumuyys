@@ -4,7 +4,6 @@ import aircv
 import pyautogui
 
 import app
-import logger
 import script
 from script import window
 
@@ -23,8 +22,6 @@ def printScreen(ux=None, uy=None, uw=None, uh=None, uf="screenshot.jpg"):
     # 脚本运行的本质是 识别图片+鼠标点击, 所以只需要在截图和点击功能里加入线程阻塞即可实现暂停功能
     while script.getRunning() != "运行中":
         time.sleep(1)
-
-    logger.info(script.currentTask)
 
     x = window.x
     y = window.y
