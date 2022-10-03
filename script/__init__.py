@@ -39,6 +39,7 @@ def script():
                 zudui.run()
             elif moshi == "活动模式":
                 huodong.run()
+            run()
         time.sleep(1)
 
 
