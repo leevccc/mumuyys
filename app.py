@@ -74,6 +74,14 @@ class App:
         tab4.config(padding=10)
         self.regTab4(tab4)
 
+        tipsTab = ttk.Frame(notebook)
+        notebook.add(tipsTab, text="使用说明")
+        self.regTipsTab(tipsTab)
+
+        updateTab = ttk.Frame(notebook)
+        notebook.add(updateTab, text="更新日志")
+        self.regUpdateTab(updateTab)
+
         notebook.grid(row=0, column=0, sticky=tk.NSEW)
 
     def regTab1(self, tab):
@@ -179,7 +187,8 @@ class App:
         ttk.Checkbutton(jj, text="开启", offvalue=0, onvalue=1, variable=dkConfigs["阴阳寮结界"]) \
             .grid(row=0, column=0, sticky=tk.W, padx=5)
         ttk.Label(jj, text="间隔 (时)", anchor="e").grid(row=1, column=0, sticky=tk.W, padx=5, pady=5)
-        ttk.Combobox(jj, textvariable=dkConfigs["阴阳寮结界间隔"], values=["1", "2", "3", "4", "5", "6"], state='readonly') \
+        ttk.Combobox(jj, textvariable=dkConfigs["阴阳寮结界间隔"], values=["1", "2", "3", "4", "5", "6"],
+                     state='readonly') \
             .grid(row=1, column=1, columnspan=2, sticky=tk.W, padx=5, pady=5)
         ttk.Label(jj, text="结界卡").grid(row=2, column=0, sticky=tk.W, padx=5, pady=5)
         ttk.Combobox(jj, textvariable=dkConfigs["结界卡"],
@@ -215,6 +224,26 @@ class App:
             .grid(row=0, column=1, sticky=tk.W, padx=5)
         ttk.Entry(tab, textvariable=hdConfigs["次数"]) \
             .grid(row=0, column=2, sticky=tk.W, padx=5)
+
+    # Tab: 使用说明
+    @staticmethod
+    def regTipsTab(tab):
+        tips = tk.Text(tab)
+        tips.pack(fill="both")
+        file = open(os.getcwd() + "\\tips.txt", "r", encoding="utf-8")
+        for txt in file:
+            tips.insert("insert", txt)
+        file.close()
+
+    # Tab: 更新日志
+    @staticmethod
+    def regUpdateTab(tab):
+        update = tk.Text(tab)
+        update.pack(fill="both")
+        file = open(os.getcwd() + "\\update.txt", "r", encoding="utf-8")
+        for txt in file:
+            update.insert("insert", txt)
+        file.close()
 
     def clock(self, root, label):
         now = datetime.now()

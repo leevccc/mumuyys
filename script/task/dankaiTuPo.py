@@ -28,6 +28,8 @@ def jieJieTuPo():
     while script.getInfo("local") != "结界突破":
         local.quJieJieTuPo()
 
+    unlockZhenRong()
+
     running = True
     no = 1  # 挑战位置
     while running:
@@ -79,6 +81,8 @@ def jieJieTuPo():
 def liaoTuPo():
     if script.getInfo("local") != "寮突破":
         local.quLiaoTuPo()
+
+    unlockZhenRong()
 
     running = True
     while running:
@@ -241,3 +245,8 @@ def handleFightEnd():
     if result != "进行中":
         logger.info("[状态] 战斗%s" % result)
     return result
+
+
+def unlockZhenRong():
+    if pic.click("suo.jpg") is True:
+        logger.info("解除阵容锁")
