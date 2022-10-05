@@ -57,3 +57,95 @@ def quJieJie():
     logger.info("[位置] 去结界")
     pic.click("jiejie.jpg", times=10)
     script.setInfo("local", "结界")
+
+
+def zaiTanSuo():
+    result = False
+
+    if script.getInfo("local") == "探索":
+        result = True
+
+    if result is False:
+        result = pic.find("yao.jpg", times=4)
+
+    if result is True:
+        script.setInfo("local", "探索")
+
+    return result
+
+
+def quTanSuo():
+    while script.getInfo("local") != "探索":
+        logger.info("[位置] 进入探索界面")
+        # 庭院打开路线
+        if script.getInfo("local") == "庭院":
+            pic.click("tansuo.jpg")
+        # 突破界面打开路线
+        if script.getInfo("local") in ["结界突破", "寮突破"]:
+            pic.click("close2.jpg")
+        # 打开失败, 回庭院
+        if zaiTanSuo() is False:
+            quTingYuan()
+
+
+def zaiJieJieTuPo():
+    result = False
+
+    if script.getInfo("local") == "结界突破":
+        result = True
+
+    if result is False:
+        result = pic.find("fangshoujilu.jpg", times=6)
+
+    if result is True:
+        script.setInfo("local", "结界突破")
+
+    return result
+
+
+def quJieJieTuPo():
+    while script.getInfo("local") != "结界突破":
+        logger.info("[位置] 打开结界突破界面")
+        # 庭院打开路线
+        if script.getInfo("local") == "庭院":
+            quTanSuo()
+        if script.getInfo("local") == "探索":
+            pic.click("jiejietupo.jpg", times=10)
+        # 寮突破打开路线
+        if script.getInfo("local") == "寮突破":
+            pic.click("geren.jpg", times=10)
+        # 打开失败, 回庭院
+        if zaiJieJieTuPo() is False:
+            quTingYuan()
+    script.setInfo("local", "结界突破")
+
+
+def zaiLiaoTuPo():
+    result = False
+
+    if script.getInfo("local") == "寮突破":
+        result = True
+
+    if result is False:
+        result = pic.find("tupojilu.jpg", times=6)
+
+    if result is True:
+        script.setInfo("local", "寮突破")
+
+    return result
+
+
+def quLiaoTuPo():
+    while script.getInfo("local") != "寮突破":
+        logger.info("[位置] 切换寮突破界面")
+        # 庭院打开路线
+        if script.getInfo("local") == "庭院":
+            quTanSuo()
+        if script.getInfo("local") == "探索":
+            quJieJieTuPo()
+        if script.getInfo("local") == "结界突破":
+            pic.click("yinyangliao.jpg", times=10)
+        # 打开失败, 回庭院
+        if zaiLiaoTuPo() is False:
+            quTingYuan()
+    script.setInfo("local", "寮突破")

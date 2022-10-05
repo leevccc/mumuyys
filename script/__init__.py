@@ -39,7 +39,12 @@ def script():
                 zudui.run()
             elif moshi == "活动模式":
                 huodong.run()
+            # 任务结束
             run()
+            if moshi == "单开养号" and configs.get("单开养号", "任务循环") == 1:
+                logger.info("任务循环已启用, 将在延时结束后自动恢复任务")
+                random.sleep(configs.get("单开养号", "休息时间min"), configs.get("单开养号", "休息时间max"), "分")
+                run()
         time.sleep(1)
 
 
