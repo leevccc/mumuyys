@@ -43,13 +43,10 @@ def sleep(f=500, t=1000, pType="毫秒"):
 
 
 def sleeping():
-    t = script.getInfo("delay")
-    while t > 0:
-        if t > 1:
+    while script.getInfo("delay") > 0:
+        if script.getInfo("delay") > 1:
             time.sleep(1)
-            t -= 1
-            script.setInfo("delay", t)
+            script.setInfo("delay", script.getInfo("delay") - 1)
         else:
-            time.sleep(t)
-            t = 0
-            script.setInfo("delay", t)
+            time.sleep(script.getInfo("delay"))
+            script.setInfo("delay", 0)
