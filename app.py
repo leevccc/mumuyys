@@ -143,6 +143,9 @@ class App:
         delay.grid(row=6, column=1, sticky=tk.W, padx=5, pady=3)
         self.getScriptStatus(tab, delay, "delay")
 
+        ttk.Button(baseFrame, text="保存配置", command=config.Config().save) \
+            .grid(row=7, column=0, pady=3)
+
     def regTab2(self, tab):
         dkConfigs = self.configs.configs["单开养号"]
         row1 = tk.Frame(tab)

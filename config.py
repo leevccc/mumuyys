@@ -2,6 +2,8 @@ from configparser import ConfigParser
 import tkinter as tk
 from datetime import datetime
 
+import logger
+
 
 class Config:
     conf = None  # 配置文件里的配置, 包含临时信息, 临时配置和界面配置
@@ -82,6 +84,7 @@ class Config:
             for __key in configs[_key]:
                 self.conf.set(_key, __key, str(configs[_key][__key].get()))
         self.conf.write(open('config.ini', 'w'))
+        logger.info("保存配置")
 
     def load(self):
         """
