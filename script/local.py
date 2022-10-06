@@ -49,13 +49,17 @@ def quTingYuan():
 
 def quYinYangLiao():
     logger.info("[位置] 打开阴阳寮界面")
-    mouse.click(530, 674, 66, 73)
+    # mouse.click(530, 674, 66, 73)
+    if pic.click("liao.jpg") is False:
+        return False
     script.setInfo("local", "阴阳寮")
+    return True
 
 
 def quJieJie():
     logger.info("[位置] 去结界")
     pic.click("jiejie.jpg", times=10)
+    pic.find("fanhui2.jpg", times=10)
     script.setInfo("local", "结界")
 
 

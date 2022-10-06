@@ -1,5 +1,6 @@
 import config
 import logger
+import script.local
 from script import task, local, pic, random, mouse
 
 
@@ -7,12 +8,11 @@ def yinYangLiaoJieJie():
     if task.isTimeExpired("阴阳寮结界") is False:
         logger.info("时间间隔不足， 跳过")
         return
-    if local.zaiTingYuan() is False:
+    if script.getInfo("local") != "阴阳寮" and local.zaiTingYuan() is False:
         local.quTingYuan()
-    local.quYinYangLiao()
+        local.quYinYangLiao()
 
-    xy = pic.get("xinxi2.jpg", times=4)
-    if xy is not False or pic.click("xinxi.jpg", times=4):
+    if pic.find("xinxi2.jpg", times=4) or pic.click("xinxi.jpg", times=4):
         local.quJieJie()
         lingQuTiLiShiHe()
         lingQuJingYanJiuHu()
@@ -28,7 +28,7 @@ def yinYangLiaoJieJie():
             gengHuanManJiShiShen()
             haoYouJiYang()
         task.setExecuteTime("阴阳寮结界")
-    local.quYinYangLiao()
+        local.quTingYuan()
 
 
 def lingQuTiLiShiHe():

@@ -62,10 +62,12 @@ def ShouYouQingDian():
 
 
 def LingLiaoZiJin():
-    local.quYinYangLiao()
-    if pic.click("zijinlingqu.jpg", confidence=0.985, times=4):
-        if pic.click("lingqu.jpg", times=4):
-            random.sleep()
-            mouse.click_100()
-            return True
-    return False
+    if local.quYinYangLiao() is False:
+        return False
+    if pic.click("zijinlingqu.jpg", confidence=0.985, times=4) is False:
+        return False
+    if pic.click("lingqu.jpg", times=4) is False:
+        return False
+    random.sleep()
+    mouse.click_100()
+    return True
