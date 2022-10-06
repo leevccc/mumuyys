@@ -69,7 +69,7 @@ def jieJieTuPo():
             setSuccess()
             if success in [3, 6, 9]:
                 logger.info("领取额外奖励")
-                random.sleep(1500, 2000)
+                random.sleep(2000, 2500)
                 pic.click("victory2.jpg", confidence=0.95)
         elif result == "失败":
             setFailure()
@@ -79,6 +79,9 @@ def jieJieTuPo():
 
 
 def liaoTuPo():
+    if script.getInfo("寮突破今日目标") == "已完成":
+        logger.info("寮突破今日目标已完成，跳过")
+        return True
     if script.getInfo("local") != "寮突破":
         local.quLiaoTuPo()
 
@@ -127,13 +130,14 @@ def findObj(no, x, y, width, height):
         no = 1
         if failure > 0:
             refreshList()
+        init()
 
     # 查找未挑战的结界
     while True:
         # 判断当前位置状态 未挑战/ 已挑战(失败)/ 已攻破
         cx = x + (no - 1) % 3 * 374
         cy = y + int((no - 1) / 3) * 152
-        status = yiTiaoZhan(cx, cy, width, height, detail=True)
+        status = yiTiaoZhan(cx, cy, width, height)
         if status == "未挑战":
             break  # 结束查找
         elif status == "已挑战":
@@ -146,24 +150,28 @@ def findObj(no, x, y, width, height):
             no = 1
             if failure > 0:
                 refreshList()
+            init()
 
     return no
 
 
 def findLiaoObj(x, y, width, height):
     no = 1
-    for i in range(1, 9):
-        cx = x + (i - 1) % 2 * 380
-        cy = y + int((i - 1) / 2) * 152
-        if yiTiaoZhan(cx, cy, width, height) is False:
+    for no in range(1, 9):
+        cx = x + (no - 1) % 2 * 380
+        cy = y + int((no - 1) / 2) * 152
+        status = yiTiaoZhan(cx, cy, width, height)
+        if status == "未挑战":
             break
-        elif i == 8:
+        elif no <= 8 and status == "已攻破":
+            script.setInfo("寮突破今日目标", "已完成")
+            return 0
+        elif no == 8:
             return 0
     return no
 
 
 def refreshList():
-    init()
     logger.info("[动作] 刷新结界列表")
     pic.click("refresh.jpg")
     random.sleep(1000, 1500)
@@ -171,14 +179,14 @@ def refreshList():
     random.sleep()
 
 
-def yiTiaoZhan(x, y, width, height, detail=False):
+def yiTiaoZhan(x, y, width, height):
     if pic.find("po.jpg", ux=x, uy=y, uw=width, uh=height):
-        return True if detail is False else "已攻破"
+        return "已攻破"
     if pic.find("po2.jpg", ux=x, uy=y, uw=width, uh=height):
-        return True if detail is False else "已攻破"
+        return "已攻破"
     if pic.find("shibaibiaoji.jpg", ux=x, uy=y, uw=width, uh=height):
-        return True if detail is False else "已挑战"
-    return False if detail is False else "未挑战"
+        return "已挑战"
+    return "未挑战"
 
 
 def attack():

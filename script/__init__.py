@@ -61,6 +61,7 @@ def newThread():
         "local": "未知",
         "times": 0,
         "delay": 0,
+        "寮突破今日目标": "进行中",
     })
     taskThread.append(TaskThread())
     taskThread[currentTask].daemon = True

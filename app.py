@@ -13,7 +13,7 @@ import config
 import logger
 import script
 
-version = "v2.1.0"
+version = "v2.1.1"
 user32 = ctypes.windll.user32  # 加载user32.dll
 path = os.getcwd()
 imgPath = path + "\\img\\"
@@ -131,20 +131,26 @@ class App:
         local.grid(row=4, column=1, sticky=tk.W, padx=5, pady=3)
         self.getScriptStatus(tab, local, "local")
 
-        ttk.Label(baseFrame, text="剩余次数") \
+        ttk.Label(baseFrame, text="寮突目标") \
             .grid(row=5, column=0, pady=3)
+        local = ttk.Label(baseFrame, text="")
+        local.grid(row=5, column=1, sticky=tk.W, padx=5, pady=3)
+        self.getScriptStatus(tab, local, "寮突破今日目标")
+
+        ttk.Label(baseFrame, text="剩余次数") \
+            .grid(row=6, column=0, pady=3)
         times = ttk.Label(baseFrame, text="")
-        times.grid(row=5, column=1, sticky=tk.W, padx=5, pady=3)
+        times.grid(row=6, column=1, sticky=tk.W, padx=5, pady=3)
         self.getScriptStatus(tab, times, "times")
 
         ttk.Label(baseFrame, text="延时") \
-            .grid(row=6, column=0, pady=3)
+            .grid(row=7, column=0, pady=3)
         delay = ttk.Label(baseFrame, text="")
-        delay.grid(row=6, column=1, sticky=tk.W, padx=5, pady=3)
+        delay.grid(row=7, column=1, sticky=tk.W, padx=5, pady=3)
         self.getScriptStatus(tab, delay, "delay")
 
         ttk.Button(baseFrame, text="保存配置", command=config.Config().save) \
-            .grid(row=7, column=0, columnspan=99, pady=3)
+            .grid(row=8, column=0, columnspan=99, pady=3)
 
     def regTab2(self, tab):
         dkConfigs = self.configs.configs["单开养号"]
@@ -252,6 +258,10 @@ class App:
         now = datetime.now()
         if now.strftime("%H:%M:%S") == "00:00:00":
             config.Config().clearDaily()
+            logger.info("[时钟] 清理日常任务记录")
+        elif now.strftime("%H:%M:%S") == "06:00:00":
+            script.setInfo("寮突破今日目标", "进行中")
+            logger.info("[时钟] 重置寮突破今日目标")
         self.now = now.strftime("%Y-%m-%d %H:%M:%S")
         label.configure(text=self.now)
         root.after(1000, self.clock, root, label)
