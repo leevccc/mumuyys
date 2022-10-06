@@ -13,7 +13,7 @@ import config
 import logger
 import script
 
-version = "v2.0.0"
+version = "v2.1.0"
 user32 = ctypes.windll.user32  # 加载user32.dll
 path = os.getcwd()
 imgPath = path + "\\img\\"

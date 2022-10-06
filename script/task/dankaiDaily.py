@@ -22,7 +22,10 @@ def HuangJinQianDao():
 
 def ShangDianHeiDan():
     logger.info("[动作] 进入商店")
-    mouse.click(685, 684, 50, 60)
+    # mouse.click(685, 684, 50, 60)
+    if pic.click("shangdian.jpg") is False:
+        return False
+    script.setInfo("local", "商店")
 
     logger.info("[动作] 关闭推荐按钮")
     pic.click("close.jpg", times=4)
