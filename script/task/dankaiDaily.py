@@ -44,15 +44,18 @@ def ShangDianHeiDan():
 
 
 def ShouYouQingDian():
-    result = False
-    mouse.click(964, 686, 62, 68)
-    if pic.click("youqingdian.jpg", times=4):
-        if pic.click("yijianlingqu.jpg", times=4):
-            random.sleep()
-            mouse.click_100()
-            result = True
+    # mouse.click(964, 686, 62, 68)
+    if pic.click("haoyou.jpg", times=4) is False:
+        return False
+    script.setInfo("local", "好友界面")
+    if pic.click("youqingdian.jpg", times=4) is False:
+        return False
+    if pic.click("yijianlingqu.jpg", times=4) is False:
+        return False
+    random.sleep()
+    mouse.click_100()
     local.quTingYuan()
-    return result
+    return True
 
 
 def LingLiaoZiJin():

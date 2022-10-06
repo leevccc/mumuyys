@@ -144,7 +144,7 @@ class App:
         self.getScriptStatus(tab, delay, "delay")
 
         ttk.Button(baseFrame, text="保存配置", command=config.Config().save) \
-            .grid(row=7, column=0, pady=3)
+            .grid(row=7, column=0, columnspan=99, pady=3)
 
     def regTab2(self, tab):
         dkConfigs = self.configs.configs["单开养号"]
