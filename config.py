@@ -61,6 +61,9 @@ class Config:
         configs["单开养号"]["突破绿标式神位"] = tk.IntVar()
         configs["单开养号"]["突破绿标式神位"].set(0)
 
+        configs["单开养号"]["探索"] = tk.IntVar()
+        configs["单开养号"]["探索"].set(1)
+
         configs["活动模式"] = {}
         configs["活动模式"]["开启"] = tk.IntVar()
         configs["活动模式"]["开启"].set(1)

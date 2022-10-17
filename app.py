@@ -13,7 +13,7 @@ import config
 import logger
 import script
 
-version = "v2.1.1"
+version = "v2.2.0"
 user32 = ctypes.windll.user32  # 加载user32.dll
 path = os.getcwd()
 imgPath = path + "\\img\\"
@@ -173,7 +173,7 @@ class App:
             .grid(row=0, column=1, padx=5)
         ttk.Checkbutton(tyjc, text="庭院勾玉", offvalue=0, onvalue=1, variable=dkConfigs["庭院勾玉"]) \
             .grid(row=0, column=2, padx=5)
-        tyjc.grid(row=1, column=0, sticky=tk.W, pady=2)
+        tyjc.grid(row=0, column=0, sticky=tk.W, pady=2)
         row2.grid(row=1, column=0, sticky=tk.W, pady=2)
 
         row3 = tk.Frame(tab)
@@ -188,7 +188,7 @@ class App:
             .grid(row=0, column=3, padx=5)
         ttk.Checkbutton(mryc, text="领取寮资金", offvalue=0, onvalue=1, variable=dkConfigs["领取寮资金"]) \
             .grid(row=0, column=4, padx=5)
-        mryc.grid(row=2, column=0, sticky=tk.W, pady=2)
+        mryc.grid(row=0, column=0, sticky=tk.W, pady=2)
         row3.grid(row=2, column=0, sticky=tk.W, pady=2)
 
         row4 = tk.Frame(tab)
@@ -208,7 +208,7 @@ class App:
             .grid(row=3, column=1, sticky=tk.W, padx=5, pady=5)
         ttk.Radiobutton(jj, text="升序", value="升序", variable=dkConfigs["结界卡排序"]) \
             .grid(row=3, column=2, sticky=tk.W, padx=5, pady=5)
-        jj.grid(row=3, column=0, sticky=tk.NW, pady=2)
+        jj.grid(row=0, column=0, sticky=tk.NW, pady=2)
 
         jjtp = ttk.LabelFrame(row4, text="结界突破", padding=10)
         ttk.Checkbutton(jjtp, text="个人突破", offvalue=0, onvalue=1, variable=dkConfigs["个人突破"]) \
@@ -218,8 +218,15 @@ class App:
         ttk.Label(jjtp, text="结界突破绿标位置").grid(row=1, column=0, sticky=tk.W, padx=5, pady=5)
         ttk.Combobox(jjtp, textvariable=dkConfigs["突破绿标式神位"], values=["0", "1", "2", "3", "4", "5"],
                      state='readonly').grid(row=1, column=1, sticky=tk.W, padx=5, pady=5)
-        jjtp.grid(row=3, column=1, sticky=tk.NW, pady=2, padx=10)
+        jjtp.grid(row=0, column=1, sticky=tk.NW, pady=2, padx=10)
         row4.grid(row=3, column=0, sticky=tk.W, pady=2)
+
+        row5 = tk.Frame(tab)
+        ts = ttk.LabelFrame(row5, text="探索", padding=10)
+        ttk.Checkbutton(ts, text="开启", offvalue=0, onvalue=1, variable=dkConfigs["探索"]) \
+            .grid(row=0, column=0, sticky=tk.W, padx=5)
+        ts.grid(row=0, column=0, sticky=tk.W, pady=2)
+        row5.grid(row=4, column=0, sticky=tk.W, pady=2)
 
     def regTab3(self, tab):
         logger.info("组队刷刷尚未制作")

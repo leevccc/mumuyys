@@ -32,7 +32,8 @@ def script():
             moshi = configs.get("基本设置", "模式")
 
             # 初始化位置信息
-            setInfo("local", local.get())
+            if getInfo("local") == "未知":
+                setInfo("local", local.get())
             if moshi == "单开养号":
                 dankai.run()
             elif moshi == "组队刷刷":

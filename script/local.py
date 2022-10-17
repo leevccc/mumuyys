@@ -1,6 +1,6 @@
 import logger
 import script
-from script import pic, mouse
+from script import pic, mouse, random
 from script.task import tingyuan
 
 
@@ -90,6 +90,23 @@ def quTanSuo():
         # 打开失败, 回庭院
         if zaiTanSuo() is False:
             quTingYuan()
+
+
+def quTanSuoZhangJie():
+    while script.getInfo("local") != "探索章节":
+        if script.getInfo("local") == "探索副本":
+            logger.info("返回探索界面")
+            pic.click("fanhui2.jpg", times=2)
+            pic.click("tansuoqueren.jpg", times=2)
+            random.sleep()
+            if zaiTanSuo() is False:  # 打完出年兽会自动跳回到探索界面
+                script.setInfo("local", "探索章节")
+        else:
+            logger.info("[位置] 打开探索章节")
+            quTanSuo()
+            logger.info("打开第二十八章")
+            if pic.click("tansuo\\28.jpg", times=4):
+                script.setInfo("local", "探索章节")
 
 
 def zaiJieJieTuPo():

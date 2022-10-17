@@ -115,7 +115,7 @@ def find(img, confidence=0.9, times=1, ux=None, uy=None, uw=None, uh=None):
     return False if get(img, confidence, times, ux, uy, uw, uh) is False else True
 
 
-def click(img, confidence=0.9, times=1, ux=None, uy=None, uw=None, uh=None):
+def click(img, confidence=0.9, times=1, ux=None, uy=None, uw=None, uh=None, delay=True):
     """
     查找并点击
 
@@ -126,6 +126,7 @@ def click(img, confidence=0.9, times=1, ux=None, uy=None, uw=None, uh=None):
     :param uy: 游戏窗口的相对 y, 不指定则为整个游戏窗口
     :param uw: 截图宽度, 不指定则为整个游戏窗口
     :param uh: 截图高度, 不指定则为整个游戏窗口
+    :param delay: 是否需要延时
     :return: True/False
     """
     details = get(img, confidence, times, ux, uy, uw, uh, True)
@@ -140,5 +141,5 @@ def click(img, confidence=0.9, times=1, ux=None, uy=None, uw=None, uh=None):
         x += ux
         y += uy
 
-    script.mouse.click(x, y, width, height)
+    script.mouse.click(x, y, width, height, delay)
     return True

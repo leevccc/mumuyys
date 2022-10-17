@@ -1,7 +1,6 @@
-import config
 import logger
 import script
-from script import local, pic, random, mouse
+from script import local, pic, random, mouse, fight
 
 success = 0
 failure = 0
@@ -49,17 +48,17 @@ def jieJieTuPo():
         if attack() is False:
             logger.info("找不到进攻按钮, 请手动点击, 并按 F10 继续")
             script.run()
-        ready()
+        fight.ready()
         random.sleep(200, 500)
-        switchAutoFight()
+        fight.switchAutoFight()
         random.sleep()
-        greenMark()
+        fight.greenMark()
         random.sleep(1, 3, "秒")
 
-        result = handleFightEnd()
+        result = fight.handleFightEnd()
         while result == "进行中":
             random.sleep(1, 2, "秒")
-            result = handleFightEnd()
+            result = fight.handleFightEnd()
 
         # 当前挑战后移
         no += 1
@@ -104,7 +103,7 @@ def liaoTuPo():
             y = 186 + int((no - 1) / 2) * 152
             mouse.click(x, y, 220, 70)
             random.sleep()
-            if attack() is False or ready() is False:
+            if attack() is False or fight.ready() is False:
                 # 结界已被攻破无法进入战斗界面,先返回探索界面,重新进入寮界面
                 # 下次切换进来要重新打开界面刷新数据, 否则多开可能同个寮, 其他窗口把你的目标突破了, 而你没刷新, 导致无法进攻
                 mouse.click_100()
@@ -112,12 +111,12 @@ def liaoTuPo():
                 local.quLiaoTuPo()
                 continue
             random.sleep(200, 500)
-            switchAutoFight()
+            fight.switchAutoFight()
             random.sleep()
-            greenMark()
+            fight.greenMark()
             random.sleep(1, 3, "秒")
 
-            while handleFightEnd() == "进行中":
+            while fight.handleFightEnd() == "进行中":
                 random.sleep(1, 2, "秒")
             random.sleep(1000, 1500)
 
@@ -195,63 +194,6 @@ def attack():
     if pic.click("attack.jpg", times=6) is False:
         logger.info("找不到进攻按钮")
         result = False
-    return result
-
-
-def ready():
-    random.sleep(3, 4, "秒")
-    if pic.click("ready.jpg", confidence=0.95, times=10) is True:
-        logger.info("[动作] 准备")
-        return True
-    else:
-        return False
-
-
-def switchAutoFight():
-    if pic.click("shoudong.jpg"):
-        logger.info("[动作] 切换到自动战斗")
-
-
-def greenMark():
-    no = config.Config().get("单开养号", "突破绿标式神位")
-    x, y, width, height = 0, 0, 45, 110
-    if no == 0:
-        return
-    elif no == 1:
-        x, y = 254, 522
-    elif no == 2:
-        x, y = 489, 452
-    elif no == 3:
-        x, y = 684, 427
-    elif no == 4:
-        x, y = 879, 452
-    elif no == 5:
-        x, y = 1129, 522
-
-    # 点击范围缩小
-    x += 5
-    y += 5
-    width -= 10
-    height -= 10
-    mouse.click(x, y, width, height)
-    logger.info("[动作] 绿标 %s 号位式神" % no)
-
-
-def handleFightEnd():
-    result = "进行中"  # 转场动画, 如好友协战/刚结束战斗, 会导致无法找到返回按钮, 所以要设置一个默认值
-    if pic.find("fanhui3.jpg", ux=0, uy=0, uw=100, uh=100):
-        result = "进行中"  # 找到返回按钮, 则跳过后面的战斗结果检测
-    elif pic.click("victory.jpg", confidence=0.98):
-        random.sleep(500, 1000)
-        pic.click("victory2.jpg", confidence=0.98, times=4)
-        result = "胜利"
-    elif pic.click("failure.jpg", confidence=0.98):
-        result = "失败"
-    elif pic.click("victory2.jpg", confidence=0.98):
-        result = "胜利"
-
-    if result != "进行中":
-        logger.info("[状态] 战斗%s" % result)
     return result
 
 

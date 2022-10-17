@@ -1,6 +1,6 @@
 import logger
 from script import task
-from script.task import dankaiDaily, dankaiJieJie, dankaiTuPo
+from script.task import dankaiDaily, dankaiJieJie, dankaiTuPo, dankaiTanSuo
 
 
 def run():
@@ -13,4 +13,5 @@ def run():
     task.run("单开养号", "阴阳寮结界", dankaiJieJie.yinYangLiaoJieJie, daily=False)
     task.run("单开养号", "个人突破", dankaiTuPo.jieJieTuPo, daily=False)
     task.run("单开养号", "寮突破", dankaiTuPo.liaoTuPo, daily=False)
+    task.run("单开养号", "探索", dankaiTanSuo.run, daily=False)
 
