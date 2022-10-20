@@ -41,8 +41,9 @@ def run():
                 logger.info("未进入战斗")
                 rMove = True
 
-            if pic.find("fanhui3.jpg", times=10, ux=0, uy=0, uw=100, uh=100) is False:
+            if fighting and pic.find("fanhui3.jpg", times=10, ux=0, uy=0, uw=100, uh=100) is False:
                 logger.info("未进入战斗")
+                finished = False
                 continue
 
             if fighting:
