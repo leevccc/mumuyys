@@ -98,7 +98,7 @@ def quTanSuoZhangJie():
             logger.info("返回探索界面")
             pic.click("fanhui2.jpg", times=2)
             pic.click("tansuoqueren.jpg", times=2)
-            random.sleep()
+            random.sleep(1500, 2000)
             if zaiTanSuo() is False:  # 打完出年兽会自动跳回到探索界面
                 script.setInfo("local", "探索章节")
         else:
