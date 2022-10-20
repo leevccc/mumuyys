@@ -18,6 +18,7 @@ def run():
             logger.info("进入探索挑战失败")
             return False
         script.setInfo("local", "探索副本")
+        random.sleep(1000, 1500)
 
         finished = False
         rMove = False
