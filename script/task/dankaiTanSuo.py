@@ -11,6 +11,7 @@ def run():
     script.setInfo("times", times)
 
     while times > 0:
+        random.sleep()
         local.quTanSuoZhangJie()
         logger.info("点击探索按钮")
         pic.click("tansuoanniu.jpg", times=10)
