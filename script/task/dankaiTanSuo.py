@@ -28,17 +28,20 @@ def run():
                 rightMove()
                 rMove = False  # 重置变量
 
-            if pic.click("tiaozhan.jpg", times=4, delay=False) \
-                    and pic.find("fanhui3.jpg", times=10, ux=0, uy=0, uw=100, uh=100):
+            if pic.click("tiaozhan.jpg", times=4, delay=False):
                 logger.info("普通战斗")
                 fighting = True
-            elif pic.click("tiaozhanboss.jpg") and pic.find("fanhui3.jpg", times=10, ux=0, uy=0, uw=100, uh=100):
+            elif pic.click("tiaozhanboss.jpg"):
                 logger.info("Boss战斗")
                 fighting = True
                 finished = True
             else:
                 logger.info("未进入战斗")
                 rMove = True
+
+            if pic.find("fanhui3.jpg", times=10, ux=0, uy=0, uw=100, uh=100) is False:
+                logger.info("未进入战斗")
+                continue
 
             if fighting:
                 # 战斗处理
