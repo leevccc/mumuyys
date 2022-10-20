@@ -63,6 +63,8 @@ class Config:
 
         configs["单开养号"]["探索"] = tk.IntVar()
         configs["单开养号"]["探索"].set(1)
+        configs["单开养号"]["探索次数"] = tk.IntVar()
+        configs["单开养号"]["探索次数"].set(5)
 
         configs["活动模式"] = {}
         configs["活动模式"]["开启"] = tk.IntVar()

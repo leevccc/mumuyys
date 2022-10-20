@@ -93,6 +93,7 @@ def liaoTuPo():
             continue
 
         # 寻找未挑战的对象
+        random.sleep(1000, 1500)
         no = findLiaoObj(x=465, y=147, width=379, height=151)
         if no == 0:
             running = False

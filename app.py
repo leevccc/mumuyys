@@ -13,7 +13,7 @@ import config
 import logger
 import script
 
-version = "v2.2.0"
+version = "v2.3.0"
 user32 = ctypes.windll.user32  # 加载user32.dll
 path = os.getcwd()
 imgPath = path + "\\img\\"
@@ -225,6 +225,10 @@ class App:
         ts = ttk.LabelFrame(row5, text="探索", padding=10)
         ttk.Checkbutton(ts, text="开启", offvalue=0, onvalue=1, variable=dkConfigs["探索"]) \
             .grid(row=0, column=0, sticky=tk.W, padx=5)
+        ttk.Label(ts, text="次数")\
+            .grid(row=0, column=1, sticky=tk.W, padx=5)
+        ttk.Entry(ts, textvariable=dkConfigs["探索次数"])\
+            .grid(row=0, column=2, padx=5)
         ts.grid(row=0, column=0, sticky=tk.W, pady=2)
         row5.grid(row=4, column=0, sticky=tk.W, pady=2)
 
