@@ -46,8 +46,7 @@ def jieJieTuPo():
         mouse.click(x, y, 220, 80)
         random.sleep()
         if attack() is False:
-            logger.info("找不到进攻按钮, 请手动点击, 并按 F10 继续")
-            script.run()
+            continue
         fight.ready()
         random.sleep(200, 500)
         fight.switchAutoFight()
