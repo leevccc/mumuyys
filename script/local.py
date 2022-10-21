@@ -112,6 +112,7 @@ def quTanSuoZhangJie():
         times += 1
         if times > 3:
             quTingYuan()
+            times = 0
 
 
 def zaiJieJieTuPo():
