@@ -95,6 +95,7 @@ def quTanSuo():
 def quTanSuoZhangJie():
     zaiTanSuo()  # 探索副本没奖励会直接跳出到探索界面，需重置位置
 
+    times = 0
     while script.getInfo("local") != "探索章节":
         if script.getInfo("local") == "探索副本":
             logger.info("返回探索界面")
@@ -108,6 +109,9 @@ def quTanSuoZhangJie():
             logger.info("打开第二十八章")
             if pic.click("tansuo\\28.jpg", times=4):
                 script.setInfo("local", "探索章节")
+        times += 1
+        if times > 3:
+            quTingYuan()
 
 
 def zaiJieJieTuPo():
