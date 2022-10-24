@@ -18,6 +18,8 @@ class Config:
         configs["基本设置"] = {}
         configs["基本设置"]["模式"] = tk.StringVar()
         configs["基本设置"]["模式"].set("单开养号")
+        configs["基本设置"]["悬赏邀请"] = tk.StringVar()
+        configs["基本设置"]["悬赏邀请"].set("取消")
         configs["单开养号"] = {}
 
         configs["单开养号"]["任务循环"] = tk.IntVar()

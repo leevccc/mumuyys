@@ -13,7 +13,7 @@ import config
 import logger
 import script
 
-version = "v2.3.1"
+version = "v2.4.0"
 user32 = ctypes.windll.user32  # 加载user32.dll
 path = os.getcwd()
 imgPath = path + "\\img\\"
@@ -22,7 +22,7 @@ tempImgPath = imgPath + "temp\\"
 
 class App:
     width = 600
-    height = 500
+    height = 550
     log = None  # 日志框
     configs = None  # 配置表
     now = None  # 当前时间
@@ -118,39 +118,48 @@ class App:
         ttk.Radiobutton(baseFrame, text="活动模式", value="活动模式", variable=baseConfigs["模式"]) \
             .grid(row=2, column=3, padx=5, sticky=tk.W, pady=3)
 
-        ttk.Label(baseFrame, text="当前时间") \
+        ttk.Label(baseFrame, text="悬赏邀请") \
             .grid(row=3, column=0, pady=3)
+        ttk.Radiobutton(baseFrame, text="取消", value="取消", variable=baseConfigs["悬赏邀请"]) \
+            .grid(row=3, column=1, padx=5, sticky=tk.W, pady=3)
+        ttk.Radiobutton(baseFrame, text="接受", value="接受", variable=baseConfigs["悬赏邀请"]) \
+            .grid(row=3, column=2, padx=5, sticky=tk.W, pady=3)
+        ttk.Radiobutton(baseFrame, text="拒绝", value="拒绝", variable=baseConfigs["悬赏邀请"]) \
+            .grid(row=3, column=3, padx=5, sticky=tk.W, pady=3)
+
+        ttk.Label(baseFrame, text="当前时间") \
+            .grid(row=4, column=0, pady=3)
         clock = ttk.Label(baseFrame, text="")
         clock \
-            .grid(row=3, column=1, sticky=tk.W, padx=5, columnspan=2, pady=3)
+            .grid(row=4, column=1, sticky=tk.W, padx=5, columnspan=2, pady=3)
         self.clock(tab, clock)
 
         ttk.Label(baseFrame, text="当前位置") \
-            .grid(row=4, column=0, pady=3)
-        local = ttk.Label(baseFrame, text="")
-        local.grid(row=4, column=1, sticky=tk.W, padx=5, pady=3)
-        self.getScriptStatus(tab, local, "local")
-
-        ttk.Label(baseFrame, text="寮突目标") \
             .grid(row=5, column=0, pady=3)
         local = ttk.Label(baseFrame, text="")
         local.grid(row=5, column=1, sticky=tk.W, padx=5, pady=3)
+        self.getScriptStatus(tab, local, "local")
+
+        ttk.Label(baseFrame, text="寮突目标") \
+            .grid(row=6, column=0, pady=3)
+        local = ttk.Label(baseFrame, text="")
+        local.grid(row=6, column=1, sticky=tk.W, padx=5, pady=3)
         self.getScriptStatus(tab, local, "寮突破今日目标")
 
         ttk.Label(baseFrame, text="剩余次数") \
-            .grid(row=6, column=0, pady=3)
+            .grid(row=7, column=0, pady=3)
         times = ttk.Label(baseFrame, text="")
-        times.grid(row=6, column=1, sticky=tk.W, padx=5, pady=3)
+        times.grid(row=7, column=1, sticky=tk.W, padx=5, pady=3)
         self.getScriptStatus(tab, times, "times")
 
         ttk.Label(baseFrame, text="延时") \
-            .grid(row=7, column=0, pady=3)
+            .grid(row=8, column=0, pady=3)
         delay = ttk.Label(baseFrame, text="")
-        delay.grid(row=7, column=1, sticky=tk.W, padx=5, pady=3)
+        delay.grid(row=8, column=1, sticky=tk.W, padx=5, pady=3)
         self.getScriptStatus(tab, delay, "delay")
 
         ttk.Button(baseFrame, text="保存配置", command=config.Config().save) \
-            .grid(row=8, column=0, columnspan=99, pady=3)
+            .grid(row=9, column=0, columnspan=99, pady=3)
 
     def regTab2(self, tab):
         dkConfigs = self.configs.configs["单开养号"]

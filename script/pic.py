@@ -6,6 +6,7 @@ import pyautogui
 import app
 import script
 from script import window
+from script.task import dankaiXuanShangFengYin
 
 
 def printScreen(ux=None, uy=None, uw=None, uh=None, uf="screenshot.jpg"):
@@ -44,6 +45,8 @@ def printScreen(ux=None, uy=None, uw=None, uh=None, uf="screenshot.jpg"):
 
     screen = pyautogui.screenshot(region=(x, y, w, h))
     screen.save(app.tempImgPath + uf.replace("\\", "_"))
+    if dankaiXuanShangFengYin.handleHaoYouYaoQing(screenPrint=False, fileName=uf.replace("\\", "_")):
+        printScreen(ux=ux, uy=uy, uw=uw, uh=uh, uf=uf)
 
 
 def get(img, confidence=0.9, times=1, ux=None, uy=None, uw=None, uh=None, details=False):
