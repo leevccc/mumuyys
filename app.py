@@ -234,11 +234,16 @@ class App:
         ts = ttk.LabelFrame(row5, text="探索", padding=10)
         ttk.Checkbutton(ts, text="开启", offvalue=0, onvalue=1, variable=dkConfigs["探索"]) \
             .grid(row=0, column=0, sticky=tk.W, padx=5)
-        ttk.Label(ts, text="次数")\
+        ttk.Label(ts, text="次数") \
             .grid(row=0, column=1, sticky=tk.W, padx=5)
-        ttk.Entry(ts, textvariable=dkConfigs["探索次数"])\
+        ttk.Entry(ts, textvariable=dkConfigs["探索次数"]) \
             .grid(row=0, column=2, padx=5)
-        ts.grid(row=0, column=0, sticky=tk.W, pady=2)
+        ts.grid(row=0, column=0, sticky=tk.NW, pady=2)
+
+        fm = ttk.LabelFrame(row5, text="逢魔之时", padding=10)
+        ttk.Checkbutton(fm, text="开启", offvalue=0, onvalue=1, variable=dkConfigs["逢魔之时"]) \
+            .grid(row=0, column=0, sticky=tk.W, padx=5)
+        fm.grid(row=0, column=1, sticky=tk.NW, pady=2, padx=10)
         row5.grid(row=4, column=0, sticky=tk.W, pady=2)
 
     def regTab3(self, tab):

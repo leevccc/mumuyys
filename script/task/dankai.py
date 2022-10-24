@@ -1,10 +1,11 @@
 import logger
 from script import task
-from script.task import dankaiDaily, dankaiJieJie, dankaiTuPo, dankaiTanSuo
+from script.task import dankaiDaily, dankaiJieJie, dankaiTuPo, dankaiTanSuo, dankaiFengMo
 
 
 def run():
     logger.info("[模式] 单开养号")
+    task.run("单开养号", "逢魔之时", dankaiFengMo.run, daily=True)
     task.run("单开养号", "每日签到", dankaiDaily.QianDao, daily=True)
     task.run("单开养号", "黄金签到", dankaiDaily.HuangJinQianDao, daily=True)
     task.run("单开养号", "领取黑蛋", dankaiDaily.ShangDianHeiDan, daily=True)
