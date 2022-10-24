@@ -45,7 +45,22 @@ def printScreen(ux=None, uy=None, uw=None, uh=None, uf="screenshot.jpg"):
 
     screen = pyautogui.screenshot(region=(x, y, w, h))
     screen.save(app.tempImgPath + uf.replace("\\", "_"))
-    if dankaiXuanShangFengYin.handleHaoYouYaoQing(screenPrint=False, fileName=uf.replace("\\", "_")):
+
+    # 处理悬赏封印邀请
+    sp = False
+    # 指定截图区域的
+    if ux is not None:
+        # 悬赏封印位置
+        _x = window.x + 624
+        _y = window.y + 161
+        _rx = _x + 194
+        _ry = _y + 64
+        # 截图范围覆盖了悬赏封印位置
+        if ux < _x and uy < _y and rx > _rx and ry > _ry:
+            sp = False  # 不需要重新截屏
+        else:
+            sp = True
+    if dankaiXuanShangFengYin.handleHaoYouYaoQing(screenPrint=sp, fileName=uf.replace("\\", "_")):
         printScreen(ux=ux, uy=uy, uw=uw, uh=uh, uf=uf)
 
 

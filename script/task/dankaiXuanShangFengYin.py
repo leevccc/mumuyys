@@ -1,9 +1,10 @@
 import aircv
+import pyautogui
 
 import app
 import config
 import logger
-from script import pic, mouse, random
+from script import mouse, random, window
 
 
 def handleHaoYouYaoQing(screenPrint=True, fileName=None):
@@ -16,7 +17,26 @@ def handleHaoYouYaoQing(screenPrint=True, fileName=None):
     result = False
     option = config.Config().get("基本设置", "悬赏邀请")
     if screenPrint:
-        yaoQing = pic.find("xuanshangfengyin.jpg", confidence=0.95, ux=624, uy=161, uw=194, uh=64)
+        x = window.x + 624
+        y = window.y + 161
+        w = 194
+        h = 64
+        rx = x + w
+        ry = y + h
+
+        # 截图前把鼠标移出截图区域
+        mouse_x, mouse_y = pyautogui.position()
+        if x < mouse_x < rx and y < mouse_y < ry:
+            pyautogui.moveTo(rx, ry)
+
+        screen = pyautogui.screenshot(region=(x, y, w, h))
+        screen.save(app.tempImgPath + "xuanshangfengyin.jpg")
+
+        screenshot = aircv.imread(app.tempImgPath + "xuanshangfengyin.jpg")
+        imgObject = aircv.imread(app.imgPath + "\\" + "xuanshangfengyin.jpg")
+
+        match_result = aircv.find_template(screenshot, imgObject, 0.95)
+        yaoQing = match_result is not None
     else:
         screenshot = aircv.imread(app.tempImgPath + fileName)
         img = aircv.imread(app.imgPath + "xuanshangfengyin.jpg")
