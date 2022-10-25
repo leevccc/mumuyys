@@ -11,15 +11,17 @@ def get():
     """
     # 庭院
     result = "未知"
-    if zaiTingYuan() is True:
+    if zaiTingYuan():
         result = "庭院"
+    if zaiTanSuo():
+        result = "探索"
     return result
 
 
 def zaiTingYuan():
     if script.getInfo("local") == "庭院":
         return True
-    if pic.find("tansuo.jpg", times=2) is True:
+    if pic.find("tansuo.jpg", times=4):
         tingyuan.lingYuHun()
         tingyuan.lingShouSi()
         tingyuan.lingGouYu()
