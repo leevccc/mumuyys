@@ -5,7 +5,7 @@ from script import random, pic, mouse
 
 def ready():
     random.sleep(3, 4, "秒")
-    if pic.click("ready.jpg", confidence=0.95, times=10) is True:
+    if pic.click("ready.jpg", confidence=0.95, times=10, ux=1231, uy=576, uw=200, uh=190) is True:
         logger.info("[动作] 准备")
         return True
     else:
