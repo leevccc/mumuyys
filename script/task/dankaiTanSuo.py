@@ -60,5 +60,5 @@ def run():
 
 def rightMove():
     logger.info("向右移动")
-    mouse.click(1232, 589, 25, 25)
+    mouse.click(1100, 580, 160, 40)
     random.sleep(2000, 2500)
