@@ -1,8 +1,10 @@
+import pyautogui
 import win32con
 import win32gui
 
 import logger
 import script
+from script import random
 
 x, y, width, height = 0, 0, 1440, 810
 
@@ -48,3 +50,10 @@ def initMuMuWindow():
     logger.info("窗口信息: 宽 " + str(right) + " 高 " + str(bottom) + " 顶 " + str(top) + " 左 " + str(
         left))
     logger.info("分辨率: 1440 x 810")
+
+
+def switch(num):
+    num = str(int(num))
+    logger.info("切换到窗口 %s" % num)
+    pyautogui.hotkey("ctrl", num)
+    random.sleep()

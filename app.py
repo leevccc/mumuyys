@@ -247,7 +247,11 @@ class App:
         row5.grid(row=4, column=0, sticky=tk.W, pady=2)
 
     def regTab3(self, tab):
-        logger.info("组队刷刷尚未制作")
+        zdConfigs = self.configs.configs["组队刷刷"]
+        ttk.Checkbutton(tab, text="双开", offvalue=0, onvalue=1, variable=zdConfigs["双开"]) \
+            .grid(row=0, column=0, sticky=tk.W, padx=5)
+        ttk.Checkbutton(tab, text="跟队模式", offvalue=0, onvalue=1, variable=zdConfigs["跟队模式"]) \
+            .grid(row=1, column=0, sticky=tk.W, padx=5)
 
     def regTab4(self, tab):
         hdConfigs = self.configs.configs["活动模式"]
