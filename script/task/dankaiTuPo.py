@@ -47,7 +47,7 @@ def jieJieTuPo():
         random.sleep()
         if attack(343 + dx, 390 + dy, 185, 100) is False:
             continue
-        random.sleep(4000, 4500)
+        random.sleep(4500, 5000)
         fight.greenMark()
         random.sleep(1, 3, "秒")
 
@@ -107,7 +107,7 @@ def liaoTuPo():
                 local.quTanSuo()
                 local.quLiaoTuPo()
                 continue
-            random.sleep(4000, 4500)
+            random.sleep(4500, 5000)
             fight.greenMark()
             random.sleep(1, 3, "秒")
 
