@@ -5,7 +5,7 @@ import pyautogui
 
 import app
 import script
-from script import window
+from script import window, random
 from script.task import dankaiXuanShangFengYin
 
 
@@ -41,7 +41,7 @@ def printScreen(ux=None, uy=None, uw=None, uh=None, uf="screenshot.jpg"):
     # 截图前把鼠标移出截图区域
     mouse_x, mouse_y = pyautogui.position()
     if x < mouse_x < rx and y < mouse_y < ry:
-        pyautogui.moveTo(rx, ry)
+        pyautogui.moveTo(rx + 1 + random.get(5, 10), ry + 1 + random.get(5, 10))
 
     screen = pyautogui.screenshot(region=(x, y, w, h))
     screen.save(app.tempImgPath + uf.replace("\\", "_"))
