@@ -18,7 +18,7 @@ def switchAutoFight():
 
 
 def tiaoZhan():
-    if pic.click("zuiduitiaozhan.jpg", times=10):
+    if pic.click("zuduitiaozhan.jpg", times=10):
         logger.info("[动作] 挑战")
         return True
     return False
