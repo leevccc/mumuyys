@@ -34,3 +34,7 @@ def click(x, y, rw=0, rh=0, delay=True):
 
 def click_100():
     click(120, 10, 80, 90)
+
+
+def clickRightDown():
+    click(1130, 616, 235, 142)
