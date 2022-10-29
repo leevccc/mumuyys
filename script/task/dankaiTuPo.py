@@ -169,7 +169,7 @@ def refreshList():
     logger.info("[动作] 刷新结界列表")
     pic.click("refresh.jpg")
     random.sleep(1000, 1500)
-    pic.click("queding.jpg")
+    pic.click("queding.jpg", ux=748, uy=441, uw=211, uh=90)
     random.sleep()
 
 
