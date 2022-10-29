@@ -17,6 +17,13 @@ def switchAutoFight():
         logger.info("[动作] 切换到自动战斗")
 
 
+def tiaoZhan():
+    if pic.click("zuiduitiaozhan.jpg", times=10):
+        logger.info("[动作] 挑战")
+        return True
+    return False
+
+
 def greenMark():
     no = config.Config().get("单开养号", "突破绿标式神位")
     x, y, width, height = 0, 0, 45, 50

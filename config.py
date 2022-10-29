@@ -72,10 +72,12 @@ class Config:
         configs["单开养号"]["逢魔之时"].set(1)
 
         configs["组队刷刷"] = {}
-        configs["组队刷刷"]["双开"] = tk.IntVar()
-        configs["组队刷刷"]["双开"].set(1)
-        configs["组队刷刷"]["跟队模式"] = tk.IntVar()
-        configs["组队刷刷"]["跟队模式"].set(1)
+        configs["组队刷刷"]["模式"] = tk.StringVar()
+        configs["组队刷刷"]["模式"].set("带队模式")
+        configs["组队刷刷"]["客户端数"] = tk.IntVar()
+        configs["组队刷刷"]["客户端数"].set(1)
+        configs["组队刷刷"]["队长窗口"] = tk.IntVar()
+        configs["组队刷刷"]["队长窗口"].set(1)
 
         configs["活动模式"] = {}
         configs["活动模式"]["开启"] = tk.IntVar()

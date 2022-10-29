@@ -40,7 +40,7 @@ class App:
         configs = self.configs = config.Config()
         configs.init()
         # 助手界面
-        root.title("阴阳师助手 %s" % version)
+        root.title("蓝色光标 %s" % version)
         screenwidth = root.winfo_screenwidth()
         screenheight = root.winfo_screenheight()
         align_str = '%dx%d+%d+%d' % \
@@ -248,10 +248,24 @@ class App:
 
     def regTab3(self, tab):
         zdConfigs = self.configs.configs["组队刷刷"]
-        ttk.Checkbutton(tab, text="双开", offvalue=0, onvalue=1, variable=zdConfigs["双开"]) \
-            .grid(row=0, column=0, sticky=tk.W, padx=5)
-        ttk.Checkbutton(tab, text="跟队模式", offvalue=0, onvalue=1, variable=zdConfigs["跟队模式"]) \
-            .grid(row=1, column=0, sticky=tk.W, padx=5)
+        ttk.Radiobutton(tab, text="带队模式", value="带队模式", variable=zdConfigs["模式"]) \
+            .grid(row=0, column=0, sticky=tk.W, padx=5, pady=10)
+        ttk.Radiobutton(tab, text="跟队模式", value="跟队模式", variable=zdConfigs["模式"]) \
+            .grid(row=0, column=1, sticky=tk.W, padx=5, pady=10)
+        ttk.Radiobutton(tab, text="单开", value="1", variable=zdConfigs["客户端数"]) \
+            .grid(row=1, column=0, sticky=tk.W, padx=5, pady=10)
+        ttk.Radiobutton(tab, text="双开", value="2", variable=zdConfigs["客户端数"]) \
+            .grid(row=1, column=1, sticky=tk.W, padx=5, pady=10)
+        ttk.Radiobutton(tab, text="三开", value="3", variable=zdConfigs["客户端数"]) \
+            .grid(row=1, column=2, sticky=tk.W, padx=5, pady=10)
+        ttk.Radiobutton(tab, text="无队长", value="0", variable=zdConfigs["队长窗口"]) \
+            .grid(row=2, column=0, sticky=tk.W, padx=5, pady=10)
+        ttk.Radiobutton(tab, text="第一个", value="1", variable=zdConfigs["队长窗口"]) \
+            .grid(row=2, column=1, sticky=tk.W, padx=5, pady=10)
+        ttk.Radiobutton(tab, text="第二个", value="2", variable=zdConfigs["队长窗口"]) \
+            .grid(row=2, column=2, sticky=tk.W, padx=5, pady=10)
+        ttk.Radiobutton(tab, text="第三个", value="3", variable=zdConfigs["队长窗口"]) \
+            .grid(row=2, column=3, sticky=tk.W, padx=5, pady=10)
 
     def regTab4(self, tab):
         hdConfigs = self.configs.configs["活动模式"]
