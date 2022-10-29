@@ -27,8 +27,6 @@ def jieJieTuPo():
     while script.getInfo("local") != "结界突破":
         local.quJieJieTuPo()
 
-    unlockZhenRong()
-
     running = True
     no = 1  # 挑战位置
     while running:
@@ -49,10 +47,7 @@ def jieJieTuPo():
         random.sleep()
         if attack(343 + dx, 390 + dy, 185, 100) is False:
             continue
-        fight.ready()
-        random.sleep(200, 500)
-        fight.switchAutoFight()
-        random.sleep()
+        random.sleep(3000, 4000)
         fight.greenMark()
         random.sleep(1, 3, "秒")
 
@@ -85,8 +80,6 @@ def liaoTuPo():
     if script.getInfo("local") != "寮突破":
         local.quLiaoTuPo()
 
-    unlockZhenRong()
-
     running = True
     while running:
         if pic.find("liaotupowancheng.jpg", confidence=0.97) or pic.find("liaotupowancheng2.jpg", confidence=0.97):
@@ -107,16 +100,14 @@ def liaoTuPo():
             y = 186 + dy
             mouse.click(x, y, 220, 70)
             random.sleep()
-            if attack(659 + dx, 386 + dy, 167, 86) is False or fight.ready() is False:
+            if attack(659 + dx, 386 + dy, 167, 86) is False:
                 # 结界已被攻破无法进入战斗界面,先返回探索界面,重新进入寮界面
                 # 下次切换进来要重新打开界面刷新数据, 否则多开可能同个寮, 其他窗口把你的目标突破了, 而你没刷新, 导致无法进攻
                 mouse.click_100()
                 local.quTanSuo()
                 local.quLiaoTuPo()
                 continue
-            random.sleep(200, 500)
-            fight.switchAutoFight()
-            random.sleep()
+            random.sleep(3000, 4000)
             fight.greenMark()
             random.sleep(1, 3, "秒")
 
