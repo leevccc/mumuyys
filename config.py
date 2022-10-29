@@ -78,6 +78,8 @@ class Config:
         configs["组队刷刷"]["客户端数"].set(1)
         configs["组队刷刷"]["队长窗口"] = tk.IntVar()
         configs["组队刷刷"]["队长窗口"].set(1)
+        configs["组队刷刷"]["次数"] = tk.IntVar()
+        configs["组队刷刷"]["次数"].set(30)
 
         configs["活动模式"] = {}
         configs["活动模式"]["开启"] = tk.IntVar()

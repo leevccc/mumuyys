@@ -248,24 +248,34 @@ class App:
 
     def regTab3(self, tab):
         zdConfigs = self.configs.configs["组队刷刷"]
-        ttk.Radiobutton(tab, text="带队模式", value="带队模式", variable=zdConfigs["模式"]) \
+        ttk.Label(tab, text="模式") \
             .grid(row=0, column=0, sticky=tk.W, padx=5, pady=10)
-        ttk.Radiobutton(tab, text="跟队模式", value="跟队模式", variable=zdConfigs["模式"]) \
+        ttk.Radiobutton(tab, text="带队模式", value="带队模式", variable=zdConfigs["模式"]) \
             .grid(row=0, column=1, sticky=tk.W, padx=5, pady=10)
-        ttk.Radiobutton(tab, text="单开", value="1", variable=zdConfigs["客户端数"]) \
+        ttk.Radiobutton(tab, text="跟队模式", value="跟队模式", variable=zdConfigs["模式"]) \
+            .grid(row=0, column=2, sticky=tk.W, padx=5, pady=10)
+        ttk.Label(tab, text="客户端数") \
             .grid(row=1, column=0, sticky=tk.W, padx=5, pady=10)
-        ttk.Radiobutton(tab, text="双开", value="2", variable=zdConfigs["客户端数"]) \
+        ttk.Radiobutton(tab, text="单开", value="1", variable=zdConfigs["客户端数"]) \
             .grid(row=1, column=1, sticky=tk.W, padx=5, pady=10)
-        ttk.Radiobutton(tab, text="三开", value="3", variable=zdConfigs["客户端数"]) \
+        ttk.Radiobutton(tab, text="双开", value="2", variable=zdConfigs["客户端数"]) \
             .grid(row=1, column=2, sticky=tk.W, padx=5, pady=10)
-        ttk.Radiobutton(tab, text="无队长", value="0", variable=zdConfigs["队长窗口"]) \
+        ttk.Radiobutton(tab, text="三开", value="3", variable=zdConfigs["客户端数"]) \
+            .grid(row=1, column=3, sticky=tk.W, padx=5, pady=10)
+        ttk.Label(tab, text="队长窗口") \
             .grid(row=2, column=0, sticky=tk.W, padx=5, pady=10)
-        ttk.Radiobutton(tab, text="第一个", value="1", variable=zdConfigs["队长窗口"]) \
+        ttk.Radiobutton(tab, text="无队长", value="0", variable=zdConfigs["队长窗口"]) \
             .grid(row=2, column=1, sticky=tk.W, padx=5, pady=10)
-        ttk.Radiobutton(tab, text="第二个", value="2", variable=zdConfigs["队长窗口"]) \
+        ttk.Radiobutton(tab, text="第一个", value="1", variable=zdConfigs["队长窗口"]) \
             .grid(row=2, column=2, sticky=tk.W, padx=5, pady=10)
-        ttk.Radiobutton(tab, text="第三个", value="3", variable=zdConfigs["队长窗口"]) \
+        ttk.Radiobutton(tab, text="第二个", value="2", variable=zdConfigs["队长窗口"]) \
             .grid(row=2, column=3, sticky=tk.W, padx=5, pady=10)
+        ttk.Radiobutton(tab, text="第三个", value="3", variable=zdConfigs["队长窗口"]) \
+            .grid(row=2, column=4, sticky=tk.W, padx=5, pady=10)
+        ttk.Label(tab, text="次数") \
+            .grid(row=3, column=0, sticky=tk.W, padx=5, pady=10)
+        ttk.Entry(tab, textvariable=zdConfigs["次数"]) \
+            .grid(row=3, column=1, sticky=tk.W, columnspan=4, padx=5, pady=10)
 
     def regTab4(self, tab):
         hdConfigs = self.configs.configs["活动模式"]

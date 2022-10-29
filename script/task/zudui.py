@@ -1,5 +1,6 @@
 import config
 import logger
+import script
 from script import window, fight, random
 
 
@@ -12,7 +13,9 @@ def run():
 
 
 def genDui():
-    while True:
+    times = getConfig("次数")
+    script.setInfo("times", times)
+    while times > 0:
         if getConfig("客户端数") > 1:
             window.switch(2)
         while fight.handleFightEnd() == "进行中":
@@ -25,6 +28,8 @@ def genDui():
             window.switch(4)
             while fight.handleFightEnd() == "进行中":
                 random.sleep(1, 2, "秒")
+        times -= 1
+        script.setInfo("times", times)
         random.sleep(6000, 7000)
 
 
@@ -33,7 +38,10 @@ def daiDui():
     winMax = int(getConfig("客户端数"))
     # 切换到队长窗口
     window.switch(winDuiZhang + 1)
-    while True:
+
+    times = getConfig("次数")
+    script.setInfo("times", times)
+    while times > 0:
         # 队长挑战
         if fight.tiaoZhan() is False:
             logger.info("找不到挑战按钮")
@@ -52,6 +60,9 @@ def daiDui():
             window.switchNext(win, winMax)
             while fight.handleFightEnd() == "进行中":
                 random.sleep(1, 2, "秒")
+        times -= 1
+        script.setInfo("times", times)
+        random.sleep(1, 2, "秒")
 
 
 def getConfig(key):

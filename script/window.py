@@ -60,6 +60,8 @@ def switch(num):
 
 
 def switchNext(currentWindow, maxWindow):
+    if maxWindow == 1:
+        return 0
     window = currentWindow + 1
     if window > maxWindow:
         window = 1
