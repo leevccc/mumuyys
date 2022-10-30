@@ -65,6 +65,13 @@ def handleFightEnd():
         mouse.clickRightDown()
         result = "胜利"
 
+    if result == "胜利":
+        # 再次判断 确保已出去
+        while pic.find("victory2.jpg", confidence=0.98, ux=563, uy=442, uw=336, uh=284):
+            random.sleep()
+            mouse.clickRightDown()
+            random.sleep()
+
     if result != "进行中":
         logger.info("[状态] 战斗%s" % result)
     return result
