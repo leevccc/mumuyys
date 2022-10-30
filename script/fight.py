@@ -67,7 +67,9 @@ def handleFightEnd():
 
     if result == "胜利":
         # 再次判断 确保已出去
+        random.sleep()
         while pic.find("victory2.jpg", confidence=0.98, ux=563, uy=442, uw=336, uh=284):
+            logger.info("清理战斗")
             random.sleep()
             mouse.clickRightDown()
             random.sleep()
