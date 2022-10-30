@@ -32,7 +32,7 @@ def run():
     script.setInfo("local", "逢魔之时")
 
     # 现世逢魔
-    while pic.find("hun.jpg"):
+    while pic.find("hun.jpg", times=2, ux=1338, uy=313, uw=96, uh=308):
         mouse.click(1310, 715, 55, 55)
         random.sleep(5, 7, "秒")
 
