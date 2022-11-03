@@ -18,3 +18,5 @@ pytweening==1.0.4
 pywin32==304
 pywin32-ctypes==0.2.0
 ttkbootstrap==1.9.0
+
+xlwings~=0.28.5
