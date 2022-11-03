@@ -78,7 +78,7 @@ def yuHunTiaoZhan():
             random.sleep(1, 2, "秒")
         times -= 1
         script.setInfo("times", times)
-        random.sleep(6000, 7000)
+        random.sleep()
 
 
 def getConfig(key):
