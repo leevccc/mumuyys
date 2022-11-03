@@ -21,15 +21,15 @@ def genDui():
         if getConfig("客户端数") > 1:
             window.switch(2)
         while fight.handleFightEnd() == "进行中":
-            random.sleep(1, 2, "秒")
+            random.sleep()
         if getConfig("客户端数") >= 2:
             window.switch(3)
             while fight.handleFightEnd() == "进行中":
-                random.sleep(1, 2, "秒")
+                random.sleep()
         if getConfig("客户端数") == 3:
             window.switch(4)
             while fight.handleFightEnd() == "进行中":
-                random.sleep(1, 2, "秒")
+                random.sleep()
         times -= 1
         script.setInfo("times", times)
         random.sleep(6000, 7000)
