@@ -12,6 +12,7 @@ from ttkbootstrap import ttk
 import config
 import logger
 import script
+from script import anaYuHun
 
 version = "v2.4.0"
 user32 = ctypes.windll.user32  # 加载user32.dll
@@ -73,6 +74,11 @@ class App:
         notebook.add(tab4, text="活动模式")
         tab4.config(padding=10)
         self.regTab4(tab4)
+
+        tab5 = ttk.Frame(notebook)
+        notebook.add(tab5, text="工具箱")
+        tab5.config(padding=10)
+        self.regTab5(tab5)
 
         tipsTab = ttk.Frame(notebook)
         notebook.add(tipsTab, text="使用说明")
@@ -286,6 +292,11 @@ class App:
             .grid(row=0, column=1, sticky=tk.W, padx=5)
         ttk.Entry(tab, textvariable=hdConfigs["次数"]) \
             .grid(row=0, column=2, sticky=tk.W, padx=5)
+
+    @staticmethod
+    def regTab5(tab):
+        ttk.Button(tab, text="强化方案", command=anaYuHun.run) \
+            .grid(row=0, column=0, pady=3)
 
     # Tab: 使用说明
     @staticmethod
