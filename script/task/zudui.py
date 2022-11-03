@@ -71,7 +71,7 @@ def yuHunTiaoZhan():
     times = getConfig("次数")
     script.setInfo("times", times)
     while times > 0:
-        if fight.zuDuiTiaoZhan() is False:
+        if fight.yuHunTiaoZhan() is False:
             logger.info("找不到挑战按钮")
             break
         while fight.handleFightEnd() == "进行中":
