@@ -40,8 +40,9 @@ def ana(data):
     yuhun = []
     plan = [
         {"名称": "头", "位置": [2], "御魂": ["全部"]},
-        {"名称": "稀有暴爆", "位置": [6], "御魂": ["全部"]},
         {"名称": "提速", "位置": [1, 3, 4, 5, 6], "御魂": ["全部"]},
+        {"名称": "稀有暴爆", "位置": [6], "御魂": ["全部"]},
+        {"名称": "因幡爆伤", "位置": ["全部"], "御魂": ["全部"]},
     ]
     # 整理御魂[[破势,2,攻,输出],[破势,4,攻,输出]]
     for item in data:
@@ -58,12 +59,15 @@ def ana(data):
 
     # 生成 246 号位方案
     for item in yuhun:
+        # 过滤无属性
+        if item[2] is None:
+            continue
         # 过滤6号位稀有属性
         if item[2] in ["爆", "暴"]:
             continue
         name = "主%s副%s" % (item[2], item[3])
         # 过滤通用组合
-        if name in ["主None副速", "主速副速"]:
+        if name in ["主速副速"]:
             continue
         isNew = True
         for p in plan:
@@ -79,6 +83,9 @@ def ana(data):
 
     # 生成 135 号位方案
     for item in yuhun:
+        # 过滤无指标
+        if item[3] is None:
+            continue
         # 过滤特殊指标
         if item[3] in ["速"]:
             continue
