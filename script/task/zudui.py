@@ -10,6 +10,8 @@ def run():
         genDui()
     elif getConfig("模式") == "带队模式":
         daiDui()
+    elif getConfig("模式") == "御魂挑战":
+        yuHunTiaoZhan()
 
 
 def genDui():
@@ -43,7 +45,7 @@ def daiDui():
     script.setInfo("times", times)
     while times > 0:
         # 队长挑战
-        if fight.tiaoZhan() is False:
+        if fight.zuDuiTiaoZhan() is False:
             logger.info("找不到挑战按钮")
             break
         # 处理第一个队员
@@ -63,6 +65,20 @@ def daiDui():
         times -= 1
         script.setInfo("times", times)
         random.sleep(1, 2, "秒")
+
+
+def yuHunTiaoZhan():
+    times = getConfig("次数")
+    script.setInfo("times", times)
+    while times > 0:
+        if fight.zuDuiTiaoZhan() is False:
+            logger.info("找不到挑战按钮")
+            break
+        while fight.handleFightEnd() == "进行中":
+            random.sleep(1, 2, "秒")
+        times -= 1
+        script.setInfo("times", times)
+        random.sleep(6000, 7000)
 
 
 def getConfig(key):

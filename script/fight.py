@@ -17,11 +17,16 @@ def switchAutoFight():
         logger.info("[动作] 切换到自动战斗")
 
 
-def tiaoZhan():
+def zuDuiTiaoZhan():
     if pic.click("zuduitiaozhan.jpg", times=10):
         logger.info("[动作] 挑战")
         return True
     return False
+
+
+def yuHunTiaoZhan():
+    mouse.click(1267, 691, 69, 57)
+    return True
 
 
 def greenMark():
