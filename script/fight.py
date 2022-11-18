@@ -18,14 +18,14 @@ def switchAutoFight():
 
 
 def zuDuiTiaoZhan():
-    if pic.click("zuduitiaozhan.jpg", times=4):
+    if pic.click("zuduitiaozhan.jpg", times=4, ux=1266, uy=614, uw=214, uh=196):
         logger.info("[动作] 组队挑战")
         return True
     return False
 
 
 def zuDuiTiaoZhanYongShengZhiHai():
-    if pic.click("zuduitiaozhanyongshengzhihai.jpg", times=4):
+    if pic.click("zuduitiaozhanyongshengzhihai.jpg", times=4, ux=1266, uy=614, uw=214, uh=196):
         logger.info("[动作] 挑战永生之海")
         return True
     return False
