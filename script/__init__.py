@@ -31,10 +31,10 @@ def script():
             configs = config.Config()
             moshi = configs.get("基本设置", "模式")
 
-            # 初始化位置信息
-            if getInfo("local") == "未知":
-                setInfo("local", local.get())
             if moshi == "单开养号":
+                # 初始化位置信息
+                if getInfo("local") == "未知":
+                    setInfo("local", local.get())
                 dankai.run()
             elif moshi == "组队刷刷":
                 zudui.run()
