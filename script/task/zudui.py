@@ -32,7 +32,6 @@ def genDui():
                 random.sleep()
         times -= 1
         script.setInfo("times", times)
-        random.sleep(6000, 7000)
 
 
 def daiDui():
@@ -43,25 +42,30 @@ def daiDui():
 
     times = getConfig("次数")
     script.setInfo("times", times)
+    mode = "普通"
     while times > 0:
         # 队长挑战
-        if fight.zuDuiTiaoZhan() is False:
+        if mode == "普通" and fight.zuDuiTiaoZhan() is False:
+            mode = "永生之海"
+            logger.info("永生之海模式")
+        if mode == "永生之海" and fight.zuDuiTiaoZhanYongShengZhiHai() is False:
             logger.info("找不到挑战按钮")
+            mode = "普通"
             break
         # 处理第一个队员
         win = window.switchNext(winDuiZhang, winMax)
         while fight.handleFightEnd() == "进行中":
-            random.sleep(1, 2, "秒")
+            random.sleep()
         # 处理第二个队员
         if getConfig("客户端数") >= 2:
             win = window.switchNext(win, winMax)
             while fight.handleFightEnd() == "进行中":
-                random.sleep(1, 2, "秒")
+                random.sleep()
         # 处理第三个队员
         if getConfig("客户端数") == 3:
             window.switchNext(win, winMax)
             while fight.handleFightEnd() == "进行中":
-                random.sleep(1, 2, "秒")
+                random.sleep()
         times -= 1
         script.setInfo("times", times)
         random.sleep(1, 2, "秒")
@@ -78,7 +82,7 @@ def yuHunTiaoZhan():
             random.sleep(1, 2, "秒")
         times -= 1
         script.setInfo("times", times)
-        random.sleep()
+        random.sleep(1, 2, "秒")
 
 
 def getConfig(key):

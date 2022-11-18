@@ -18,8 +18,15 @@ def switchAutoFight():
 
 
 def zuDuiTiaoZhan():
-    if pic.click("zuduitiaozhan.jpg", times=10):
-        logger.info("[动作] 挑战")
+    if pic.click("zuduitiaozhan.jpg", times=4):
+        logger.info("[动作] 组队挑战")
+        return True
+    return False
+
+
+def zuDuiTiaoZhanYongShengZhiHai():
+    if pic.click("zuduitiaozhanyongshengzhihai.jpg", times=4):
+        logger.info("[动作] 挑战永生之海")
         return True
     return False
 
@@ -55,9 +62,9 @@ def handleFightEnd():
         result = "进行中"  # 找到返回按钮, 则跳过后面的战斗结果检测
     elif pic.find("victory.jpg", confidence=0.98, ux=426, uy=58, uw=234, uh=211):
         mouse.clickRightDown()
-        while pic.find("victory2.jpg", confidence=0.98, times=4, ux=563, uy=442, uw=336, uh=284) is False:
+        while pic.find("victory2.jpg", confidence=0.98, ux=563, uy=442, uw=336, uh=284) is False:
             mouse.clickThis()
-        while pic.find("victory2.jpg", confidence=0.98, times=4, ux=563, uy=442, uw=336, uh=284):
+        while pic.find("victory2.jpg", confidence=0.98, ux=563, uy=442, uw=336, uh=284):
             mouse.clickThis()
         result = "胜利"
     elif pic.find("failure.jpg", confidence=0.98, ux=426, uy=58, uw=234, uh=211):
@@ -66,7 +73,7 @@ def handleFightEnd():
         result = "失败"
     elif pic.find("victory2.jpg", confidence=0.98, ux=563, uy=442, uw=336, uh=284):
         mouse.clickRightDown()
-        while pic.find("victory2.jpg", confidence=0.98, times=4, ux=563, uy=442, uw=336, uh=284):
+        while pic.find("victory2.jpg", confidence=0.98, ux=563, uy=442, uw=336, uh=284):
             mouse.clickThis()
         result = "胜利"
 

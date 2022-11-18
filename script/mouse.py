@@ -37,7 +37,7 @@ def click_100():
 
 
 def clickRightDown():
-    click(1130, 616, 235, 142)
+    click(1130, 616, 50, 50)
 
 
 def clickThis(delay=True):
