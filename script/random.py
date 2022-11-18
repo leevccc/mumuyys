@@ -13,22 +13,26 @@ def get(f=0, t=100):
     :param t: to 最大值
     :return:
     """
-    return f + round(random() * (t - f))
+    return int(f + round(random() * (t - f)))
 
 
-def sleep(f=500, t=1000, pType="毫秒"):
+def sleep(f=500, t=1000, pType="毫秒", msg=None):
     """
     随机延迟 f ~ t 毫秒, 如果 f > t 则固定延迟 f
 
     :param f: from 最小毫秒
     :param t: to 最大毫秒
     :param pType: 参数类型 毫秒/秒/分/时
+    :param msg: 延时信息
     """
     if f > t:
         t = f
 
     s = get(f, t)
-    logger.info("[延时] %s %s" % (s, pType))
+    if msg is not None:
+        logger.info("[延时] %s" % msg)
+    else:
+        logger.info("[延时] %s %s" % (s, pType))
 
     # 把 s 转换为秒
     if pType == "毫秒":

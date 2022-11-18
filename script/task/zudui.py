@@ -55,17 +55,17 @@ def daiDui():
         # 处理第一个队员
         win = window.switchNext(winDuiZhang, winMax)
         while fight.handleFightEnd() == "进行中":
-            random.sleep()
+            random.sleep(msg="战斗进行中")
         # 处理第二个队员
         if getConfig("客户端数") >= 2:
             win = window.switchNext(win, winMax)
             while fight.handleFightEnd() == "进行中":
-                random.sleep()
+                random.sleep(msg="战斗进行中")
         # 处理第三个队员
         if getConfig("客户端数") == 3:
             window.switchNext(win, winMax)
             while fight.handleFightEnd() == "进行中":
-                random.sleep()
+                random.sleep(msg="战斗进行中")
         times -= 1
         script.setInfo("times", times)
         random.sleep(1, 2, "秒")

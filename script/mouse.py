@@ -28,7 +28,7 @@ def click(x, y, rw=0, rh=0, delay=True):
 
     pyautogui.moveTo(x + script.random.get(t=rw), y + script.random.get(t=rh))
     if delay:
-        script.random.sleep()
+        script.random.sleep(msg="鼠标点击")
     pyautogui.click()
 
 

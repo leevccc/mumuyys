@@ -61,19 +61,25 @@ def handleFightEnd():
     if pic.find("fanhui3.jpg", ux=0, uy=0, uw=100, uh=100):
         result = "进行中"  # 找到返回按钮, 则跳过后面的战斗结果检测
     elif pic.find("victory.jpg", confidence=0.98, ux=426, uy=58, uw=234, uh=211):
+        logger.info("识别到胜利状态 一")
         mouse.clickRightDown()
         while pic.find("victory2.jpg", confidence=0.98, ux=563, uy=442, uw=336, uh=284) is False:
+            logger.info("等待胜利状态 二")
             mouse.clickThis()
         while pic.find("victory2.jpg", confidence=0.98, ux=563, uy=442, uw=336, uh=284):
+            logger.info("识别到胜利状态 二")
             mouse.clickThis()
         result = "胜利"
     elif pic.find("failure.jpg", confidence=0.98, ux=426, uy=58, uw=234, uh=211):
+        logger.info("识别到失败状态")
         random.sleep()
         mouse.clickRightDown()
         result = "失败"
     elif pic.find("victory2.jpg", confidence=0.98, ux=563, uy=442, uw=336, uh=284):
+        logger.info("识别到胜利状态 二")
         mouse.clickRightDown()
         while pic.find("victory2.jpg", confidence=0.98, ux=563, uy=442, uw=336, uh=284):
+            logger.info("识别到胜利状态 二")
             mouse.clickThis()
         result = "胜利"
 
