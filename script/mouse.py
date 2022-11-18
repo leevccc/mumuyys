@@ -42,5 +42,5 @@ def clickRightDown():
 
 def clickThis(delay=True):
     if delay:
-        script.random.sleep()
+        script.random.sleep(msg="鼠标点击")
     pyautogui.click()

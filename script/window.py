@@ -54,9 +54,8 @@ def initMuMuWindow():
 
 def switch(num):
     num = str(int(num))
-    logger.info("切换到窗口 %s" % num)
     pyautogui.hotkey("ctrl", num)
-    random.sleep()
+    random.sleep(msg="切换到窗口 %s" % num)
 
 
 def switchNext(currentWindow, maxWindow):

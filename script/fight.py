@@ -66,6 +66,7 @@ def handleFightEnd():
         while pic.find("victory2.jpg", confidence=0.98, ux=563, uy=442, uw=336, uh=284) is False:
             logger.info("等待胜利状态 二")
             mouse.clickThis()
+            mouse.clickThis()
         while pic.find("victory2.jpg", confidence=0.98, ux=563, uy=442, uw=336, uh=284):
             logger.info("识别到胜利状态 二")
             mouse.clickThis()
