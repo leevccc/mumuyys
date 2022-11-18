@@ -14,7 +14,7 @@ import logger
 import script
 from script import anaYuHun
 
-version = "v2.5.0"
+version = "v2.6.0"
 user32 = ctypes.windll.user32  # 加载user32.dll
 path = os.getcwd()
 imgPath = path + "\\img\\"
