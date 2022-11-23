@@ -67,8 +67,8 @@ def handleFightEnd():
             mouse.clickThis(delay=False)
             random.sleep(msg="等待胜利状态 二")
         while pic.find("victory2.jpg", confidence=0.90, ux=563, uy=442, uw=336, uh=284):
-            logger.info("识别到胜利状态 二")
-            mouse.clickThis()
+            mouse.clickThis(delay=False)
+            random.sleep(msg="识别到胜利状态 二")
         result = "胜利"
     elif pic.find("failure.jpg", confidence=0.98, ux=426, uy=58, uw=234, uh=211):
         logger.info("识别到失败状态")
@@ -79,8 +79,8 @@ def handleFightEnd():
         logger.info("识别到胜利状态 二")
         mouse.clickRightDown()
         while pic.find("victory2.jpg", confidence=0.98, ux=563, uy=442, uw=336, uh=284):
-            logger.info("识别到胜利状态 二")
-            mouse.clickThis()
+            mouse.clickThis(delay=False)
+            random.sleep(msg="识别到胜利状态 二")
         result = "胜利"
 
     if result != "进行中":
