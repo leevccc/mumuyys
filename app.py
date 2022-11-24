@@ -12,7 +12,7 @@ from ttkbootstrap import ttk
 import config
 import logger
 import script
-from script import anaYuHun
+from script import anaYuHun, yuhun
 
 version = "v2.6.0"
 user32 = ctypes.windll.user32  # 加载user32.dll
@@ -299,6 +299,8 @@ class App:
     def regTab5(tab):
         ttk.Button(tab, text="强化方案", command=anaYuHun.run) \
             .grid(row=0, column=0, pady=3)
+        ttk.Button(tab, text="御魂胚子", command=yuhun.ana) \
+            .grid(row=1, column=0, pady=3)
 
     # Tab: 使用说明
     @staticmethod
