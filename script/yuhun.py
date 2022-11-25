@@ -7,32 +7,140 @@ import app
 import logger
 from script import window
 
+init = False
+yuHunRowImgObject = {}
+cleanImgObject = None
+yuHunImgObject = {}
+mainImgObject = {}
+fuImgObject = {}
+
+yuHunList = {
+    "bcf": "贝吹坊",
+    "bzb": "兵主部",
+    "kg": "狂骨",
+    "yml": "阴摩罗",
+    "xy": "心眼",
+    "mw": "鸣屋",
+    "z": "狰",
+    "lrd": "轮入道",
+    "fy": "蝠翼",
+    "hyhy": "海月火玉",
+    "qnf": "青女房",
+    "zn": "针女",
+    "zms": "镇墓兽",
+    "ps": "破势",
+    "shn": "伤魂鸟",
+    "wq": "网切",
+    "sw": "三味",
+    "el": "恶楼",
+    "tf": "涂佛",
+    "sy": "树妖",
+    "zh": "薙魂",
+    "zl": "钟灵",
+    "jj": "镜姬",
+    "bf": "被服",
+    "npzh": "涅槃之火",
+    "dzx": "地藏像",
+    "csl": "出世螺",
+    "my": "魅妖",
+    "zz": "珍珠",
+    "mm": "木魅",
+    "rnss": "日女巳时",
+    "fz": "反枕",
+    "zcm": "招财猫",
+    "xyh": "雪幽魂",
+    "ynh": "遗念火",
+    "fym": "飞缘魔",
+    "bj": "蚌精",
+    "hl": "火灵",
+    "gq": "共潜",
+    "ygx": "幽谷响",
+    "fhx": "返魂香",
+    "tzg": "骰子鬼",
+    "wlzx": "魍魉之匣",
+    "glgj": "鬼灵歌伎",
+    "sql": "蜃气楼",
+    "dzn": "地震鲶",
+    "hkl": "荒骷髅",
+    "lc": "胧车",
+    "tzz": "土蜘蛛",
+}
+mainList = {
+    "mGongJi": "攻击",
+    "mFangYu": "防御",
+    "mShengMing": "生命",
+    "mSuDu": "速度",
+    "mBaoJi": "暴击",
+    "mBaoJiShangHai": "暴击伤害",
+    "mGongJiJiaCheng": "攻击加成",
+    "mFangYuJiaCheng": "防御加成",
+    "mShengMingJiaCheng": "生命加成",
+    "mXiaoGuoMingZhong": "效果命中",
+    "mXiaoGuoDiKang": "效果抵抗",
+}
+
+fuList = {
+    "fGongJi": "攻击",
+    "fFangYu": "防御",
+    "fShengMing": "生命",
+    "fSuDu": "速度",
+    "fBaoJi": "暴击",
+    "fBaoJiShangHai": "暴击伤害",
+    "fGongJiJiaCheng": "攻击加成",
+    "fFangYuJiaCheng": "防御加成",
+    "fShengMingJiaCheng": "生命加成",
+    "fXiaoGuoMingZhong": "效果命中",
+    "fXiaoGuoDiKang": "效果抵抗",
+}
+
+
+def initial():
+    global init, cleanImgObject
+    if init is False:
+        logger.info("加载御魂位置素材")
+        for i in range(1, 7):
+            yuHunRowImgObject[str(i)] = getImgObjectByFileName(str(i))
+        logger.info("加载御魂名称素材")
+        for k, v in yuHunList.items():
+            yuHunImgObject[k] = getImgObjectByFileName(f"\\type\\{k}")
+        logger.info("加载清理图标素材")
+        cleanImgObject = getImgObjectByFileName("clean")
+        logger.info("加载主属性素材")
+        for k, v in mainList.items():
+            mainImgObject[k] = getImgObjectByFileName(k)
+        logger.info("加载副属性素材")
+        for k, v in fuList.items():
+            fuImgObject[k] = getImgObjectByFileName(k)
+        init = True
+
 
 def ana():
+    initial()  # 初始化加载各种图片素材
+
+    # 获取"清理图标"的坐标信息
+    screen = printScreen()
+    clean = findImgByImgObject(cleanImgObject, screen)
+    # 只取左上角并转换为游戏里的相对坐标
+    cleanX = clean["rectangle"][0][0]
+    cleanY = clean["rectangle"][0][1]
+
+    # 通过清理图标位置计算御魂名称和图标区域
+    nameX = cleanX - 265
+    nameY = cleanY - 70
     # 识别几号位御魂
-    screen = printScreen(643, 56, 368, 530)
+    screen = printScreen(nameX, nameY, 253, 131)
     num = 0
-    for i in range(1, 7):
-        if getImg(str(i), screen) is not None:
-            num = i
+    for k, v in yuHunRowImgObject.items():
+        if findImgByImgObject(v, screen) is not None:
+            num = k
             break
     # 识别御魂名称
-    yuHunList = {
-        "bcf": "贝吹坊",
-    }
-    yuHun = None
+    yuHunName = None
     for k, v in yuHunList.items():
-        if getImg(k, screen) is not None:
-            yuHun = v
+        if findImgByImgObject(yuHunImgObject[k], screen) is not None:
+            yuHunName = v
             break
-    logger.info(f"{yuHun} {num}号位")
-
-    # "清理图标"的坐标信息
-    screen = printScreen()
-    clean = getImg("clean", screen)
-    # 只取左上角并转换为游戏里的相对坐标
-    cleanX = clean["rectangle"][0][0] - window.x
-    cleanY = clean["rectangle"][0][1] - window.y
+    logger.info(f"{yuHunName} {num}号位")
 
     # 通过清理图标计算主属性位置
     mainX = cleanX - 231
@@ -40,41 +148,15 @@ def ana():
 
     # 主属性列表
     main = False
-    mainList = {
-        "mGongJi": "攻击",
-        "mFangYu": "防御",
-        "mShengMing": "生命",
-        "mSuDu": "速度",
-        "mBaoJi": "暴击",
-        "mBaoJiShangHai": "暴击伤害",
-        "mGongJiJiaCheng": "攻击加成",
-        "mFangYuJiaCheng": "防御加成",
-        "mShengMingJiaCheng": "生命加成",
-        "mXiaoGuoMingZhong": "效果命中",
-        "mXiaoGuoDiKang": "效果抵抗",
-    }
     # 识别主属性
     screen = printScreen(mainX, mainY, 150, 37)
     for k, v in mainList.items():
-        if getImg(k, screen) is not None:
+        if findImgByImgObject(mainImgObject[k], screen) is not None:
             main = v
             break
     logger.info("主属性 %s" % main)
 
     # 副属性列表
-    fuList = {
-        "fGongJi": "攻击",
-        "fFangYu": "防御",
-        "fShengMing": "生命",
-        "fSuDu": "速度",
-        "fBaoJi": "暴击",
-        "fBaoJiShangHai": "暴击伤害",
-        "fGongJiJiaCheng": "攻击加成",
-        "fFangYuJiaCheng": "防御加成",
-        "fShengMingJiaCheng": "生命加成",
-        "fXiaoGuoMingZhong": "效果命中",
-        "fXiaoGuoDiKang": "效果抵抗",
-    }
     # 遍历4个副属性词条
     fu = 0
     for i in range(1, 5):
@@ -83,7 +165,7 @@ def ana():
         screen = printScreen(fuX, fuY, 150, 37)
         # 识别副属性
         for k, v in fuList.items():
-            if getImg(k, screen) is not None:
+            if findImgByImgObject(fuImgObject[k], screen) is not None:
                 logger.info("副属性%s %s" % (i, v))
                 fu += 1
                 break
@@ -106,7 +188,16 @@ def printScreen(ux=None, uy=None, uw=None, uh=None):
     return screenshot
 
 
-def getImg(fileName, screenshot, confidence=0.90):
+def findImgByFileName(fileName, screenshot, confidence=0.90):
     imgObject = cv2.imread(app.imgPath + "yuhun\\" + fileName + ".jpg")
+    match = aircv.find_template(screenshot, imgObject, confidence)
+    return match
+
+
+def getImgObjectByFileName(fileName):
+    return cv2.imread(app.imgPath + "yuhun\\" + fileName + ".jpg")
+
+
+def findImgByImgObject(imgObject, screenshot, confidence=0.90):
     match = aircv.find_template(screenshot, imgObject, confidence)
     return match
