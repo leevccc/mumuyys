@@ -4,6 +4,7 @@ import numpy as np
 import pyautogui
 import xlwings as xw
 import app
+import config
 import logger
 from script import window
 
@@ -13,6 +14,8 @@ cleanImgObject = None
 yuHunImgObject = {}
 mainImgObject = {}
 fuImgObject = {}
+allPlanList = []
+excel = None
 
 yuHunList = {
     "bcf": "贝吹坊",
@@ -101,6 +104,7 @@ keyList = {
     "爆": "暴击伤害",
     "命": "效果命中",
     "抵": "效果抵抗",
+    "抗": "效果抵抗",
     "攻击加成": "攻击加成",
     "防御加成": "防御加成",
     "生命加成": "生命加成",
@@ -109,6 +113,17 @@ keyList = {
     "暴击伤害": "暴击伤害",
     "效果命中": "效果命中",
     "效果抵抗": "效果抵抗",
+}
+
+rKeyList = {
+    "攻击加成": "攻",
+    "防御加成": "防",
+    "生命加成": "生",
+    "速度": "速",
+    "暴击": "暴",
+    "暴击伤害": "爆",
+    "效果命中": "命",
+    "效果抵抗": "抵",
 }
 
 indexList = {
@@ -140,6 +155,11 @@ indexList = {
 def initial():
     global init, cleanImgObject
     if init is False:
+        logger.info("开始初始化...")
+        logger.info("生成御魂强化方案")
+        getPlan()
+        # for apl in allPlanList:
+        #     logger.info(apl)
         logger.info("加载御魂位置素材")
         for i in range(1, 7):
             yuHunRowImgObject[str(i)] = getImgObjectByFileName(str(i))
@@ -157,13 +177,19 @@ def initial():
         init = True
 
 
-def readYuHun():
+def ana():
+    global excel
     initial()  # 初始化加载各种图片素材
 
     # 获取"清理图标"的坐标信息
     screen = printScreen()
     clean = findImgByImgObject(cleanImgObject, screen)
     # 只取左上角并转换为游戏里的相对坐标
+    if clean is None:
+        logger.info("没有读取到御魂信息")
+        excel.sheets["分析"].range('A1:C3').value = ["没有读取到御魂信息", None, None]
+        excel.activate(steal_focus=True)
+        return False
     cleanX = clean["rectangle"][0][0]
     cleanY = clean["rectangle"][0][1]
 
@@ -172,7 +198,7 @@ def readYuHun():
     nameY = cleanY - 70
     # 识别几号位御魂
     screen = printScreen(nameX, nameY, 253, 131)
-    num = 0
+    num = "0"
     for k, v in yuHunRowImgObject.items():
         if findImgByImgObject(v, screen) is not None:
             num = k
@@ -199,6 +225,21 @@ def readYuHun():
             break
     logger.info("主属性 %s" % main)
 
+    # 初始化结果集
+    result = [
+        [None, yuHunName, f"{num}号位", None, None, None, None, None],
+        [None, None, None, None, None, None, None, None],
+        ["主属性", main, None, None, None, None, None, None],
+        ["副属性", None, None, None, None, None, None, None],
+        [None, None, None, None, None, None, None, None],
+        [None, None, None, None, None, None, None, None],
+        [None, None, None, None, None, None, None, None],
+        [None, None, None, None, None, None, None, None],
+        ["强化依据", None, None, None, None, None, None, None],
+        ["匹配数", "御魂", "位置", "主属性", "副1", "副2", "副3", "副4"],
+        [None, None, None, None, None, None, None, None],  # 强化方案
+        [None, None, None, None, None, None, None, None],  # 应用套装..
+    ]
     # 副属性列表
     # 遍历4个副属性词条
     fu = 0
@@ -211,8 +252,69 @@ def readYuHun():
             if findImgByImgObject(fuImgObject[k], screen) is not None:
                 logger.info("副属性%s %s" % (i, v))
                 fu += 1
+                result[2 + i][1] = v
                 break
     logger.info(f"共有副属性 {fu} 条")
+
+    if fu < getConfig("副属性数量"):
+        # 输出结果
+        excel.sheets["分析"].range('A1:C3').value = ["副属性数量不满足设定值", None, None]
+        excel.activate(steal_focus=True)
+        return False
+    # 查找强化方案
+    for apl in allPlanList:
+        # "御魂": pl["御魂"],
+        # "位置": pl["位置"],
+        # "主属性": pl["主属性"],
+        # "副属性1": pl["副属性1"],
+        # "副属性2": pl["副属性2"],
+        # "副属性3": pl["副属性3"],
+        # "副属性4": pl["副属性4"],
+        # "套装": [pl["套装"]],
+        # "套装详情": [pl["套装详情"]],
+        if apl["御魂"] != yuHunName:
+            continue
+        if int(apl["位置"]) != int(num):
+            continue
+        if int(num) == 6 and apl["主属性"] in ["暴", "爆"] and main not in ["暴", "爆"]:
+            continue
+        elif apl["主属性"] is not None and apl["主属性"] != main:
+            continue
+
+        # 命中的副属性数量
+        count = 0
+        if apl["副属性1"] is not None and apl["副属性1"] in [result[3][1], result[4][1], result[5][1], result[6][1]]:
+            count += 1
+        if apl["副属性2"] is not None and apl["副属性2"] in [result[3][1], result[4][1], result[5][1], result[6][1]]:
+            count += 1
+        if apl["副属性3"] is not None and apl["副属性3"] in [result[3][1], result[4][1], result[5][1], result[6][1]]:
+            count += 1
+        if apl["副属性4"] is not None and apl["副属性4"] in [result[3][1], result[4][1], result[5][1], result[6][1]]:
+            count += 1
+
+        target = getConfig("匹配数")
+        if fu == 3 and getConfig("3副匹配少1") == 1 and target > 1:
+            target -= 1
+        if count >= target:
+            lResult = len(result)
+            # "匹配数", "御魂", "位置", "主属性", "副1", "副2", "副3", "副4"
+            result.insert(lResult - 2, [
+                count,
+                apl["御魂"],
+                apl["位置"],
+                apl["主属性"],
+                apl["副属性1"],
+                apl["副属性2"],
+                apl["副属性3"],
+                apl["副属性4"]
+            ])
+            for d in apl["套装详情"]:
+                result.insert(lResult - 1, [d, None, None, None, None, None, None, None])
+    for i in range(0, 100):
+        result.append([None, None, None, None, None, None, None, None])
+    # 输出结果
+    excel.sheets["分析"].range('A1').expand().value = result
+    excel.activate(steal_focus=True)
 
 
 def printScreen(ux=None, uy=None, uw=None, uh=None):
@@ -247,6 +349,7 @@ def findImgByImgObject(imgObject, screenshot, confidence=0.90):
 
 
 def getPlan():
+    global excel, allPlanList
     excel = xw.Book(app.path + r"\yuhun.xlsx")
     data = excel.sheets["套装"].range('A1').expand().value
     planList = []
@@ -262,9 +365,9 @@ def getPlan():
             "式神": item[1],
             "御魂1": item[2],
             "御魂2": item[3],
-            "二号位": keyList[item[4]],
-            "四号位": keyList[item[5]],
-            "六号位": keyList[item[6]],
+            "二号位": None if item[4] is None else keyList[item[4]],
+            "四号位": None if item[5] is None else keyList[item[5]],
+            "六号位": None if item[6] is None else keyList[item[6]],
             "指标1": indexList[item[7]],
             "指标2": None if item[8] is None else indexList[item[8]],
             "备注": item[9],
@@ -287,23 +390,46 @@ def getPlan():
             fu[i] = f
             i += 1
 
-        planList.append(planData(package["御魂1"], 1, None, fu))
-        planList.append(planData(package["御魂1"], 2, package["二号位"], fu))
-        planList.append(planData(package["御魂1"], 3, None, fu))
-        planList.append(planData(package["御魂1"], 4, package["四号位"], fu))
-        planList.append(planData(package["御魂1"], 5, None, fu))
-        planList.append(planData(package["御魂1"], 6, package["六号位"], fu))
+        planList.append(planData(package, package["御魂1"], 1, None, fu))
+        planList.append(planData(package, package["御魂1"], 2, package["二号位"], fu))
+        planList.append(planData(package, package["御魂1"], 3, None, fu))
+        planList.append(planData(package, package["御魂1"], 4, package["四号位"], fu))
+        planList.append(planData(package, package["御魂1"], 5, None, fu))
+        planList.append(planData(package, package["御魂1"], 6, package["六号位"], fu))
 
         if package["御魂2"] is not None and package["御魂2"] != package["御魂1"]:
-            planList.append(planData(package["御魂2"], 1, None, fu))
-            planList.append(planData(package["御魂2"], 2, package["二号位"], fu))
-            planList.append(planData(package["御魂2"], 3, None, fu))
-            planList.append(planData(package["御魂2"], 4, package["四号位"], fu))
-            planList.append(planData(package["御魂2"], 5, None, fu))
-            planList.append(planData(package["御魂2"], 6, package["六号位"], fu))
+            planList.append(planData(package, package["御魂2"], 1, None, fu))
+            planList.append(planData(package, package["御魂2"], 2, package["二号位"], fu))
+            planList.append(planData(package, package["御魂2"], 3, None, fu))
+            planList.append(planData(package, package["御魂2"], 4, package["四号位"], fu))
+            planList.append(planData(package, package["御魂2"], 5, None, fu))
+            planList.append(planData(package, package["御魂2"], 6, package["六号位"], fu))
 
-    logger.info(packageList)
-    logger.info(planList)
+    # logger.info(packageList)
+    # logger.info(planList)
+    newPlanList = []
+    for pl in planList:
+        isNew = True
+        for npl in newPlanList:
+            if planIsSame(pl, npl):
+                npl["套装"].append(pl["套装"])
+                npl["套装详情"].append(pl["套装详情"])
+                isNew = False
+                break
+        if isNew:
+            newPlanList.append({
+                "御魂": pl["御魂"],
+                "位置": pl["位置"],
+                "主属性": pl["主属性"],
+                "副属性1": pl["副属性1"],
+                "副属性2": pl["副属性2"],
+                "副属性3": pl["副属性3"],
+                "副属性4": pl["副属性4"],
+                "套装": [pl["套装"]],
+                "套装详情": [pl["套装详情"]],
+            })
+
+    allPlanList = newPlanList
 
 
 def getFuKey(index):
@@ -317,7 +443,25 @@ def getFuKey(index):
         return [index]
 
 
-def planData(yuHun, index, main=None, fu=None):
+def planIsSame(pl, npl):
+    if pl["御魂"] != npl["御魂"]:
+        return False
+    if pl["位置"] != npl["位置"]:
+        return False
+    if pl["主属性"] != npl["主属性"]:
+        return False
+    if pl["副属性1"] != npl["副属性1"]:
+        return False
+    if pl["副属性2"] != npl["副属性2"]:
+        return False
+    if pl["副属性3"] != npl["副属性3"]:
+        return False
+    if pl["副属性4"] != npl["副属性4"]:
+        return False
+    return True
+
+
+def planData(package, yuHun, index, main=None, fu=None):
     if fu is None:
         fu = [None, None, None, None]
 
@@ -338,9 +482,16 @@ def planData(yuHun, index, main=None, fu=None):
         "副属性2": fu[1],
         "副属性3": fu[2],
         "副属性4": fu[3],
+        "套装": package["编号"],
+        "套装详情": f"{package['使用场景']}: "
+                    f"[{package['御魂1']}{'/' if package['御魂2'] is not None else ''}{package['御魂2'] if package['御魂2'] is not None else ''}]"
+                    f"{package['式神']}"
+                    f"({'X' if package['二号位'] is None else rKeyList[package['二号位']]}"
+                    f"{'X' if package['四号位'] is None else rKeyList[package['四号位']]}"
+                    f"{'X' if package['六号位'] is None else rKeyList[package['六号位']]},"
+                    f"指标:{package['指标1']}{'/' if package['指标2'] is not None else ''}{package['指标2'] if package['指标2'] is not None else ''})"
     }
 
 
-def ana():
-    getPlan()
-    # readYuHun()
+def getConfig(key):
+    return config.Config().get("御魂强化", key)

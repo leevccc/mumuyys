@@ -87,6 +87,14 @@ class Config:
         configs["活动模式"]["次数"] = tk.IntVar()
         configs["活动模式"]["次数"].set(30)
 
+        configs["御魂强化"] = {}
+        configs["御魂强化"]["副属性数量"] = tk.IntVar()
+        configs["御魂强化"]["副属性数量"].set(3)
+        configs["御魂强化"]["匹配数"] = tk.IntVar()
+        configs["御魂强化"]["匹配数"].set(2)
+        configs["御魂强化"]["3副匹配少1"] = tk.IntVar()
+        configs["御魂强化"]["3副匹配少1"].set(1)
+
         self.load()
         # 第一次运行的时候conf中没有任何值, 加载完再保存一遍确保conf中的值和内存中的值已同步
         self.save()

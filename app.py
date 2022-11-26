@@ -12,7 +12,7 @@ from ttkbootstrap import ttk
 import config
 import logger
 import script
-from script import anaYuHun, yuhun
+from script import yuhun
 
 version = "v2.6.0"
 user32 = ctypes.windll.user32  # 加载user32.dll
@@ -295,12 +295,30 @@ class App:
         ttk.Entry(tab, textvariable=hdConfigs["次数"]) \
             .grid(row=0, column=2, sticky=tk.W, padx=5)
 
-    @staticmethod
-    def regTab5(tab):
-        ttk.Button(tab, text="强化方案", command=anaYuHun.run) \
-            .grid(row=0, column=0, pady=3)
-        ttk.Button(tab, text="御魂胚子", command=yuhun.ana) \
+    def regTab5(self, tab):
+        yhqhConfigs = self.configs.configs["御魂强化"]
+        ttk.Button(tab, text="御魂胚子分析", command=yuhun.ana) \
             .grid(row=1, column=0, pady=3)
+        ttk.Label(tab, text="副属性数量至少") \
+            .grid(row=2, column=0, pady=3)
+        ttk.Radiobutton(tab, text="3条", value=3, variable=yhqhConfigs["副属性数量"]) \
+            .grid(row=2, column=1, sticky=tk.W, padx=5, pady=10)
+        ttk.Radiobutton(tab, text="4条", value=4, variable=yhqhConfigs["副属性数量"]) \
+            .grid(row=2, column=2, sticky=tk.W, padx=5, pady=10)
+
+        ttk.Label(tab, text="副属性匹配至少") \
+            .grid(row=3, column=0, pady=3)
+        ttk.Radiobutton(tab, text="1条", value=1, variable=yhqhConfigs["匹配数"]) \
+            .grid(row=3, column=1, sticky=tk.W, padx=5, pady=10)
+        ttk.Radiobutton(tab, text="2条", value=2, variable=yhqhConfigs["匹配数"]) \
+            .grid(row=3, column=2, sticky=tk.W, padx=5, pady=10)
+        ttk.Radiobutton(tab, text="3条", value=3, variable=yhqhConfigs["匹配数"]) \
+            .grid(row=3, column=3, sticky=tk.W, padx=5, pady=10)
+        ttk.Radiobutton(tab, text="4条", value=4, variable=yhqhConfigs["匹配数"]) \
+            .grid(row=3, column=4, sticky=tk.W, padx=5, pady=10)
+
+        ttk.Checkbutton(tab, text="3条副属性胚子,匹配数减1", offvalue=0, onvalue=1, variable=yhqhConfigs["3副匹配少1"]) \
+            .grid(row=4, column=0, columnspan=5, sticky=tk.W, padx=5, pady=10)
 
     # Tab: 使用说明
     @staticmethod
@@ -352,6 +370,7 @@ class App:
 
 
 class HotkeyThread(Thread):  # 创建一个Thread.threading的扩展类
+    f9 = 120
     f10 = 121
     f11 = 122
 
@@ -359,7 +378,9 @@ class HotkeyThread(Thread):  # 创建一个Thread.threading的扩展类
         Thread.__init__(self)
 
     def run(self):
-        # 注册快捷键F10并判断是否成功
+        # 注册快捷键并判断是否成功
+        if not user32.RegisterHotKey(None, self.f9, 0, win32con.VK_F9):
+            messagebox.showerror("注册热键失败", "F9 热键注册失败, 请检查是否被占用")
         if not user32.RegisterHotKey(None, self.f10, 0, win32con.VK_F10):
             messagebox.showerror("注册热键失败", "F10 热键注册失败, 请检查是否被占用")
         if not user32.RegisterHotKey(None, self.f11, 0, win32con.VK_F11):
@@ -371,6 +392,8 @@ class HotkeyThread(Thread):  # 创建一个Thread.threading的扩展类
             while True:
                 if user32.GetMessageA(ctypes.byref(msg), None, 0, 0) != 0:
                     if msg.message == win32con.WM_HOTKEY:
+                        if msg.wParam == self.f9:
+                            yuhun.ana()
                         if msg.wParam == self.f10:
                             script.run()
                         if msg.wParam == self.f11:
@@ -381,6 +404,7 @@ class HotkeyThread(Thread):  # 创建一个Thread.threading的扩展类
 
         finally:
             # 释放热键
+            user32.UnregisterHotKey(None, "F9")
             user32.UnregisterHotKey(None, "F10")
             user32.UnregisterHotKey(None, "F11")
 
