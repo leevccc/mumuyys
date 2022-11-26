@@ -292,7 +292,19 @@ def ana():
         if apl["副属性4"] is not None and apl["副属性4"] in [result[3][1], result[4][1], result[5][1], result[6][1]]:
             count += 1
 
+        planCount = 0
+        if apl["副属性1"] is not None:
+            planCount += 1
+        if apl["副属性2"] is not None:
+            planCount += 1
+        if apl["副属性3"] is not None:
+            planCount += 1
+        if apl["副属性4"] is not None:
+            planCount += 1
+
         target = getConfig("匹配数")
+        if planCount < target:
+            target = planCount
         if fu == 3 and getConfig("3副匹配少1") == 1 and target > 1:
             target -= 1
         if count >= target:
