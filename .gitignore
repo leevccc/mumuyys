@@ -1,6 +1,7 @@
 # 临时文件
 img/temp
 config.ini
+yuhun.xlsx
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
