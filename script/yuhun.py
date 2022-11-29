@@ -301,7 +301,9 @@ def ana():
             planCount += 1
         if apl["副属性4"] is not None:
             planCount += 1
-
+        # 单个要求时求必须满腿
+        if fu == 3 and planCount == 1:
+            continue
         target = getConfig("匹配数")
         if planCount < target:
             target = planCount
