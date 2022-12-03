@@ -31,7 +31,7 @@ def jieJieTuPo():
     no = 1  # 挑战位置
     while running:
         # 判断是否完成
-        if pic.find("gerentupowancheng.jpg", confidence=0.95, times=2, ux=1200, uy=0, uw=260, uh=70):
+        if pic.find("gerentupowancheng.jpg", confidence=0.98, times=2, ux=1200, uy=0, uw=260, uh=70):
             running = False
             continue
         # 寻找未挑战的对象
@@ -82,7 +82,7 @@ def liaoTuPo():
 
     running = True
     while running:
-        if pic.find("liaotupowancheng.jpg", confidence=0.97) or pic.find("liaotupowancheng2.jpg", confidence=0.97):
+        if pic.find("liaotupowancheng.jpg", confidence=0.98) or pic.find("liaotupowancheng2.jpg", confidence=0.98):
             running = False
             continue
 

@@ -1,15 +1,18 @@
 import time
 
 import aircv
+import cv2
+import numpy as np
 import pyautogui
 
 import app
+import logger
 import script
 from script import window, random
 from script.task import dankaiXuanShangFengYin
 
 
-def printScreen(ux=None, uy=None, uw=None, uh=None, uf="screenshot.jpg"):
+def printScreen(ux=None, uy=None, uw=None, uh=None):
     """
     游戏窗口截图，截图保存在 img/temp/ 目录下
 
@@ -17,7 +20,6 @@ def printScreen(ux=None, uy=None, uw=None, uh=None, uf="screenshot.jpg"):
     :param uy: 指定区域 y, 相对坐标 (仅游戏画面)
     :param uw: 指定区域 宽度
     :param uh: 指定区域 高度
-    :param uf: 指定保存的文件名
     """
 
     # 脚本运行的本质是 识别图片+鼠标点击, 所以只需要在截图和点击功能里加入线程阻塞即可实现暂停功能
@@ -38,30 +40,19 @@ def printScreen(ux=None, uy=None, uw=None, uh=None, uf="screenshot.jpg"):
     rx = x + w
     ry = y + h
 
+    # 悬赏封印邀请处理
+    while dankaiXuanShangFengYin.handleHaoYouYaoQing():
+        logger.info("处理了悬赏邀请")
     # 截图前把鼠标移出截图区域
     mouse_x, mouse_y = pyautogui.position()
     if x < mouse_x < rx and y < mouse_y < ry:
         pyautogui.moveTo(rx + 1 + random.get(5, 10), ry + 1 + random.get(5, 10))
 
     screen = pyautogui.screenshot(region=(x, y, w, h))
-    screen.save(app.tempImgPath + uf.replace("\\", "_"))
+    # screen.save(app.tempImgPath + uf.replace("\\", "_"))
+    screenshot = cv2.cvtColor(np.asarray(screen), cv2.COLOR_RGB2BGR)
 
-    # 处理悬赏封印邀请
-    sp = False
-    # 指定截图区域的
-    if ux is not None:
-        # 悬赏封印位置
-        _x = window.x + 624
-        _y = window.y + 161
-        _rx = _x + 194
-        _ry = _y + 64
-        # 截图范围覆盖了悬赏封印位置
-        if ux < _x and uy < _y and rx > _rx and ry > _ry:
-            sp = False  # 不需要重新截屏
-        else:
-            sp = True
-    if dankaiXuanShangFengYin.handleHaoYouYaoQing(screenPrint=sp, fileName=uf.replace("\\", "_")):
-        printScreen(ux=ux, uy=uy, uw=uw, uh=uh, uf=uf)
+    return screenshot
 
 
 def get(img, confidence=0.9, times=1, ux=None, uy=None, uw=None, uh=None, details=False):
@@ -84,8 +75,8 @@ def get(img, confidence=0.9, times=1, ux=None, uy=None, uw=None, uh=None, detail
 
     match_result = None
     for i in range(0, times):
-        printScreen(ux=ux, uy=uy, uw=uw, uh=uh, uf=img)
-        screenshot = aircv.imread(app.tempImgPath + img.replace("\\", "_"))
+        screenshot = printScreen(ux=ux, uy=uy, uw=uw, uh=uh)
+        # screenshot = aircv.imread(app.tempImgPath + img.replace("\\", "_"))
         imgObject = aircv.imread(app.imgPath + "\\" + img)
 
         match_result = aircv.find_template(screenshot, imgObject, confidence)

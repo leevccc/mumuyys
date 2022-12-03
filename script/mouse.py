@@ -2,6 +2,7 @@ import time
 
 import pyautogui
 
+import logger
 import script
 from script.task import dankaiXuanShangFengYin
 
@@ -23,12 +24,16 @@ def click(x, y, rw=0, rh=0, delay=True):
     x += script.window.x
     y += script.window.y
 
-    # 悬赏封印邀请处理
-    dankaiXuanShangFengYin.handleHaoYouYaoQing()
-
-    pyautogui.moveTo(x + script.random.get(t=rw), y + script.random.get(t=rh))
-    if delay:
-        script.random.sleep(msg="鼠标点击")
+    handleHaoYouYaoQing = True
+    while handleHaoYouYaoQing:
+        pyautogui.moveTo(x + script.random.get(t=rw), y + script.random.get(t=rh))
+        if delay:
+            script.random.sleep(msg="鼠标点击")
+        handleHaoYouYaoQing = False
+        # 处理悬赏封印好友邀请
+        while dankaiXuanShangFengYin.handleHaoYouYaoQing():
+            logger.info("处理了悬赏邀请")
+            handleHaoYouYaoQing = True
     pyautogui.click()
 
 
