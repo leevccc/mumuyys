@@ -276,9 +276,11 @@ def ana():
             continue
         if int(apl["位置"]) != int(num):
             continue
-        if int(num) == 6 and apl["主属性"] in ["暴", "爆"] and main not in ["暴", "爆"]:
+        if int(num) != 6 and apl["主属性"] is not None and apl["主属性"] != main:
             continue
-        elif apl["主属性"] is not None and apl["主属性"] != main:
+        elif int(num) == 6 and apl["主属性"] is not None and apl["主属性"] not in ["暴击", "暴击伤害"] and apl["主属性"] != main:
+            continue
+        elif int(num) == 6 and apl["主属性"] is not None and apl["主属性"] in ["暴击", "暴击伤害"] and main not in ["暴击", "暴击伤害"]:
             continue
 
         # 命中的副属性数量
