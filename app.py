@@ -262,6 +262,8 @@ class App:
             .grid(row=0, column=2, sticky=tk.W, padx=5, pady=10)
         ttk.Radiobutton(tab, text="御魂挑战", value="御魂挑战", variable=zdConfigs["模式"]) \
             .grid(row=0, column=3, sticky=tk.W, padx=5, pady=10)
+        ttk.Radiobutton(tab, text="跟队探索", value="跟队探索", variable=zdConfigs["模式"]) \
+            .grid(row=0, column=4, sticky=tk.W, padx=5, pady=10)
         ttk.Label(tab, text="客户端数") \
             .grid(row=1, column=0, sticky=tk.W, padx=5, pady=10)
         ttk.Radiobutton(tab, text="单开", value="1", variable=zdConfigs["客户端数"]) \
