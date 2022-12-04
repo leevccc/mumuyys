@@ -45,7 +45,7 @@ def handleHaoYouYaoQing():
         elif option == "拒绝":
             rx, ry, rw, rh = 943, 565, 37, 39
 
-        mouse.click(rx, ry, rw, rh)
+        # mouse.click(rx, ry, rw, rh)
         pyautogui.moveTo(rx + window.x + random.get(t=rw), ry + window.y + random.get(t=rh))
         random.sleep(msg="鼠标点击")
         pyautogui.click()
